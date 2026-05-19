@@ -176,6 +176,12 @@ async function main() {
     /^(sort|uniq|cut|tr|tee|column)/i,
     /^mkdir /i,
     /^touch /i,
+    // Safe single-file removal — explicit `rm` for /tmp paths or relative files.
+    // Excludes -r/-R (recursive — Tier 0 blocklist still catches `rm -rf` dangerous paths).
+    /^rm(\s+-[fivI]+)?\s+(\/tmp\/|\/var\/folders\/|\/private\/tmp\/|\.\/|[a-zA-Z0-9_])[^\s]*\s*$/i,
+    /^(unlink|rmdir) /i,                  // single-file/empty-dir removal — narrower than rm
+    /^(mv|cp) /i,                          // move / copy — dest-dir guarded by Tier 0 if dangerous
+    /^ln -s? /i,                           // symlinks — non-destructive
     // find — read-only subset (NOT -exec, -delete, -ok which can run commands).
     // The flag-boundary check uses (?<=^|\s) lookbehind because `\b` doesn't
     // anchor between two non-word chars (space and `-`).
