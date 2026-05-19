@@ -1,6 +1,6 @@
 ---
 name: review-code-style
-description: Code Style Review Agent — reviews code for project convention adherence, import patterns, TypeScript practices, naming standards, React patterns, and file organization. Use for focused style review.
+description: Use when checking adherence to project conventions — import order, naming standards, TypeScript patterns, React idioms, file organization. Not formatting (use a linter).
 context: fork
 version: 1.0.0
 ---

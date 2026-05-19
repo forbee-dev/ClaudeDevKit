@@ -10,6 +10,16 @@ allowed-tools: Read, Glob, Grep, Bash, Task, WebSearch
 
 Make and document architecture decisions with clear trade-off analysis. Output: an ADR that the team can reference and agents can implement from.
 
+## Karpathy Principle (P3 — YAGNI Timing)
+
+Good architecture solves **today's** problem simply, not tomorrow's prematurely. Reject:
+- Speculative configurability ("make it pluggable in case we need it")
+- Abstractions for single-use code
+- Patterns adopted for prestige rather than fit ("we should use CQRS")
+- Cross-cutting concerns invented for hypothetical future complexity
+
+If the user wants flexibility they will ask. Default to the minimum design that answers the actual question.
+
 ## Never
 
 - Never recommend a technology without evaluating at least 2 alternatives

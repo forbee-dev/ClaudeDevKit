@@ -36,6 +36,14 @@ When in doubt, route UP — more planning, not less.
 
 Guide through the required phases. After each, summarize and confirm before moving on. Create the `docs/planning/` directory structure if it doesn't exist.
 
+### Decision logging (every /plan and /workflow run)
+
+Alongside the canonical artifacts (brief, requirements, stories), maintain a **decision log** at `docs/planning/requirements/<feature>.decision-log.md`. Append a D-NNN entry every time a choice is made — choice, why, alternatives considered, status. See `forgebee/templates/decision-log-template.md` for the shape.
+
+If rejected alternatives, options matrices, or sizing data accumulate, write an **addendum** at `docs/planning/requirements/<feature>.addendum.md`. See `forgebee/templates/addendum-template.md`.
+
+On subsequent `/plan` or `/workflow` runs for the same feature: **read both files first** and treat all prior decisions as binding context. Don't re-litigate; only extend with new D-NNN entries.
+
 ---
 
 ### Brief (always required when /plan is invoked)

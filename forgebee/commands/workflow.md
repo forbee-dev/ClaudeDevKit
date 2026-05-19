@@ -12,6 +12,10 @@ Ship verified, debated, production-ready code by delegating to specialist agents
 
 **Success looks like:** After delivery, running review-all finds zero critical or high issues.
 
+## Anti-Stop Rule (P5)
+
+**After dispatching a sub-agent, IMMEDIATELY continue with your own next-step work. Do not idle waiting for the sub-agent to return.** The harness notifies you when work completes — until then, plan the next dispatch, integrate partial results, prepare verification, or surface progress to the user. Never sit silent after a dispatch.
+
 ## Never
 
 - Never write code, architecture docs, stories, or tests yourself
@@ -19,6 +23,17 @@ Ship verified, debated, production-ready code by delegating to specialist agents
 - Never override a Judge's ruling — escalate to the user
 - Never skip the quality mandate — reject specialist output that lacks self-review evidence
 - Never dispatch two agents to the same file in parallel
+- Never idle after dispatching — see Anti-Stop Rule
+
+## Step 0: Strict Mode Gate (opt-in)
+
+If the user invoked `/workflow --strict` or the prompt explicitly asks to "design first" or "brainstorm before building":
+
+1. Check whether a design spec already exists at `docs/planning/specs/YYYY-MM-DD-<topic>-design.md` for this work
+2. If **absent**: invoke the **brainstorming** skill. Do not proceed past Step 0 until the brainstorming skill writes and the user approves a spec
+3. If **present**: read the spec and treat it as authoritative input to Step 1
+
+Strict mode is opt-in. Default `/workflow` (no flag) skips this step entirely and goes straight to Step 1.
 
 ## Step 1: Assess Complexity
 
@@ -44,10 +59,18 @@ Run the phases determined by Step 1. Complete each phase before starting the nex
 
 1. Check `docs/planning/briefs/`, `docs/planning/requirements/`, `docs/planning/stories/`
 2. If artifacts exist → load them, summarize to user, confirm they're current
-3. If missing → ask: "No planning artifacts found. Run /plan first?"
-4. If user says yes → delegate to `/plan` → wait → continue
+3. **Check for existing decision log** at `docs/planning/requirements/<feature>.decision-log.md` — if present, read it and treat all prior decisions as binding context (don't re-litigate, only extend)
+4. If missing → ask: "No planning artifacts found. Run /plan first?"
+5. If user says yes → delegate to `/plan` → wait → continue
 
-**Output required:** Problem Brief (minimum). Requirements doc (Medium+).
+**Output required:** Problem Brief (minimum). Requirements doc (Medium+). **Decision log** (`<feature>.decision-log.md` — append decisions made at each phase). **Addendum** (`<feature>.addendum.md` — only if rejected alternatives, sizing data, or option matrices were considered worth keeping).
+
+**Auto-offer elicitation at phase boundary:** After plan artifacts are produced, surface 2-3 stress-test methods inline:
+> Want to stress-test this before moving on? Try `/elicit pre-mortem`, `/elicit stakeholder-round-table`, or `/elicit red-team`. Or skip and continue.
+
+Skip is the default — elicitation is a tool, not a gate.
+
+**Decision log shape** — see `forgebee/templates/decision-log-template.md`. Each decision: D-NNN id, date, phase, decision sentence, why, considered alternatives, status. Never edit closed decisions in place — open a new D-NNN that supersedes.
 
 ---
 
@@ -145,6 +168,23 @@ Present before dispatching any work:
 
 You decide parallelism based on dependency graph. Explain reasoning. **Wait for approval.**
 
+### Step→Verify format (required for every assigned story)
+
+Each specialist must expand its assigned story into a numbered Step→Verify plan before writing code. Karpathy's Goal-Driven Execution — "vibes correctness" is not acceptable. Verify lines name concrete checks (test names, commands, manual steps).
+
+```markdown
+## Story N — Step→Verify Plan
+
+1. <Action 1>
+   - verify: <test name, command, or manual check>
+2. <Action 2>
+   - verify: <check>
+3. <Action 3>
+   - verify: <check>
+```
+
+A plan without per-step verify lines is rejected at dispatch — return it to the specialist.
+
 ---
 
 ### Execute
@@ -162,11 +202,40 @@ Dispatch specialist agents with structured handoff contracts:
   },
   "acceptance_criteria": [
     { "criterion": "Given X, when Y, then Z", "verification": "how to test" }
-  ]
+  ],
+  "responseStyle": "orchestrator"
 }
 ```
 
-All three keys required. Do NOT dispatch without them.
+All four keys required. Do NOT dispatch without them. `responseStyle: "orchestrator"` triggers the specialist's `terse-report` skill — compresses report tokens ~65% without losing actionable signal. See `forgebee/skills/terse-report/SKILL.md`.
+
+### Budget Circuit Breaker (every dispatch carries a budget)
+
+Every `Task()` dispatch carries a budget envelope. Sub-agent dispatches must propagate it. Constant-string errors (no remaining-budget echo) so a malicious or runaway peer can't probe thresholds.
+
+Extend the handoff contract with:
+
+```json
+{
+  "budget": {
+    "hopCount": 1,
+    "maxHops": 8,
+    "maxTokens": null,
+    "maxUsd": null
+  }
+}
+```
+
+**Rules:**
+- `hopCount` starts at 1 (this dispatch is hop 1)
+- Sub-dispatches increment `hopCount` and re-pass the same budget
+- A sub-dispatch that would push `hopCount > maxHops` is rejected immediately with `HOP_LIMIT_EXCEEDED`
+- `maxHops` default 8, **absolute ceiling 64** — never accept or set higher
+- `maxTokens` and `maxUsd` are optional; if set, reject with `TOKEN_LIMIT_EXCEEDED` / `USD_LIMIT_EXCEEDED`
+- Error strings are **constants only** — never include current/remaining budget in the error (oracle leakage)
+- When the breaker trips, surface "circuit breaker tripped at hop N: <reason>" to the user with the originating dispatch chain
+
+This guards against runaway debate fan-out (e.g., code-skeptic finding an issue, dispatching a sub-debate on it, which dispatches another, etc).
 
 **Coordination:**
 - Two agents same file → sequence, never parallel
@@ -185,6 +254,60 @@ All three keys required. Do NOT dispatch without them.
 Reject any response that doesn't include a status. If an agent reports `BLOCKED` twice on the same issue, escalate to the user.
 
 **Quality mandate:** Every specialist MUST self-review before reporting `DONE` — same criteria as review-all: code quality (DRY, error handling), security (no injection, no secrets, input validation), performance (no N+1), accessibility (if UI). Reject output without self-review evidence. Phase 7 validates — it should not discover basic quality issues.
+
+---
+
+### Spec Compliance Check (Medium / Large / Critical)
+
+Before the code debate fires, run a single **spec compliance reviewer**. This is a distinct check from code-quality review — it asks one question only: *did the implementer build what we asked for?*
+
+Dispatch a sub-agent (or run inline) with this prompt:
+
+```
+You are the Spec Compliance Reviewer for /workflow.
+
+You are NOT evaluating code quality, style, or test coverage — that's the next stage.
+Your single question: does the delivered diff match what was specified?
+
+Read:
+1. Requirements: docs/planning/requirements/<feature>.md (or the user's original ask)
+2. Stories / scope agreed at Step 1
+3. The current diff: `git diff <merge-base>`
+
+For each story / requirement, report one of:
+  - COMPLIANT        — built as specified
+  - PARTIAL          — built but with documented gaps (list them)
+  - NONCOMPLIANT     — built something else, or scope was silently changed
+  - SCOPE-EXPANDED   — built more than asked (flag as risk)
+
+End with: VERDICT: PASS | FAIL.
+Be skeptical of the implementer's self-report — they may have rationalized scope cuts. Read the actual diff and requirements, not the agent's summary.
+```
+
+Decision:
+- VERDICT: PASS → proceed to Code Debate (or directly to Deliver for Medium)
+- VERDICT: FAIL → return to Execute with explicit gap list. Do NOT proceed to Code Debate until compliance passes.
+
+**Why two stages:** spec compliance and code quality fail in different ways. A code-quality review pass on noncompliant code still ships the wrong thing. Catching scope drift before debate avoids spending debate cycles arguing about quality of a solution that solves the wrong problem.
+
+---
+
+### Checkpoint Preview (default — opt-out with `--skip-checkpoint`)
+
+Bridges autonomous execution back to human judgment **before** the formal Code Debate fires. Walks the diff **by concern** (not by file) with 2-5 risk-tagged hot spots. Reviewer decides: ship, rework, dig deeper.
+
+Invoke the `checkpoint-preview` skill (see `forgebee/skills/checkpoint-preview/SKILL.md`). It outputs:
+1. Orientation — one-line intent + surface area stats
+2. Walkthrough by concern (top-down, comprehension-ordered)
+3. Detail pass — 2-5 hot spots tagged `[auth]`, `[schema]`, `[billing]`, `[public API]`, `[security]`, `[data-loss]`, `[perf]`
+4. Adversarial findings surface — if Code Debate has run, surface unresolved Skeptic concerns
+5. Verdict prompt — ship / rework / dig deeper
+
+If user verdict is `rework`: return to Execute with the specific hot spots as constraints.
+If `dig deeper`: focused review on the requested area.
+If `ship`: proceed to Code Debate (Large/Critical) or directly to Deliver (Medium).
+
+Skip when user passed `--skip-checkpoint`, or for trivial changes (1-2 files, single concern).
 
 ---
 

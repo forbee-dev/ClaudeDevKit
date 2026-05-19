@@ -44,7 +44,22 @@ If pending instincts exist, present each to the user with its signal, confidence
 4. **Create/update instincts** in `~/.claude/forgebee-learning/projects/<hash>/instincts/personal/`
 5. **Report** what was learned
 
-### Step 3: Show Status
+### Step 3: Compress Aged Learnings (auto)
+
+Compress session entries in `.claude/learnings/learnings.md` older than 14 days to keep context budget under control. Originals are archived to `.claude/learnings/archive/learnings-YYYY-Q<N>.md` before compression — nothing is lost.
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning/scripts/compress-learnings.js"
+```
+
+Compression rules:
+- Preserve EXACTLY: code blocks, file paths, line refs, ISO dates, URLs, commit hashes, error messages
+- Compress prose: drop articles, filler words, pleasantries — fragments OK
+- Refuse on entries containing `.env`, credentials, `.ssh/`, `.aws/`, private keys, secrets, passwords (sensitive-path defense)
+
+Override age threshold: `node compress-learnings.js --days 30` or set `FORGEBEE_LEARN_AGE_DAYS=30`.
+
+### Step 4: Show Status
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning/scripts/instinct-cli.js" status

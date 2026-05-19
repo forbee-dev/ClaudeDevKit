@@ -1,6 +1,6 @@
 ---
 name: review-tests
-description: Testing Review Agent — reviews test coverage, test quality, mocking practices, and test structure. Identifies untested code paths and coverage gaps. Use for focused testing review.
+description: Use when reviewing test suites for coverage gaps, brittle mocks, missing edge cases, or untested code paths — runs after new code or before merging.
 context: fork
 version: 1.0.0
 ---

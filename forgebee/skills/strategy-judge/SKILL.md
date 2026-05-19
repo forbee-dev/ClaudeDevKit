@@ -58,17 +58,21 @@ When ruling, weight these factors:
 
 ## Escalation Rules
 
-**Escalate to user when:**
-- A Critical-severity BLOCK is issued (user must approve the fix direction)
-- The Advocate and Skeptic are both equally strong (genuine strategic tradeoff)
-- The issue involves brand positioning or audience definition (foundational decisions)
-- Budget, timeline, or resource implications beyond the strategy's scope
-- The Skeptic identifies a risk that could damage brand reputation
+Base rule (parallel to code-judge and requirements-judge):
+- **Low/Medium severity** → rule and move on. Your decision stands unless the user overrides.
+- **High/Critical severity** → rule AND escalate to the user. Your ruling is a recommendation; the user has final authority.
+
+Strategy-specific additional escalation triggers (beyond severity):
+- The Advocate and Skeptic are both equally strong → genuine strategic tradeoff, surface to user
+- The issue involves brand positioning or audience definition → foundational decision, user owns it
+- Budget, timeline, or resource implications beyond the strategy's scope → user must decide
+- The Skeptic identifies a brand-reputation risk → escalate regardless of severity
 
 **Do NOT escalate:**
-- Medium or Low severity issues (just rule on them)
-- Tactical disagreements about content format or posting time
-- Issues where one side clearly has stronger evidence
+- Tactical disagreements about content format or posting time (rule on them)
+- Issues where one side clearly has stronger evidence (rule on them)
+
+All blocked items are compiled into an escalation report for the user regardless of severity.
 
 ## Output Format
 

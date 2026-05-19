@@ -1,0 +1,35 @@
+name: Version Sync Check
+
+on:
+  pull_request:
+    paths:
+      - '.claude-plugin/marketplace.json'
+      - 'forgebee/.claude-plugin/plugin.json'
+      - '.codex-plugin/plugin.json'
+      - '.cursor-plugin/plugin.json'
+      - 'gemini-extension.json'
+      - 'README.md'
+      - '.version-bump.json'
+      - 'scripts/bump-version.sh'
+      - '.github/workflows/version-check.yml'
+  workflow_dispatch:
+
+jobs:
+  version-sync:
+    name: Detect version drift across manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Run version check
+        run: |
+          chmod +x scripts/bump-version.sh
+          ./scripts/bump-version.sh --check
+
+      - name: Run version audit
+        run: ./scripts/bump-version.sh --audit

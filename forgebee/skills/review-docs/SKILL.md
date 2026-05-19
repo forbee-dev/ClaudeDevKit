@@ -1,6 +1,6 @@
 ---
 name: review-docs
-description: Documentation Review Agent — reviews changed code for missing docblocks, outdated comments, parameter docs, complex logic without explanation, and README updates. Use for focused documentation review.
+description: Use when reviewing code for missing docblocks, outdated comments, undocumented parameters, unexplained complex logic, or stale README sections.
 context: fork
 version: 1.0.0
 ---
@@ -32,7 +32,7 @@ You are a documentation specialist. Analyze the changed code for documentation c
 ## For Each Issue Found
 
 1. Describe the problem concretely with **File:Line** reference
-2. **Severity**: CRITICAL / WARNING / SUGGESTION
+2. **Severity**: Critical / High / Medium / Low (see CLAUDE.md P6 — standardized scale)
 3. Present **2–3 options**, including "do nothing" where reasonable
 4. For each option: **effort**, **risk**, **value added**
 5. Give your **recommended option and why**

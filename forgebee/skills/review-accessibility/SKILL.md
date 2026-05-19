@@ -1,6 +1,6 @@
 ---
 name: review-accessibility
-description: Accessibility Review Agent — reviews changed code for WCAG 2.1 AA compliance including perceivable, operable, understandable, and robust criteria. Use for focused accessibility review.
+description: Use when auditing UI changes for WCAG 2.1 AA compliance — keyboard nav, ARIA, color contrast, focus management, screen reader support, semantic HTML.
 context: fork
 version: 1.0.0
 ---
@@ -52,7 +52,7 @@ You are an accessibility specialist (WCAG 2.1 AA). Analyze the changed code in t
 ## For Each Issue Found
 
 1. Describe the problem concretely with **File:Line** reference
-2. **Severity**: CRITICAL / WARNING / SUGGESTION
+2. **Severity**: Critical / High / Medium / Low (see CLAUDE.md P6 — standardized scale)
 3. **WCAG Criterion** — e.g., 1.1.1 Non-text Content
 4. Present **2–3 options**, including "do nothing" where reasonable
 5. For each option: **effort**, **risk**, **who it affects**

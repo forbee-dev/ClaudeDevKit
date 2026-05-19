@@ -1,6 +1,6 @@
 ---
 name: review-performance
-description: Performance Review Agent — reviews changed code for N+1 queries, memory leaks, expensive loops, missing caching, bundle impact, and render performance. Use for focused performance review of staged or recent changes.
+description: Use when investigating slowness or reviewing code for N+1 queries, memory leaks, expensive loops, missing caching, bundle bloat, or render bottlenecks.
 context: fork
 version: 1.0.0
 ---
@@ -34,7 +34,7 @@ You are a performance optimization specialist. Analyze the changed code in this 
 ## For Each Issue Found
 
 1. Describe the problem concretely with **File:Line** reference
-2. **Severity**: CRITICAL / WARNING / SUGGESTION
+2. **Severity**: Critical / High / Medium / Low (see CLAUDE.md P6 — standardized scale)
 3. **Impact**: estimated performance impact (high/medium/low)
 4. Present **2–3 options**, including "do nothing" where reasonable
 5. For each option: **effort**, **risk**, **impact on other code**

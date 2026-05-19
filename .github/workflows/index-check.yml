@@ -1,0 +1,33 @@
+name: Index Drift Check
+
+# Fails the PR if forgebee/INDEX.md is out of sync with the source frontmatter.
+# Whoever adds or removes a skill/agent/command must regenerate the index:
+#   node scripts/build-index.js
+
+on:
+  pull_request:
+    paths:
+      - 'forgebee/skills/**'
+      - 'forgebee/agents/**'
+      - 'forgebee/commands/**'
+      - 'forgebee/INDEX.md'
+      - 'scripts/build-index.js'
+      - '.github/workflows/index-check.yml'
+  workflow_dispatch:
+
+jobs:
+  index-sync:
+    name: Detect INDEX.md drift vs frontmatter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run index check
+        run: node scripts/build-index.js --check

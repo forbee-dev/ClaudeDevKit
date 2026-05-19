@@ -1,11 +1,6 @@
 ---
 name: project-router
-description: >
-  Project triage and routing skill. Detects the project type (WordPress plugin/theme,
-  Next.js, PHP, Node.js, etc.), available tooling, styling systems, and database setup.
-  Routes to the correct conventions and guardrails. Should run at the start of any
-  development session or when switching projects. Triggers on: "what kind of project is this",
-  "detect project", "triage", "set up conventions", "what stack", session start.
+description: Use at session start or when switching projects — detects stack (WordPress, Next.js, PHP, Node), tooling, styling system, database, and routes to the right conventions and guardrails.
 version: 1.0.0
 ---
 

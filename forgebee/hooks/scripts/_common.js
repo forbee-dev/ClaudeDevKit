@@ -309,6 +309,131 @@ function appendFile(filePath, content) {
 }
 
 /**
+ * Atomic write with O_NOFOLLOW symlink-clobber defense.
+ *
+ * Refuses to write if the target path or any parent component resolves through
+ * a symlink. Protects predictable user-owned paths (e.g., flag files in
+ * ~/.claude/) from local-attacker symlink redirection.
+ *
+ * Adapted from caveman's safeWriteFlag pattern.
+ *
+ * @param {string} filePath - absolute path to write
+ * @param {string} content - data to write
+ * @param {object} options - { mode: number = 0o600 }
+ * @returns {{ok: boolean, error?: string}}
+ */
+function safeWriteFlag(filePath, content, options = {}) {
+  const mode = options.mode || 0o600;
+  try {
+    if (!path.isAbsolute(filePath)) {
+      return { ok: false, error: 'safeWriteFlag requires an absolute path' };
+    }
+
+    // Refuse if any ancestor in filePath resolves through a symlink
+    let cursor = path.dirname(filePath);
+    while (cursor !== path.dirname(cursor)) {
+      try {
+        const st = fs.lstatSync(cursor);
+        if (st.isSymbolicLink()) {
+          return { ok: false, error: `Refused: ancestor is symlink: ${cursor}` };
+        }
+      } catch {
+        // ancestor doesn't exist — OK, will be created by ensureDir
+      }
+      cursor = path.dirname(cursor);
+    }
+
+    // If target exists, refuse if it's a symlink
+    try {
+      const targetStat = fs.lstatSync(filePath);
+      if (targetStat.isSymbolicLink()) {
+        return { ok: false, error: `Refused: target is symlink: ${filePath}` };
+      }
+    } catch {
+      // target doesn't exist yet — fine
+    }
+
+    ensureDir(path.dirname(filePath));
+
+    // Open with O_NOFOLLOW | O_CREAT | O_WRONLY | O_TRUNC, mode 0o600
+    const flags = fs.constants.O_NOFOLLOW | fs.constants.O_CREAT | fs.constants.O_WRONLY | fs.constants.O_TRUNC;
+    const fd = fs.openSync(filePath, flags, mode);
+    try {
+      fs.writeSync(fd, String(content));
+    } finally {
+      fs.closeSync(fd);
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+/**
+ * Validates a hook entry against Claude Code's settings.json schema before
+ * mutating settings. Claude Code's Zod parser silently DROPS the entire
+ * settings.json on schema mismatch — defend by validating in advance.
+ *
+ * Adapted from caveman's validateHookFields pattern.
+ *
+ * @param {object} settingsObj - parsed settings.json content
+ * @returns {{ok: boolean, errors: string[]}}
+ */
+function validateHookFields(settingsObj) {
+  const errors = [];
+  if (!settingsObj || typeof settingsObj !== 'object') {
+    return { ok: false, errors: ['settings must be an object'] };
+  }
+  const hooks = settingsObj.hooks;
+  if (hooks == null) {
+    return { ok: true, errors: [] }; // no hooks section is valid
+  }
+  if (typeof hooks !== 'object' || Array.isArray(hooks)) {
+    return { ok: false, errors: ['settings.hooks must be an object keyed by event name'] };
+  }
+  const knownEvents = [
+    'SessionStart', 'SessionEnd', 'UserPromptSubmit',
+    'PreToolUse', 'PostToolUse', 'Stop', 'SubagentStop',
+    'Notification', 'PreCompact', 'TaskCompleted',
+  ];
+  for (const [eventName, eventArray] of Object.entries(hooks)) {
+    if (!knownEvents.includes(eventName)) {
+      errors.push(`Unknown hook event: ${eventName}`);
+      continue;
+    }
+    if (!Array.isArray(eventArray)) {
+      errors.push(`hooks.${eventName} must be an array`);
+      continue;
+    }
+    eventArray.forEach((entry, i) => {
+      const loc = `hooks.${eventName}[${i}]`;
+      if (typeof entry !== 'object' || entry == null) {
+        errors.push(`${loc} must be an object`);
+        return;
+      }
+      if (typeof entry.matcher !== 'string') {
+        errors.push(`${loc}.matcher must be a string (not regex, not undefined)`);
+      }
+      if (!Array.isArray(entry.hooks)) {
+        errors.push(`${loc}.hooks must be an array`);
+        return;
+      }
+      entry.hooks.forEach((h, j) => {
+        const hloc = `${loc}.hooks[${j}]`;
+        if (h.type !== 'command') errors.push(`${hloc}.type must be "command"`);
+        if (typeof h.command !== 'string' || h.command.trim() === '') {
+          errors.push(`${hloc}.command must be a non-empty string`);
+        }
+        if (h.timeout != null && typeof h.timeout !== 'number') {
+          errors.push(`${hloc}.timeout must be a number when present`);
+        }
+      });
+    });
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+/**
  * Recursively creates directory, ignores EEXIST
  * @param {string} dirPath - Directory path to create
  * @returns {boolean} Success status
@@ -560,6 +685,8 @@ module.exports = {
   writeFile,
   appendFile,
   ensureDir,
+  safeWriteFlag,
+  validateHookFields,
 
   // Command execution
   runCommand,

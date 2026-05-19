@@ -1,6 +1,6 @@
 ---
 name: review-best-practices
-description: Best Practices Review Agent — reviews code for SOLID principles, design patterns, separation of concerns, naming conventions, and architecture health. Use for focused best practices review.
+description: Use when reviewing code for SOLID violations, design pattern misuse, leaky abstractions, separation of concerns, or architecture-level smells.
 context: fork
 version: 1.0.0
 ---
@@ -32,7 +32,7 @@ You are a senior architect reviewing code for adherence to best practices and co
 ## For Each Issue Found
 
 1. Describe the problem concretely with **File:Line** reference
-2. **Severity**: CRITICAL / WARNING / SUGGESTION
+2. **Severity**: Critical / High / Medium / Low (see CLAUDE.md P6 — standardized scale)
 3. **Principle** — which best practice is violated
 4. Present **2–3 options**, including "do nothing" where reasonable
 5. For each option: **effort**, **risk**, **impact on other code**, **maintenance burden**

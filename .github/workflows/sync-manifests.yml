@@ -1,0 +1,86 @@
+name: Sync Manifests
+
+# On push to main touching canonical version-bearing files, detect drift
+# and (when drift is detected) push a sync commit back with [skip ci].
+#
+# Implements W3 from docs/planning/5.1.0-comprehensive-plan.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.claude-plugin/marketplace.json'
+      - 'forgebee/.claude-plugin/plugin.json'
+      - '.codex-plugin/plugin.json'
+      - '.cursor-plugin/plugin.json'
+      - 'gemini-extension.json'
+      - 'README.md'
+      - '.version-bump.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Detect and auto-fix manifest drift
+    runs-on: ubuntu-latest
+
+    # Guard against infinite loops: skip if this commit was already a sync commit
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Detect drift
+        id: detect
+        continue-on-error: true
+        run: |
+          chmod +x scripts/bump-version.sh
+          if ./scripts/bump-version.sh --check; then
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine canonical version
+        if: steps.detect.outputs.drift == 'true'
+        id: canonical
+        run: |
+          # Use marketplace.json as the canonical source
+          ver=$(jq -r '.plugins[0].version' .claude-plugin/marketplace.json)
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+          echo "Canonical version: $ver"
+
+      - name: Sync all manifests to canonical version
+        if: steps.detect.outputs.drift == 'true'
+        run: ./scripts/bump-version.sh "${{ steps.canonical.outputs.version }}"
+
+      - name: Verify drift resolved
+        if: steps.detect.outputs.drift == 'true'
+        run: ./scripts/bump-version.sh --check
+
+      - name: Commit and push sync fix
+        if: steps.detect.outputs.drift == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: auto-sync manifests to ${{ steps.canonical.outputs.version }} [skip ci]"
+          git push
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.detect.outputs.drift }}" = "true" ]; then
+            echo "Drift detected — manifests synced to ${{ steps.canonical.outputs.version }}"
+          else
+            echo "No drift — manifests in sync"
+          fi

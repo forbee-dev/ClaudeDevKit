@@ -1,6 +1,6 @@
 ---
 name: review-security
-description: Security Review Agent — reviews changed code for OWASP Top 10 vulnerabilities, injection flaws, broken auth, secret exposure, and dependency CVEs. Use for focused security review of staged or recent changes.
+description: Use when auditing code for OWASP Top 10 vulnerabilities, injection flaws, broken auth, secret exposure, or dependency CVEs — typically before shipping or after auth/data-handling changes.
 context: fork
 version: 1.0.0
 ---

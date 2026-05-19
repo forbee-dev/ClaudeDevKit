@@ -29,6 +29,25 @@ This command delegates to the `debugger-detective` specialist agent for thorough
 
 **Fallback:** If agent delegation fails, execute the process below directly.
 
+## Step→Verify format
+
+When the agent (or this command) produces a debug plan, use the numbered Step→Verify format. Each step names a concrete check:
+
+```markdown
+## Debug Plan — <symptom>
+
+1. Reproduce: <command/scenario>
+   - verify: <expected failure output>
+2. Isolate: <hypothesis 1 test>
+   - verify: <ruled out by / confirmed by>
+3. Fix: <change>
+   - verify: <regression test that fails without the fix>
+4. Verify: <full suite run>
+   - verify: <test count, no new failures>
+```
+
+No "vibes" steps — every step gets a check.
+
 ---
 
 ## Direct Execution Process

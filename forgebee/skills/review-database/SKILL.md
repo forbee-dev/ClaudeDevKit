@@ -1,6 +1,6 @@
 ---
 name: review-database
-description: Database Review Agent — reviews migrations, queries, RLS policies, schema design, and query patterns for safety, performance, and correctness. Use for focused database review.
+description: Use when reviewing SQL migrations, queries, RLS/policy changes, schema modifications, or ORM access patterns for safety, performance, or correctness.
 context: fork
 version: 1.0.0
 ---

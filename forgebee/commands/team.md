@@ -12,12 +12,17 @@ Break a task into parallel workstreams, delegate to specialist agents, and deliv
 
 **Success looks like:** After delivery, running review-all finds zero critical or high issues. All tests pass, build succeeds, no security gaps.
 
+## Anti-Stop Rule (P5)
+
+**After dispatching a sub-agent, IMMEDIATELY continue with your own next-step work. Do not idle waiting for the sub-agent to return.** The harness will notify you when work completes — until then, your job is to be planning the next dispatch, integrating partial results, or preparing the verification gate. Do not announce "waiting for X to return" — that's the most common orchestrator failure mode.
+
 ## Never
 
 - Never dispatch agents without showing the plan first
 - Never let two agents modify the same file in parallel
 - Never deliver with known failing tests or build errors
 - Never skip security-auditor for code that touches auth, payments, or user data
+- Never idle after dispatching — see Anti-Stop Rule
 - Never report done without running the full test suite
 
 ## Step 1: Assess
@@ -57,11 +62,40 @@ Present execution plan table:
 | Security review | security-auditor | all changed files | C | D |
 ```
 
+### Step→Verify format (required for every dispatched plan)
+
+Each workstream above must be expanded by its agent into a numbered Step→Verify plan before code is written. Karpathy's Goal-Driven Execution discipline — no "vibes correctness." Verify lines name concrete checks.
+
+```markdown
+## <Workstream> — Step→Verify Plan
+
+1. <Action 1>
+   - verify: <concrete check — test name, command, manual UI step>
+2. <Action 2>
+   - verify: <concrete check>
+3. <Action 3>
+   - verify: <concrete check>
+```
+
+A plan without per-step verify lines is rejected at dispatch — return it to the agent.
+
 **Wait for user approval.**
 
 ## Step 3: Execute
 
-Dispatch agents with clear context — they don't share your conversation. Each agent gets: task description, files to modify, acceptance criteria, relevant codebase patterns.
+Dispatch agents with clear context — they don't share your conversation. Each agent gets: task description, files to modify, acceptance criteria, relevant codebase patterns, and `responseStyle: "orchestrator"` (triggers the specialist's `terse-report` skill — ~65% report-token reduction without losing actionable signal). See `forgebee/skills/terse-report/SKILL.md`.
+
+### Budget envelope
+
+Every dispatch carries a budget that sub-dispatches must propagate:
+
+```json
+{
+  "budget": { "hopCount": 1, "maxHops": 8, "maxTokens": null, "maxUsd": null }
+}
+```
+
+Default `maxHops: 8`, ceiling 64. Sub-dispatches that would exceed return constant-string error (`HOP_LIMIT_EXCEEDED`, `TOKEN_LIMIT_EXCEEDED`, `USD_LIMIT_EXCEEDED`) — never echo remaining budget. Surface trip to user with the dispatch chain. Prevents runaway specialist fan-out.
 
 **If 3+ agents:** Checkpoint after each agent completes for crash recovery. On failure, offer to resume from last completed agent.
 

@@ -9,3 +9,7 @@ TASKS.md
 
 # Build artifacts
 forgebee/ECC-ANALYSIS.md
+
+# Session working artifacts — plans + audits stay local
+# (Framework docs live in README.md, CLAUDE.md, CHANGELOG.md, forgebee/README.md)
+docs/planning/

@@ -1,6 +1,6 @@
 ---
 name: review-code
-description: Code Review Agent — reviews changed code for logic errors, DRY violations, error handling, type safety, and dead code. Use for focused code quality review of staged or recent changes.
+description: Use when reviewing staged or recent code changes for logic errors, DRY violations, error handling gaps, type safety issues, or dead code — narrower than review-all.
 context: fork
 version: 1.0.0
 ---
@@ -32,7 +32,7 @@ You are a senior code reviewer. Analyze the staged and unstaged changes in this 
 ## For Each Issue Found
 
 1. Describe the problem concretely with **File:Line** reference
-2. **Severity**: CRITICAL / WARNING / SUGGESTION
+2. **Severity**: Critical / High / Medium / Low (see CLAUDE.md P6 — standardized scale)
 3. Present **2–3 options**, including "do nothing" where reasonable
 4. For each option: **effort**, **risk**, **impact on other code**
 5. Give your **recommended option and why**

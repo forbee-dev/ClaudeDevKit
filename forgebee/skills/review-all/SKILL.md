@@ -1,6 +1,6 @@
 ---
 name: review-all
-description: Full Review — Pre-Push Quality Gate. Interactive, opinionated review covering code quality, performance, security, accessibility, documentation, and best practices. Runs inline with session context for maximum efficiency.
+description: Use when about to push, open a PR, or asking for a thorough pre-ship review — covers code quality, security, performance, accessibility, docs, and best practices in one pass.
 version: 1.0.0
 ---
 
@@ -11,6 +11,10 @@ version: 1.0.0
 Find bugs, security holes, performance issues, and quality problems in changed code. Every issue has a file:line reference and a recommended fix. Runs inline — leverages session context (what you've been editing, why, what trade-offs were discussed).
 
 **Success looks like:** A clear READY/NEEDS FIXES/BLOCKED verdict with actionable items.
+
+## Karpathy Principle (P2 — Senior Engineer Test)
+
+Before issuing a `READY` verdict, ask explicitly: **would a senior engineer call this overcomplicated?** If yes, the verdict is `NEEDS FIXES` — list the simplification as a `High` issue. Do not pass overcomplicated code on the grounds that it "works."
 
 ## Never
 

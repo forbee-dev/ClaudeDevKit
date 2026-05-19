@@ -1,10 +1,6 @@
 ---
 name: forgebee-setup
-description: >
-  This skill should be used when the user asks to "set up ForgeBee", "initialize project",
-  "configure CLAUDE.md", "set up project memory", "initialize PM system", "set up project
-  management", or needs help getting started with the ForgeBee framework. Also triggers on
-  "what commands are available", "how do I use ForgeBee", or "ForgeBee help".
+description: Use when initializing ForgeBee in a project — sets up CLAUDE.md, PM system, and project memory. Also triggers on "what commands are available" or "how do I use ForgeBee".
 version: 1.1.0
 ---
 

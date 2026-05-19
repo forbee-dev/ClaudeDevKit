@@ -1,25 +1,27 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-Plugin-7C3AED?style=for-the-badge&logoColor=white" alt="Claude Code" />
-  <img src="https://img.shields.io/badge/OpenClaw-Compatible-FF6B35?style=for-the-badge&logoColor=white" alt="OpenClaw" />
-  <img src="https://img.shields.io/badge/version-4.1.2-blue?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/Codex-Compatible-10B981?style=for-the-badge&logoColor=white" alt="Codex" />
+  <img src="https://img.shields.io/badge/Cursor-Compatible-1F2937?style=for-the-badge&logoColor=white" alt="Cursor" />
+  <img src="https://img.shields.io/badge/Gemini-Compatible-4285F4?style=for-the-badge&logoColor=white" alt="Gemini" />
+  <img src="https://img.shields.io/badge/version-5.1.0-blue?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License" />
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/agents-48-orange?style=for-the-badge" alt="Agents" />
-  <img src="https://img.shields.io/badge/commands-33-red?style=for-the-badge" alt="Commands" />
-  <img src="https://img.shields.io/badge/hooks-26-blueviolet?style=for-the-badge" alt="Hooks" />
-  <img src="https://img.shields.io/badge/skills-24-teal?style=for-the-badge" alt="Skills" />
+  <img src="https://img.shields.io/badge/commands-36-red?style=for-the-badge" alt="Commands" />
+  <img src="https://img.shields.io/badge/hooks-23-blueviolet?style=for-the-badge" alt="Hooks" />
+  <img src="https://img.shields.io/badge/skills-31-teal?style=for-the-badge" alt="Skills" />
 </p>
 
 <h1 align="center">ForgeBee</h1>
 
 <p align="center">
   <strong>A colony of AI agents forging your product</strong><br/>
-  48 specialist agents. 24 skills. 33 slash commands. 26 lifecycle hooks.<br/>
+  48 specialist agents. 31 skills. 36 slash commands. 23 lifecycle hooks.<br/>
   Three execution modes: inline skills, context:fork, subagents.<br/>
-  Adaptive pipeline. Agent status protocol. Review calibration. Continuous learning.<br/>
-  <em>Works with Claude Code and OpenClaw.</em>
+  Adaptive pipeline. Karpathy principles. Adversarial debate. Continuous learning.<br/>
+  <em>Works with Claude Code, Codex, Cursor, Gemini, and OpenClaw.</em>
 </p>
 
 <p align="center">
@@ -52,6 +54,25 @@ Claude Code and OpenClaw are powerful out of the box. ForgeBee makes them **opin
 | Commands duplicate agent logic | Commands delegate to specialist agents with automatic fallback |
 | Review finds issues that should have been caught | Quality pipeline — specialists self-review, code-skeptic validates, review-all just confirms |
 | Agents take shortcuts under pressure | Every agent has explicit "Never" rules — hard boundaries that can't be rationalized away |
+| Skill descriptions drift silently | All skill descriptions follow "Use when..." triggering format — Claude reads triggers, not workflow summaries |
+| Version numbers drift across manifests | `.version-bump.json` + `scripts/bump-version.sh` — single source of truth, drift detection, full-repo audit |
+| Debug loops forever on the same bug | 3-failed-fix Iron Law — debugger-detective escalates to architecture question after 3 failed attempts |
+| User forgets to run `/learn` | Auto-nudge on SessionStart when ≥5 pending instincts and no `/learn` in 24h |
+| One implementation = one harness | Single source ships to Claude Code, Codex, Cursor, Gemini via dedicated manifests |
+| Agents make silent assumptions | Karpathy P1–P4 baked into every code-producing agent: trace test, senior-engineer check, YAGNI timing, orphan rule |
+| Orchestrators idle after dispatch | P5 Anti-Stop Rule in `/workflow` + `/team`: continue with next-step work immediately, the harness wakes you when sub-agents return |
+| Review reviewer drift | P6 Severity Standard (`Critical/High/Medium/Low`) across all review skills — enables cross-skill aggregation |
+| Untrusted code can hijack agents | 6-line Adversarial Input Hardening preamble in all 48 agents — homoglyphs, urgency, role-play overrides flagged not executed |
+| Sub-agent reports waste orchestrator context | `terse-report` skill cuts ~65% of report tokens while preserving code/citations exact |
+| Decisions get lost between sessions | `/workflow` and `/plan` emit `.decision-log.md` + `addendum.md` — re-read on next run |
+| Recursive debate fan-out runs away | Budget circuit breaker (`maxHops`, `maxTokens`, `maxUsd`) on every dispatch with constant-string errors |
+| Silent picks mid-task | `surface-ambiguity` micro-skill forces listing of interpretations + rationale before non-trivial choices |
+| Debugging without evidence | Failure-Capture template (7 fields) required before any recovery action in `debugger-detective` |
+| Diagnosis vs fix blur together | `/investigate` produces a forensic case file (Confirmed / Deduced / Hypothesized) — `debugger-detective` then fixes |
+| Reviews skim or lose-the-forest | Checkpoint Preview phase: diff-by-concern with `[auth]` / `[schema]` / `[billing]` risk tags before debate |
+| Plans drift without stress-test | `/elicit` applies 18 named methods (Pre-mortem, Red Team, Inversion, Stakeholder Round Table…) to your own output |
+| Quality decays as the kit grows | `/audit-self` re-runs the full scorecard on demand and surfaces regressions since last audit |
+| Claude scans 115 frontmatter blocks per routing decision | Auto-generated `forgebee/INDEX.md` loaded once on SessionStart — replaces speculative scanning with one indexed read |
 
 ---
 
@@ -144,7 +165,10 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 
 | Command | Description |
 |:--------|:------------|
-| `/workflow` | **Full pipeline**: Plan &rarr; Debate &rarr; Architect &rarr; **Work Breakdown** (promptable) &rarr; Execute &rarr; Debate &rarr; Deliver |
+| `/workflow` | **Full pipeline**: Plan &rarr; Debate &rarr; Architect &rarr; **Work Breakdown** (promptable) &rarr; Execute &rarr; **Spec Compliance** &rarr; **Checkpoint Preview** (default, `--skip-checkpoint` to opt out) &rarr; Code Debate &rarr; Deliver. Pass `--strict` to require a design spec via `brainstorming` before any code. Auto-offers `/elicit` methods at phase boundaries |
+| `/investigate` | Forensic diagnosis — produces a case file with Confirmed / Deduced / Hypothesized grading. Hand off to `debugger-detective` for the fix. Different from `/debug` (which fixes directly) |
+| `/elicit` | Stress-test the most recent plan or design with one of 18 named reasoning methods (`pre-mortem`, `red-team`, `inversion`, `stakeholder-round-table`, `tree-of-thoughts`, …). Applied to OUTPUT, not requirements |
+| `/audit-self` | Re-run the ForgeBee quality scorecard across all skills, agents, and commands. Detects regressions since last audit. Timestamped findings |
 | `/team` | Multi-agent orchestration with dependency graphs + checkpoints at 3+ agents |
 | `/idea` | Idea &rarr; validate &rarr; debate &rarr; MVP &rarr; roadmap |
 | `/pm` | Project dashboard from `state.yaml` |
@@ -156,6 +180,10 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 
 48 specialist agents + 24 skills for Claude Code's Agent Teams. Use them directly or let `/team` and `/workflow` orchestrate automatically.
 
+> **v5.1 highlights:** Karpathy P1–P6 principles baked into every code-producing agent (trace test, senior-engineer check, YAGNI timing, orphan rule, anti-stop rule, severity standard). Seven new skills: `brainstorming` (opt-in via `--strict`), `surface-ambiguity`, `terse-report`, `checkpoint-preview`, `investigate`, `elicitation` (18 methods), `audit-self`. Three new commands: `/investigate`, `/elicit`, `/audit-self`. Adversarial Input Hardening preamble on all 48 agents. Budget circuit breaker on dispatch (maxHops/maxTokens/maxUsd). Decision logs, failure-capture templates, learnings compression. Bloat trim: 6 over-budget agents trimmed to ≤200 lines via references/. **Auto-generated `forgebee/INDEX.md`** — Claude reads one indexed routing map on SessionStart instead of scanning every skill description. See [`CHANGELOG.md`](./CHANGELOG.md) for full release notes.
+>
+> **v5.0 highlights:** Multi-platform manifests (Codex/Cursor/Gemini), brainstorming hard-gate skill (opt-in via `/workflow --strict`), two-stage review (spec compliance before code debate), `debugger-detective` Iron Law (3 failed fixes → escalate), auto-learn SessionStart nudge, "Use when..." skill descriptions, and `.version-bump.json` drift detection.
+>
 > **v4.1 migration:** 21 agents moved to skills — 9 debate agents and 12 review agents now use `context:fork` for efficient isolated execution. `review-all` is an inline skill that runs in session context.
 
 <details>
@@ -557,9 +585,12 @@ This converts every agent and command into `SKILL.md` files in `~/.openclaw/work
 Contributions welcome! ForgeBee is markdown files and Node.js scripts — easy to extend.
 
 1. Fork the repo
-2. Add your command (`commands/your-command.md`) or agent (`agents/your-agent.md`)
-3. Update counts in `plugin.json`
-4. Open a PR
+2. Add your command (`forgebee/commands/your-command.md`) or agent (`forgebee/agents/your-agent.md`) or skill (`forgebee/skills/your-skill/SKILL.md`)
+3. Run `node scripts/build-index.js` to regenerate the routing index — CI fails the PR otherwise
+4. Run `./scripts/bump-version.sh <new-version>` if you're shipping a release; counts/descriptions in manifests stay in sync
+5. Open a PR
+
+**Release notes:** see [`CHANGELOG.md`](./CHANGELOG.md). The `v5.1.0` entry is the canonical reference for all the discipline patterns (Karpathy P1-P6, prompt defense, budget circuit breaker, terse-report, etc.).
 
 ---
 

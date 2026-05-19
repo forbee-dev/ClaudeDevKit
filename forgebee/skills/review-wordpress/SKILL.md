@@ -1,6 +1,6 @@
 ---
 name: review-wordpress
-description: WordPress Plugin Review Agent — reviews WordPress plugin code for WP coding standards, security (nonces, sanitization, escaping), hook naming, text domains, and plugin architecture. Use for focused WordPress review.
+description: Use when reviewing WordPress plugin or theme code for WP coding standards (WPCS), security (nonces, sanitization, escaping), hook naming, text domains, or plugin architecture.
 context: fork
 version: 1.0.0
 ---

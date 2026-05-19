@@ -1,0 +1,44 @@
+{
+  "files": [
+    { "path": ".claude-plugin/marketplace.json", "field": "plugins.0.version" },
+    { "path": "forgebee/.claude-plugin/plugin.json", "field": "version" },
+    { "path": ".codex-plugin/plugin.json", "field": "version" },
+    { "path": ".cursor-plugin/plugin.json", "field": "version" },
+    { "path": "gemini-extension.json", "field": "version" }
+  ],
+  "patterns": [
+    {
+      "path": "README.md",
+      "regex": "version-([0-9]+\\.[0-9]+\\.[0-9]+)-blue",
+      "replacement": "version-{VERSION}-blue"
+    }
+  ],
+  "audit": {
+    "exclude": [
+      "CHANGELOG.md",
+      "RELEASE-NOTES.md",
+      "node_modules",
+      ".git",
+      ".claude",
+      ".version-bump.json",
+      "scripts/bump-version.sh",
+      "docs/planning",
+      "DevKit-Documentation.docx",
+      "DevKit-Documentation.pdf",
+      "DevKit-vs-BMAD-Analysis.docx",
+      "forgebee.plugin",
+      "forgebee/agents/audit.md",
+      "TASKS.md",
+      "tools-nextjs.js",
+      "router-nextjs-tailwind.js",
+      "superpowers-improvements-plan.md",
+      "5.1.0-comprehensive-plan.md",
+      "audit-self.md",
+      "compress-learnings.js",
+      "inject-status-protocol.js",
+      "inject-principles.js",
+      "inject-prompt-defense.js",
+      "sync-manifests.yml"
+    ]
+  }
+}

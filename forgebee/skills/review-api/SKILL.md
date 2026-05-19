@@ -1,6 +1,6 @@
 ---
 name: review-api
-description: API Review Agent — reviews API routes for design, security, error handling, input validation, rate limiting, and REST consistency. Use for focused API review of route handlers.
+description: Use when reviewing route handlers, REST/GraphQL endpoints, or API contracts — covers design, input validation, error shapes, auth, rate limiting, and REST consistency.
 context: fork
 version: 1.0.0
 ---

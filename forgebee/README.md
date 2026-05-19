@@ -1,50 +1,87 @@
 # ForgeBee — Plugin Package
 
-This is the plugin directory that Claude Code loads. It contains:
+The plugin directory Claude Code loads. Single source of truth for the framework.
 
 ```
 forgebee/
 ├── .claude-plugin/
-│   └── plugin.json          # Plugin metadata (name, version, hooks)
+│   └── plugin.json              # Plugin metadata (name, version, hooks)
+├── INDEX.md                     # Auto-generated routing index — loaded on SessionStart
 ├── hooks/
-│   ├── hooks.json           # Hook event wiring (26 hooks across 9 events)
-│   └── scripts/             # 20 lifecycle hook scripts (Node.js)
-├── agents/                  # 48 specialist agents (execution & routing)
-├── commands/                # 33 slash commands
-├── contexts/                # 3 session modes (dev, research, review)
-├── rules/                   # Language-specific conventions (common, TS, PHP, Python)
+│   ├── hooks.json               # Hook event wiring
+│   └── scripts/                 # 23 Node.js lifecycle hook scripts
+├── agents/
+│   ├── *.md                     # 48 specialist agent personas
+│   └── references/              # Reference material extracted from agents (W16 bloat trim)
+├── commands/                    # 36 slash commands
+├── contexts/                    # Session modes (dev, research, review)
+├── rules/                       # Language-specific conventions (common, TS, PHP, Python)
 ├── skills/
-│   ├── review-all/          # Inline skill — pre-push quality gate (session context)
-│   ├── review-*/            # 11 context:fork review skills (delegated for large diffs)
-│   ├── code-*/              # 3 context:fork debate skills (blind code debate)
-│   ├── requirements-*/      # 3 context:fork debate skills (blind requirements debate)
-│   ├── strategy-*/          # 3 context:fork debate skills (blind strategy debate)
-│   ├── continuous-learning/ # Instinct-based learning system
-│   ├── forgebee-setup/      # Project initialization
-│   └── project-router/      # Auto-detect project type and conventions
-├── templates/               # CLAUDE.md, PM system templates
-└── eval/                    # 5 evaluation scenarios
+│   ├── audit-self/              # On-demand quality scorecard with regression detection
+│   ├── brainstorming/           # Opt-in hard-gate via /workflow --strict
+│   ├── checkpoint-preview/      # Diff-by-concern review before Code Debate
+│   ├── code-{advocate,skeptic,judge}/      # Code debate triad (context: fork)
+│   ├── continuous-learning/     # Instinct-based learning system + references/
+│   ├── elicitation/             # 18 reasoning methods (methods.csv)
+│   ├── forgebee-setup/          # Project initialization
+│   ├── investigate/             # Forensic case files (Confirmed/Deduced/Hypothesized)
+│   ├── project-router/          # Stack detection + routing
+│   ├── requirements-{advocate,skeptic,judge}/ # Requirements debate triad (context: fork)
+│   ├── review-*/                # 11 focused review skills (context: fork)
+│   ├── review-all/              # Inline pre-push quality gate
+│   ├── strategy-{advocate,skeptic,judge}/  # Strategy debate triad (context: fork)
+│   ├── surface-ambiguity/       # Catch silent picks mid-task
+│   └── terse-report/            # Sub-agent token compression for orchestrators
+├── templates/                   # Decision log, addendum, failure-capture, investigation case file, prompt-defense baseline
+└── eval/                        # Eval scenarios
 ```
 
-## Key Features
+## Key Features (v5.1.0)
 
-- **33 slash commands** — planning, development, growth, marketing, meta, learning
-- **48 specialist agents** — dev, growth OS, WordPress, Next.js, CRO specialists
-- **24 skills** — 1 inline (review-all), 20 context:fork (reviews + debates), 3 utility
-- **26 lifecycle hooks** across 10 events — session management, quality gates, observation, PermissionDenied logging
-- **Three execution modes** — inline skills (session context, lowest tokens), context:fork skills (isolated, medium), subagents (parallel, highest)
-- **Agent status protocol** — agents report DONE/DONE_WITH_CONCERNS/BLOCKED/NEEDS_CONTEXT; orchestrators handle each
+### Behavioral discipline (Karpathy principles)
+- **P1 Trace test** — every changed line traces to the user's request; no drive-by edits
+- **P2 Senior engineer test** — "would a senior engineer call this overcomplicated?" before reporting DONE
+- **P3 YAGNI timing** — solve today's problem simply, not tomorrow's prematurely
+- **P4 Orphan rule** — clean only what your changes made unused
+- **P5 Anti-stop rule** — orchestrators continue with next-step work immediately after dispatch
+- **P6 Severity standard** — Critical / High / Medium / Low across all review skills
+
+### Quality pipeline
+- **Two-stage review** in `/workflow`: Spec Compliance Check → Checkpoint Preview → Code Debate → Deliver
+- **Adversarial debate triads** (advocate/skeptic/judge) for requirements, code, and strategy
+- **3-failed-fix Iron Law** in `debugger-detective` — escalate to architecture after 3 attempts
+- **Failure-Capture template** (7 fields) required before any recovery action
+- **Verification-enforcer + delivery-agent contract** — Step 0 reads verdict, does NOT re-run
+
+### Token efficiency
+- **Routing index** (`INDEX.md`) — Claude reads 1 file once per session vs. scanning 115 frontmatter blocks
+- **Terse-report mode** — sub-agent reports compress ~65% via `responseStyle: "orchestrator"` contract
+- **Learnings compression** — `/learn` ages entries >14 days, archives originals
+- **Bloat-trimmed agents** — 6 worst offenders moved to `references/` (1,733 lines extracted)
+
+### Safety
+- **Adversarial Input Hardening** preamble on all 48 agents (homoglyphs, urgency, role-play overrides flagged)
+- **Budget circuit breaker** on every `Task()` dispatch (maxHops default 8, ceiling 64) with constant-string errors
+- **Defensive hooks** — `safeWriteFlag` (O_NOFOLLOW symlink defense), `validateHookFields` (settings.json guard)
+- **Sensitive-path refusal** in compression (`.env`, credentials, `.ssh/`, `.aws/`, private keys)
+
+### Counts
+- **36 slash commands** — orchestration, diagnosis, quality, growth, learning, meta
+- **48 specialist agents** — code, growth, debate, WordPress, Next.js, mobile, CRO, tool
+- **31 skills** — 14 inline + 17 context:fork
+- **23 lifecycle hooks** across 10 events
+- **6 templates** — decision log, addendum, failure-capture, investigation case file, prompt-defense baseline, brainstorming/spec
+
+### Other capabilities
+- **Multi-platform** — works with Claude Code, Codex, Cursor, Gemini, OpenClaw (separate manifests)
 - **Adaptive pipeline** — `/workflow` scrum phase is promptable (full sprint planning OR direct delegation)
-- **Review calibration** — only Critical/High block push; Medium/Low are recommendations
+- **Decision logs + addenda** — `/workflow` and `/plan` persist decisions across runs
+- **Continuous learning** — `/learn` extracts instincts; `/evolve` clusters them; auto-nudge on SessionStart
+- **`/audit-self`** — re-runs the quality scorecard, surfaces regressions since last audit
+- **`/elicit`** — 18 named reasoning methods (Pre-mortem, Red Team, Inversion, Stakeholder Round Table) applied to artifacts
+- **Growth OS** — 9-phase marketing pipeline with strategy debate and CRO
+- **Project management** — state.yaml, TASKS.md, automated dashboards
 - **Instruction priority** — CLAUDE.md > Inline skills > Forked skills > Subagents > Defaults
-- **Mode-aware permissions** — fully yields to auto-mode's classifier (no double-gating); blocklist enforced in default and bypass modes
-- **Adversarial debate** — advocate/skeptic/judge as context:fork skills — blind isolation with less overhead
-- **JSON handoff contracts** — structured context packages for workflow-to-agent dispatch
-- **Growth OS** — 9-phase marketing pipeline with CRO and email automation
-- **Project management** — state.yaml, TASKS.md, dashboard generation
-- **Quality pipeline** — specialists self-review before reporting DONE, review-all runs inline with session context as final gate
-- **Objective + Never on everything** — all 33 commands, 48 agents, and 24 skills have clear objectives and hard "Never" boundaries
-- **Plugin-only distribution** — `forgebee/` is the single source of truth, loaded directly by Claude Code's plugin system
 
 ## Install
 
@@ -54,3 +91,4 @@ forgebee/
 ```
 
 For full documentation, see the [main README](../README.md).
+For the routing index, see [INDEX.md](./INDEX.md) — auto-generated, never hand-edit.
