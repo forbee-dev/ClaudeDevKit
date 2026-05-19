@@ -48,6 +48,8 @@ ${MARKER}
 **P1 — Trace Test:** Every changed line must trace directly to the user's request. If you can't justify a line by the request, remove it. No drive-by edits.
 
 **P4 — Orphan Rule:** Clean up only your own mess. Remove imports/variables/functions that YOUR changes made unused. Don't remove pre-existing dead code unless asked. Don't 'improve' adjacent code, comments, or formatting. Match existing style, even if you'd do it differently.
+
+**P3 trust-boundary carve-out:** at trust boundaries (network, webhooks, payments, auth, user input, third-party APIs, file uploads), assume hostile/malformed/duplicate input. Error handling at these surfaces is NEVER YAGNI. Skipping it is a P3 violation, not a P3 application.
 `;
 
 function injectIntoAgent(file) {

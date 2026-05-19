@@ -6,6 +6,59 @@ The format roughly follows [Keep a Changelog](https://keepachangelog.com/) and t
 
 ---
 
+## [5.1.1] — 2026-05-19
+
+**Theme: post-release polish + permission-guard fixes.** Patch release addressing audit findings, defensive hook hardening, and friction in the permission system that surfaced after 5.1.0 shipped.
+
+### Fixed — Permission guard
+
+- **Permission mode detection bug.** `detectPermissionMode()` only read root-level `settings.defaultMode`, missed the nested `settings.permissions.defaultMode` shape Claude Code actually uses. Combined with `skipDangerousModePermissionPrompt: true`, this caused auto-mode users to be detected as `bypassPermissions`, which then exited the guard silently and let Claude Code's classifier ask about every command. Now checks (in priority): `settings.permissions.defaultMode` → `settings.defaultMode` → flag fallbacks → `default`. Also reads project-local `.claude/settings.json` for per-project override.
+- **Auto mode now genuinely complements the classifier.** Previously the guard ran Tier 0 (blocklist) only in auto mode, then exited — the classifier was asked about every legitimate dev command. Now Tier 0 + Tier 1 (allowlist) both run in auto mode: known-safe commands get `permissionDecision: 'allow'` upfront so the classifier never sees them; unknown commands still fall through to the classifier.
+- **Re-wired `permission-guard.js` into `hooks.json`** (was removed in 4.1.2 for double-gating). Auto-mode conflict that caused the original removal is now fixed by the additive Tier-0-plus-allowlist design.
+
+### Added — Permission allowlist coverage
+
+Substantial expansion for non-destructive dev workflows. Auto mode now pre-approves (no classifier ask) for:
+
+- **Git daily ops:** `checkout`, `merge`, `restore`, `cherry-pick`, `rebase` (non-interactive), `config --get/--list`, `worktree`, `bisect`, `rev-parse`, `reflog`, `whatchanged`, `describe`
+- **GitHub CLI:** `gh pr/issue/repo/run/workflow` create/view/list, `gh api ... GET`
+- **Package mgmt:** `npm i` short form, `npm exec/create/update/upgrade/prune/cache`, `yarn add/remove`, `pnpm add/remove`, `bun add`
+- **Ruby / PHP / .NET:** `bundle install/exec`, `rails *`, `rake *`, `php artisan *`, `composer *`, `dotnet build/test/run`
+- **Python tooling:** `pytest`, `tox`, `nox`, `coverage`, `uv *`, `poetry *`, `pipx *`, `hatch *`, `python -m {pytest,unittest,black,ruff,mypy,http.server,pip,venv,build,twine,json.tool}`
+- **Docker:** `compose restart/pull/stop/start/top/pause`, `start/stop/restart` (container lifecycle), `pull/tag/history/diff/save/export/cp/commit`, `network/volume/system/context ls/inspect/df`, `buildx`, `dc` shell alias
+- **Kubernetes:** `kubectl get/describe/logs/top/config view/cluster-info`, `helm list/status/repo`, `minikube status`, `k9s`
+- **Cloud read-only:** `aws ec2 describe-*`, `gcloud compute instances list` (nested subcommands), `az vm list`, `terraform plan/init/validate/fmt/show`
+- **DB read-only:** `psql -c "SELECT/SHOW/DESCRIBE/\d/\l"`, `redis-cli info/get/keys/scan`, `pg_dump`, `mongodump`
+- **Editors / clipboards:** `code .`, `cursor`, `subl`, `vim`, `nvim`, `open`, `xdg-open`, `pbcopy`, `pbpaste`
+- **Search tools:** `fd`/`fdfind` (no `-x`/`--exec`), `locate`/`mlocate`/`plocate`, `ctags`/`etags`/`gtags`/`cscope`, modern viewers (`bat`, `lsd`, `eza`, `delta`, `broot`), structured data (`miller`/`mlr`, `csvkit`, `csvq`, `jc`)
+- **Process / monitor:** `htop`, `btop`, `glances`, `iotop`, `atop`, `pidstat`, `lsof -i`, `ss`, `netstat` (read-only)
+- **Local scripts:** `./bin/*`, `./scripts/*`, `./tools/*`, `./tasks/*` (project-relative scripts)
+- **Build tools:** `gradle`, `gradlew`, `mvn`, `just`, `task`, `mage`, `mise`, `asdf`
+- **Bench/docs:** `hyperfine`, `time`, `man`, `tldr`, `info`
+
+### Hardened
+
+- **`xargs` no longer permissive.** Previously `xargs <anything>` was allowlisted, which would have let `find ... | xargs rm` bypass the find guard. Now `xargs` only allows a curated list of safe subcommands (`grep`, `wc`, `cat`, `head`, `tail`, `stat`, etc.).
+- **`fd -x` / `fd --exec` now properly excluded.** Previous negative lookahead used `\b` which doesn't anchor between two non-word chars (space and `-`); fixed with `(?<=^|\s)` lookbehind and end-of-string anchoring.
+- **`find -ok` properly excluded.** Same `\b` bug; same fix.
+- **`auto` mode Tier 0 blocklist enforced.** Auto mode no longer skips dangerous-pattern checks. `rm -rf /etc`, force-push, `curl|bash`, etc. blocked in every mode (compliance baseline).
+- **Permission cache normalization tightened.** Previously collapsed any path to `<path>`, letting a cache hit for `rm -rf /tmp/foo` allow `rm -rf /etc`. Now preserves basename + never collapses dangerous prefixes (`/etc`, `/var`, `/usr`, `/root`, `/sys`, etc.).
+
+### Added — Hardening helpers
+
+- **`redactForPrompt()`** helper in `_common.js` — strips API keys (sk-, ghp-, AKIA, slack tokens, JWTs, bearer), emails, UUIDs, private key blocks, and large currency amounts from text before it's included in any prompt-type hook. Available for use by future `TaskCompleted`/`PreCompact`/`Notification` hooks.
+- **`FORGEBEE_GUARD_LOG_UNKNOWN=1` env var** — when set, every command that falls through to the classifier gets appended (with timestamp + which subcommands matched) to `.claude/session-cache/unknown-commands.log`. Lets users see exactly what's getting asked and decide which patterns to allowlist.
+
+### Fixed — Description sanitization
+
+- **INDEX.md description injection defense** now operates with curated patterns (not over-aggressive backtick rejection). Detects: curl|sh, ignore-previous attempts, override role frames, command substitution to dangerous calls, backticked shell commands, unicode/RTL overrides. Legitimate markdown backticks pass through.
+
+### Misc
+
+- All 3 deployment locations resynced (source, project-local `.claude/hooks/`, plugin cache). 3 hook scripts missing from project-local copy backfilled (`learn-nudge.js`, `load-index.js`, `permission-denied-logger.js`). 86 plugin-cache files refreshed from source.
+
+---
+
 ## [5.1.0] — 2026-05-19
 
 **Theme: System discipline.** Major behavioral upgrade across every code-producing agent — Karpathy principles baked into every decision point, adversarial input hardening on all 48 agents, three new skills for forensic diagnosis and stress-testing, token-saving terse-report mode for sub-agents, and an auto-generated routing index that cuts session token cost.

@@ -1,6 +1,6 @@
 ---
 name: strategy-judge
-description: Rules on strategy debate items. Use when /growth strategy debate needs adjudication.
+description: Use when /growth strategy debate needs adjudication — rules on each item after reading blind Advocate and Skeptic cases. Approve, block, or flag.
 context: fork
 version: 1.0.0
 ---

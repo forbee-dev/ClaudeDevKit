@@ -309,6 +309,36 @@ function appendFile(filePath, content) {
 }
 
 /**
+ * Redact sensitive tokens before output is included in an AI prompt.
+ *
+ * Strips: API keys (long alphanumeric), emails, JWTs, UUIDs, currency amounts
+ * over $1k, AWS-style access keys, bearer tokens, private key blocks.
+ *
+ * Implements H-2 — defense for `type: prompt` hooks that send session data
+ * back into an LLM context. Call this BEFORE outputting hook content that
+ * will become part of a prompt.
+ *
+ * @param {string} text - input to scan
+ * @returns {string} text with sensitive tokens replaced by typed placeholders
+ */
+function redactForPrompt(text) {
+  if (typeof text !== 'string' || !text) return text;
+  let out = text;
+  out = out.replace(/-----BEGIN [A-Z ]+ PRIVATE KEY-----[\s\S]*?-----END [A-Z ]+ PRIVATE KEY-----/g, '[REDACTED:private-key]');
+  out = out.replace(/\b(sk-[A-Za-z0-9]{20,}|sk-proj-[A-Za-z0-9_-]{20,})\b/g, '[REDACTED:api-key]');
+  out = out.replace(/\bghp_[A-Za-z0-9]{20,}\b/g, '[REDACTED:github-token]');
+  out = out.replace(/\bAKIA[0-9A-Z]{16}\b/g, '[REDACTED:aws-access-key]');
+  out = out.replace(/\bxox[bpoa]-[A-Za-z0-9-]{10,}\b/g, '[REDACTED:slack-token]');
+  out = out.replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, '[REDACTED:jwt]');
+  out = out.replace(/\bBearer\s+[A-Za-z0-9._-]{20,}/gi, 'Bearer [REDACTED:token]');
+  out = out.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED:email]');
+  out = out.replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, '[REDACTED:uuid]');
+  // Currency amounts over $1,000 (heuristic for sensitive finance numbers)
+  out = out.replace(/\$\s?\d{1,3}(?:[,.]\d{3})+(?:\.\d{2})?/g, '[REDACTED:amount]');
+  return out;
+}
+
+/**
  * Atomic write with O_NOFOLLOW symlink-clobber defense.
  *
  * Refuses to write if the target path or any parent component resolves through
@@ -426,6 +456,30 @@ function validateHookFields(settingsObj) {
         }
         if (h.timeout != null && typeof h.timeout !== 'number') {
           errors.push(`${hloc}.timeout must be a number when present`);
+        }
+        // Command lint — schema-valid is not enough. Reject inline interpreters
+        // (node -e, python -c, perl -e), curl|sh, wget|sh, base64 → shell
+        // pipelines, and free-form shell smuggling. Hostile hook entries must
+        // not bypass permission-guard via settings.json.
+        if (typeof h.command === 'string') {
+          const cmd = h.command;
+          const HOSTILE_PATTERNS = [
+            { re: /\b(node|nodejs|deno)\s+(-e|--eval|--print|-p)\b/i, why: 'inline node eval (-e/-p) is not allowed in hooks' },
+            { re: /\bpython3?\s+(-c|-m\s+code)\b/i, why: 'inline python -c is not allowed in hooks' },
+            { re: /\bperl\s+(-e|-E|-p\s|-n\s)/i, why: 'inline perl -e is not allowed in hooks' },
+            { re: /\bruby\s+(-e|-r)\b/i, why: 'inline ruby -e is not allowed in hooks' },
+            { re: /\b(curl|wget|fetch)\b[^|]*\|\s*(sh|bash|zsh|fish|node|python|perl)/i, why: 'pipe-to-shell pattern is not allowed' },
+            { re: /\bbase64\s+(-d|--decode|-D)\b/i, why: 'base64 decode in hooks blocked — wrap in registered script' },
+            { re: /\beval\s+/i, why: 'eval in hook command blocked' },
+            { re: /\bexec\s*</i, why: 'exec redirection in hook command blocked' },
+            { re: /;\s*(rm|curl|wget|nc|telnet)\b/i, why: 'semicolon-chained dangerous command in hook command' },
+          ];
+          for (const { re, why } of HOSTILE_PATTERNS) {
+            if (re.test(cmd)) {
+              errors.push(`${hloc}.command rejected — ${why}`);
+              break;
+            }
+          }
         }
       });
     });
@@ -593,32 +647,32 @@ function detectPermissionMode() {
     return _cachedPermissionMode;
   }
 
-  try {
-    const settingsPath = path.join(os.homedir(), '.claude', 'settings.json');
-    const raw = fs.readFileSync(settingsPath, 'utf8');
-    const settings = JSON.parse(raw);
+  const VALID = ['auto', 'bypassPermissions', 'default', 'acceptEdits', 'plan'];
 
-    if (
-      settings.defaultMode === 'auto' ||
-      settings.defaultMode === 'bypassPermissions' ||
-      settings.defaultMode === 'default'
-    ) {
-      _cachedPermissionMode = settings.defaultMode;
-      return _cachedPermissionMode;
+  function checkSettings(p) {
+    try {
+      const raw = fs.readFileSync(p, 'utf8');
+      const s = JSON.parse(raw);
+      // 1. Nested under permissions (current Claude Code shape)
+      if (VALID.includes(s?.permissions?.defaultMode)) return s.permissions.defaultMode;
+      // 2. Root-level (older / alternate shape)
+      if (VALID.includes(s?.defaultMode)) return s.defaultMode;
+      // 3. Legacy flag → bypassPermissions
+      if (s?.skipDangerousModePermissionPrompt === true) return 'bypassPermissions';
+      // 4. New flag → auto
+      if (s?.skipAutoPermissionPrompt === true) return 'auto';
+      return null;
+    } catch (e) {
+      return null;
     }
-
-    if (settings.skipDangerousModePermissionPrompt === true) {
-      _cachedPermissionMode = 'bypassPermissions';
-      return _cachedPermissionMode;
-    }
-
-    _cachedPermissionMode = 'default';
-    return _cachedPermissionMode;
-  } catch (e) {
-    // File missing, unreadable, or malformed JSON — safe fallback
-    _cachedPermissionMode = 'default';
-    return _cachedPermissionMode;
   }
+
+  // Read project-local settings first (override), then global
+  const projectSettings = path.join(getProjectDir(), '.claude', 'settings.json');
+  const globalSettings = path.join(os.homedir(), '.claude', 'settings.json');
+  const mode = checkSettings(projectSettings) || checkSettings(globalSettings) || 'default';
+  _cachedPermissionMode = mode;
+  return mode;
 }
 
 // ============================================================================
@@ -687,6 +741,7 @@ module.exports = {
   ensureDir,
   safeWriteFlag,
   validateHookFields,
+  redactForPrompt,
 
   // Command execution
   runCommand,

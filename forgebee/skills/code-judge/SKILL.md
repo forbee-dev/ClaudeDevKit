@@ -1,6 +1,6 @@
 ---
 name: code-judge
-description: Rules on code debate items after reviewing Advocate and Skeptic cases. Use when /workflow code debate needs adjudication.
+description: Use when /workflow code debate needs adjudication — rules on each item after reading blind Advocate and Skeptic cases. Approve, block, or flag.
 context: fork
 version: 1.0.0
 ---

@@ -1,6 +1,6 @@
 ---
 name: terse-report
-description: Use when reporting back to an orchestrator (/workflow, /team) rather than directly to the user — emit telegraphic format that preserves code/citations exact while dropping prose filler. Cuts ~65% of report tokens.
+description: Use when reporting to an orchestrator (/workflow, /team), not the user — emit telegraphic format keeping code/citations exact, dropping prose filler. Cuts ~65% of report tokens.
 version: 1.0.0
 ---
 
@@ -84,6 +84,12 @@ Status: <STATUS>
 - <test/check>: <result>
 - <test/check>: <result>
 
+## Scope-Delta (REQUIRED — never omit)
+- none
+  OR
+- <out-of-scope item left alone — file:line and reason>
+- <scope expansion beyond original ask — what + why>
+
 ## Concerns (only if DONE_WITH_CONCERNS)
 - <concern 1>
 - <concern 2>
@@ -92,6 +98,8 @@ Status: <STATUS>
 - <check>: <pass/finding>
 - <check>: <pass/finding>
 ```
+
+**The `Scope-Delta` section is mandatory** — orchestrators reject reports that omit it. Use the literal value `none` when no out-of-scope work was touched and no scope expansion happened. Token cost of `Scope-Delta: none` is trivial; the cost of silent scope drift is high (sprints shipping 70% of intended scope unnoticed). This is the W17 trim's load-bearing safety net.
 
 ## Never
 

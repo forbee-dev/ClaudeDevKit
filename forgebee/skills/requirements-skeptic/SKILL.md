@@ -1,6 +1,6 @@
 ---
 name: requirements-skeptic
-description: Argues AGAINST planning artifacts — finds gaps, risks, missing edge cases. Use when /workflow reaches the requirements debate phase.
+description: Use when /workflow reaches the requirements debate phase — argues AGAINST planning artifacts, finds gaps, risks, missing edge cases, flawed assumptions.
 context: fork
 version: 1.0.0
 ---

@@ -1,0 +1,21 @@
+name: References Integrity Check
+
+on:
+  pull_request:
+    paths:
+      - 'forgebee/agents/**'
+      - 'scripts/check-references.js'
+      - '.github/workflows/references-check.yml'
+  workflow_dispatch:
+
+jobs:
+  references:
+    name: persona ↔ references/ integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run references check
+        run: node scripts/check-references.js

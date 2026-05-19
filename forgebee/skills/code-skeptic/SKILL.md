@@ -1,6 +1,6 @@
 ---
 name: code-skeptic
-description: Argues AGAINST implementation during code debate — finds bugs, security holes, tech debt. Use when /workflow reaches the code debate phase.
+description: Use when /workflow reaches the code debate phase — argues AGAINST the implementation, finds bugs, security holes, missing requirements, tech debt.
 context: fork
 version: 1.0.0
 ---

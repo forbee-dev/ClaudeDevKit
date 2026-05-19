@@ -12,6 +12,18 @@ Break a task into parallel workstreams, delegate to specialist agents, and deliv
 
 **Success looks like:** After delivery, running review-all finds zero critical or high issues. All tests pass, build succeeds, no security gaps.
 
+## When to use `/team` vs `/workflow`
+
+| Situation | Use |
+|---|---|
+| **You know what you want, just need execution across 2-5 files** | `/team` |
+| **Spec is ambiguous OR auth/payments/data are involved OR scope is large (>5 files)** | `/workflow` |
+| **You want adversarial review (debate triads)** | `/workflow` |
+| **Quick refactor, bugfix, or single-concern feature** | `/team` |
+| **First time tackling a domain you're unsure about** | `/workflow --strict` (forces design spec first) |
+
+In short: `/team` is "go fast"; `/workflow` is "go thorough." If unsure → `/workflow`.
+
 ## Anti-Stop Rule (P5)
 
 **After dispatching a sub-agent, IMMEDIATELY continue with your own next-step work. Do not idle waiting for the sub-agent to return.** The harness will notify you when work completes — until then, your job is to be planning the next dispatch, integrating partial results, or preparing the verification gate. Do not announce "waiting for X to return" — that's the most common orchestrator failure mode.

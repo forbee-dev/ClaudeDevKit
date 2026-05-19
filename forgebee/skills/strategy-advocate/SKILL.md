@@ -1,6 +1,6 @@
 ---
 name: strategy-advocate
-description: Argues FOR marketing strategy during Growth OS debate. Use when /growth reaches the strategy debate phase.
+description: Use when /growth reaches the strategy debate phase — argues FOR marketing strategy artifacts, defends quality, feasibility, and effectiveness in blind debate.
 context: fork
 version: 1.0.0
 ---

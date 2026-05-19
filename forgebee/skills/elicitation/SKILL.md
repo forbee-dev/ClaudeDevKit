@@ -1,6 +1,6 @@
 ---
 name: elicitation
-description: Use after producing a plan or design artifact to stress-test it through a named reasoning method (Pre-mortem, Red Team, Inversion, Stakeholder Round Table, etc.) — applies the method to the OUTPUT, not the requirements.
+description: Use after producing a plan or design to stress-test it via a named method (Pre-mortem, Red Team, Inversion, Stakeholder Round Table, etc.) — applies to OUTPUT, not requirements.
 version: 1.0.0
 ---
 
@@ -87,10 +87,27 @@ Every method returns:
 <one-line summary: artifact survives this method / needs revision / needs discussion>
 ```
 
+## Method Pairing Guidance
+
+Not every method pairs well. Some are redundant; some complement each other:
+
+**Recommended pairs (run both for high-signal coverage):**
+- `pre-mortem` + `red-team` → forward-looking risk + adversarial probe
+- `stakeholder-round-table` + `inversion` → different perspectives + flip-the-question
+- `five-whys` + `meta-prompting` → drill down + step back
+- `tree-of-thoughts` + `self-consistency-validation` → explore + verify
+
+**Mutually exclusive (redundant — pick one):**
+- `pre-mortem` and `inversion` (both invert the success/failure framing)
+- `red-team` and `shark-tank` (both adversarial; red-team for technical, shark-tank for business)
+- `stakeholder-round-table` and `cross-functional-war-room` (both multi-persona; war-room narrower to PM/eng/design)
+
+**Hard limit:** at most **2 methods per artifact**. After 2, returns diminish — the artifact is either understood enough to ship or fundamentally needs a different approach (rewrite, not re-elicit). If asked to run a 3rd method on the same artifact, refuse: "Two methods applied — third returns diminishing signal. Ship, rework, or re-plan."
+
 ## Never
 
 - Never run elicitation on a non-existent artifact — there must be a concrete plan/decision to apply it to
 - Never produce vibes findings — every finding must map to a specific element of the artifact
 - Never use elicitation as a delay tactic — pick a method, run it quickly (~5-10 min), output concrete actions
-- Never run all 18 methods on one artifact — pick the 1-2 most relevant
+- Never run all 18 methods on one artifact — hard cap is 2; see Method Pairing Guidance above
 - Never apply elicitation to requirements — the debate triads handle that. Elicitation is for produced artifacts.

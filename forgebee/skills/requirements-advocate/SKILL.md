@@ -1,6 +1,6 @@
 ---
 name: requirements-advocate
-description: Argues FOR planning artifacts during requirements debate. Use when /workflow reaches the requirements debate phase.
+description: Use when /workflow reaches the requirements debate phase — argues FOR planning artifacts, defends quality, feasibility, and completeness in blind debate.
 context: fork
 version: 1.0.0
 ---

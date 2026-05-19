@@ -1,6 +1,6 @@
 ---
 name: code-advocate
-description: Argues FOR implementation quality during code debate. Use when /workflow reaches the code debate phase.
+description: Use when /workflow reaches the code debate phase — argues FOR implementation quality, defends completeness and correctness against the Skeptic in blind debate.
 context: fork
 version: 1.0.0
 ---

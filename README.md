@@ -3,7 +3,7 @@
   <img src="https://img.shields.io/badge/Codex-Compatible-10B981?style=for-the-badge&logoColor=white" alt="Codex" />
   <img src="https://img.shields.io/badge/Cursor-Compatible-1F2937?style=for-the-badge&logoColor=white" alt="Cursor" />
   <img src="https://img.shields.io/badge/Gemini-Compatible-4285F4?style=for-the-badge&logoColor=white" alt="Gemini" />
-  <img src="https://img.shields.io/badge/version-5.1.0-blue?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/version-5.1.1-blue?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License" />
 </p>
 
@@ -11,7 +11,11 @@
   <img src="https://img.shields.io/badge/agents-48-orange?style=for-the-badge" alt="Agents" />
   <img src="https://img.shields.io/badge/commands-36-red?style=for-the-badge" alt="Commands" />
   <img src="https://img.shields.io/badge/hooks-23-blueviolet?style=for-the-badge" alt="Hooks" />
-  <img src="https://img.shields.io/badge/skills-31-teal?style=for-the-badge" alt="Skills" />
+  <img src="https://img.shields.io/badge/skills-32-teal?style=for-the-badge" alt="Skills" />
+</p>
+
+<p align="center">
+  <sub>48 agents = <strong>30 framework-agnostic</strong> (code, growth, debate, planning) + <strong>18 stack specialists</strong> (WordPress, Next.js, Supabase, mobile, n8n, WooCommerce)</sub>
 </p>
 
 <h1 align="center">ForgeBee</h1>

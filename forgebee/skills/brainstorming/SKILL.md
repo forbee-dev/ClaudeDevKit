@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: Use when the user explicitly invokes /workflow --strict, /plan, or asks to "brainstorm before building" — turns a feature idea into a written, approved design spec before any implementation can begin. Opt-in by design.
+description: Use when invoking /workflow --strict, /plan, or "brainstorm before building" — turns an idea into a written, approved design spec before any implementation.
 version: 1.0.0
 ---
 

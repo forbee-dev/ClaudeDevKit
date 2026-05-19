@@ -44,6 +44,8 @@ For each item, apply the appropriate scorecard. Focus detail on problematic item
 - Severity vocabulary standardized in review skills? (regression on W9 P6)
 - Prompt defense baseline present in all agents? (regression on W13)
 - Description format "Use when..." across all skills? (regression on 5.0 audit)
+- Persona ↔ references/ symmetry intact? (run `node scripts/check-references.js`)
+- `--skip-checkpoint` rate from `.claude/audit/skip-checkpoint.jsonl` — flag if >50% across last 10 `/workflow` runs (sticky-alias drift)
 
 ### Step 4: Regression detection
 - Read most recent prior `docs/planning/audit-*.md` (or audit-skills.md / audit-agents-*.md / audit-commands.md if no timestamped one exists)

@@ -1,6 +1,6 @@
 ---
 name: investigate
-description: Use when handed a crash log, stack trace, or "this used to work" complaint — produces a structured case file with evidence-graded findings before any code changes. Complements debugger-detective (which fixes).
+description: Use when handed a crash log, stack trace, or "this used to work" report — produces a forensic case file with evidence grading before code changes. Complements debugger-detective.
 version: 1.0.0
 ---
 

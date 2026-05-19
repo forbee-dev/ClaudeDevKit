@@ -1,6 +1,6 @@
 ---
 name: surface-ambiguity
-description: Use when about to make a non-trivial implementation choice with multiple valid interpretations — forces explicit listing of options and the chosen one with rationale before proceeding. Catches silent picks.
+description: Use when about to make a non-trivial choice with multiple valid interpretations — forces listing of options and the chosen one with rationale. Catches silent picks.
 version: 1.0.0
 ---
 

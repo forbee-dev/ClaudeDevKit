@@ -24,6 +24,8 @@ These principles apply to every code-producing action, regardless of which agent
 
 **P3 — YAGNI Timing:** Good code solves today's problem simply, not tomorrow's prematurely. No features beyond what was asked. No abstractions for single-use code. No flexibility/configurability that wasn't requested. No error handling for impossible scenarios.
 
+> **Trust-boundary carve-out (P3 exception):** at *trust boundaries* — network calls, webhooks, payment processors, auth, user input, third-party APIs, file uploads — assume hostile, malformed, or duplicate input. Error handling, idempotency keys, retry logic, and timeouts at these surfaces are **never YAGNI**. Skipping them is a P3 violation, not a P3 application.
+
 **P4 — Orphan Rule:** Clean up only your own mess. Remove imports/variables/functions that YOUR changes made unused. Don't remove pre-existing dead code unless asked. Don't 'improve' adjacent code, comments, or formatting. Match existing style, even if you'd do it differently.
 
 **P5 — Anti-Stop Rule (orchestrators only):** After dispatching a sub-agent, IMMEDIATELY continue with your own next-step work. Do not idle waiting for the sub-agent to return — the harness notifies you when work completes.

@@ -12,6 +12,14 @@ Ship verified, debated, production-ready code by delegating to specialist agents
 
 **Success looks like:** After delivery, running review-all finds zero critical or high issues.
 
+## When to use `/workflow` vs `/team`
+
+`/workflow` runs the full ceremony: plan → debate → architect → execute → spec compliance → checkpoint preview → code debate → deliver. Slow on purpose. Use when: spec is ambiguous, auth/payments/data are involved, scope is large (>5 files), or you want adversarial debate triads.
+
+`/team` is faster — parallel dispatch with no debate ceremony. Use when: you know what you want and need execution across 2-5 files.
+
+If unsure → `/workflow`. The ceremony catches things `/team` misses.
+
 ## Anti-Stop Rule (P5)
 
 **After dispatching a sub-agent, IMMEDIATELY continue with your own next-step work. Do not idle waiting for the sub-agent to return.** The harness notifies you when work completes — until then, plan the next dispatch, integrate partial results, prepare verification, or surface progress to the user. Never sit silent after a dispatch.
@@ -63,7 +71,7 @@ Run the phases determined by Step 1. Complete each phase before starting the nex
 4. If missing → ask: "No planning artifacts found. Run /plan first?"
 5. If user says yes → delegate to `/plan` → wait → continue
 
-**Output required:** Problem Brief (minimum). Requirements doc (Medium+). **Decision log** (`<feature>.decision-log.md` — append decisions made at each phase). **Addendum** (`<feature>.addendum.md` — only if rejected alternatives, sizing data, or option matrices were considered worth keeping).
+**Output required:** Problem Brief (minimum). Requirements doc (Medium+). **Decision log** (`YYYY-MM-DD-<feature>.decision-log.md` — date-prefixed to prevent slug collisions across iterations; append decisions made at each phase). **Addendum** (`YYYY-MM-DD-<feature>.addendum.md` — only if rejected alternatives, sizing data, or option matrices were considered worth keeping).
 
 **Auto-offer elicitation at phase boundary:** After plan artifacts are produced, surface 2-3 stress-test methods inline:
 > Want to stress-test this before moving on? Try `/elicit pre-mortem`, `/elicit stakeholder-round-table`, or `/elicit red-team`. Or skip and continue.
@@ -232,8 +240,9 @@ Extend the handoff contract with:
 - A sub-dispatch that would push `hopCount > maxHops` is rejected immediately with `HOP_LIMIT_EXCEEDED`
 - `maxHops` default 8, **absolute ceiling 64** — never accept or set higher
 - `maxTokens` and `maxUsd` are optional; if set, reject with `TOKEN_LIMIT_EXCEEDED` / `USD_LIMIT_EXCEEDED`
-- Error strings are **constants only** — never include current/remaining budget in the error (oracle leakage)
-- When the breaker trips, surface "circuit breaker tripped at hop N: <reason>" to the user with the originating dispatch chain
+- Error strings sent to *peer agents* are **constants only** — never include current/remaining budget in peer-visible error (oracle leakage defense)
+- The user-facing surface IS allowed full state: when the breaker trips, surface "circuit breaker tripped at hop N (maxHops=X, started=Y): <reason>" to the user with the originating dispatch chain — full state goes to the user + the audit log at `.claude/audit/`, never to the peer agent that triggered it
+- `/workflow --debug-budget` flag: dump the full budget envelope to the user on every dispatch (debugging only — leaves the oracle gap open for the run)
 
 This guards against runaway debate fan-out (e.g., code-skeptic finding an issue, dispatching a sub-debate on it, which dispatches another, etc).
 
@@ -308,6 +317,8 @@ If `dig deeper`: focused review on the requested area.
 If `ship`: proceed to Code Debate (Large/Critical) or directly to Deliver (Medium).
 
 Skip when user passed `--skip-checkpoint`, or for trivial changes (1-2 files, single concern).
+
+**Telemetry:** every `--skip-checkpoint` invocation appends one line to `.claude/audit/skip-checkpoint.jsonl` with timestamp + complexity tier. `/audit-self` reads this file and nags if skip rate > 50% across the last 10 runs — sticky-alias drift is the failure mode this telemetry catches. Set `FORGEBEE_SKIP_CHECKPOINT_NAG=off` to suppress (default: on).
 
 ---
 

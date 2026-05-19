@@ -1,6 +1,6 @@
 ---
 name: forgebee-setup
-description: Use when initializing ForgeBee in a project — sets up CLAUDE.md, PM system, and project memory. Also triggers on "what commands are available" or "how do I use ForgeBee".
+description: Use when initializing ForgeBee on a new project — sets up CLAUDE.md, PM system, and project memory. For command-list questions, invoke the `forgebee-help` skill.
 version: 1.1.0
 ---
 

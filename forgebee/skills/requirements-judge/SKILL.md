@@ -1,6 +1,6 @@
 ---
 name: requirements-judge
-description: Rules on requirements debate items. Use when /workflow requirements debate needs adjudication.
+description: Use when /workflow requirements debate needs adjudication — rules on each item after reading blind Advocate and Skeptic cases. Approve, block, or flag.
 context: fork
 version: 1.0.0
 ---

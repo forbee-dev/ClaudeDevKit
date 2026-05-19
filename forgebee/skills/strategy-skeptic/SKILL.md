@@ -1,6 +1,6 @@
 ---
 name: strategy-skeptic
-description: Argues AGAINST marketing strategy — finds weak positioning and audience gaps. Use when /growth reaches the strategy debate phase.
+description: Use when /growth reaches the strategy debate phase — argues AGAINST marketing strategy, finds weak positioning, audience gaps, flawed assumptions.
 context: fork
 version: 1.0.0
 ---
