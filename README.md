@@ -3,7 +3,7 @@
   <img src="https://img.shields.io/badge/Codex-Compatible-10B981?style=for-the-badge&logoColor=white" alt="Codex" />
   <img src="https://img.shields.io/badge/Cursor-Compatible-1F2937?style=for-the-badge&logoColor=white" alt="Cursor" />
   <img src="https://img.shields.io/badge/Gemini-Compatible-4285F4?style=for-the-badge&logoColor=white" alt="Gemini" />
-  <img src="https://img.shields.io/badge/version-5.1.2-blue?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/version-5.1.3-blue?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License" />
 </p>
 
@@ -170,7 +170,7 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 
 | Command | Description |
 |:--------|:------------|
-| `/workflow` | **Full pipeline**: Plan &rarr; Debate &rarr; Architect &rarr; **Work Breakdown** (promptable) &rarr; Execute &rarr; **Spec Compliance** &rarr; **Checkpoint Preview** (default, `--skip-checkpoint` to opt out) &rarr; Code Debate &rarr; Deliver. Pass `--strict` to require a design spec via `brainstorming` before any code. Auto-offers `/elicit` methods at phase boundaries |
+| `/workflow` | **Full pipeline**: Plan &rarr; Debate &rarr; Architect &rarr; **Implementation Plan** (lightweight default, `--scrum` for full sprint stories) &rarr; Execute &rarr; **Spec Compliance** &rarr; **Checkpoint Preview** (default, `--skip-checkpoint` to opt out) &rarr; Code Debate &rarr; Deliver. Pass `--strict` to require a design spec via `brainstorming` before any code. Auto-offers `/elicit` methods at phase boundaries |
 | `/investigate` | Forensic diagnosis — produces a case file with Confirmed / Deduced / Hypothesized grading. Hand off to `debugger-detective` for the fix. Different from `/debug` (which fixes directly) |
 | `/elicit` | Stress-test the most recent plan or design with one of 18 named reasoning methods (`pre-mortem`, `red-team`, `inversion`, `stakeholder-round-table`, `tree-of-thoughts`, …). Applied to OUTPUT, not requirements |
 | `/audit-self` | Re-run the ForgeBee quality scorecard across all skills, agents, and commands. Detects regressions since last audit. Timestamped findings |
@@ -420,7 +420,7 @@ review-all (inline skill — runs in session context, only Critical/High block p
 - **Every code-producing agent** has a Self-Review section matching review-all's criteria
 - **Agent status protocol** — agents report `DONE`, `DONE_WITH_CONCERNS`, `BLOCKED`, or `NEEDS_CONTEXT`; orchestrators handle each appropriately
 - **Review calibration** — only Critical/High issues block the push; Medium/Low are informational
-- **`/workflow` Work Breakdown** is promptable — full sprint planning OR direct delegation (your choice)
+- **`/workflow` Work Breakdown** defaults to a lightweight Implementation Plan (ordered workstreams + file scope + agent + acceptance criteria) — `scrum-master` full sprint stories are opt-in via `/workflow --scrum`
 - **`/workflow` code debate** uses `context:fork` skills for blind isolation with less token overhead
 - **`/team` quality gate** invokes review-all as an inline skill (session context, ~93% fewer tokens)
 - **Instruction priority** — CLAUDE.md > Inline skills > Forked skills > Subagents > Defaults

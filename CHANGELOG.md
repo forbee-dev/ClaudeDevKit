@@ -6,6 +6,23 @@ The format roughly follows [Keep a Changelog](https://keepachangelog.com/) and t
 
 ---
 
+## [5.1.3] — 2026-05-20
+
+**Theme: lighter `/workflow` breakdown for ticket-driven work.** Patch release removing the `scrum-master` prompt from the default `/workflow` path. Solo devs (and anyone arriving with a ticket that already has brief + architecture in hand) no longer pay the sprint-ceremony tax — the default is now an ordered Implementation Plan produced directly by the orchestrator.
+
+### Changed — `/workflow` Work Breakdown now defaults to Implementation Plan
+
+- **Default flow no longer prompts the user** to choose between full sprint planning and direct delegation. After Architect, `/workflow` produces a lightweight Implementation Plan directly: ordered workstreams, file scope, agent assignment, dependencies, brief acceptance criteria pulled from the ADR. No story files written to `docs/planning/stories/`. No T-shirt sizing. No estimation ceremony. ~5-10x faster than dispatching `scrum-master` for a typical Medium-complexity ticket.
+- **`scrum-master` opt-in via `/workflow --scrum`** for the cases that genuinely warrant full sprint stories (multi-sprint scope, multi-person execution, backlog grooming). The `scrum-master` agent itself is unchanged and still available for direct invocation outside `/workflow`.
+- **Step 1 complexity table updated.** Medium/Large/Critical pipelines now say "Implementation Plan after Architect" instead of "Prompt before scrum". Added clarifying note distinguishing default Implementation Plan from opt-in scrum.
+- **New "Never" rule:** "Never delegate to `scrum-master` unless the user passed `--scrum` or explicitly asked for sprint stories." Enforces the default.
+
+### Docs
+
+- **README.md** `/workflow` row and Quality Pipeline bullet updated to reflect the new default. Pattern stays consistent with the existing `--skip-checkpoint` and `--strict` opt-in flags.
+
+---
+
 ## [5.1.2] — 2026-05-20
 
 **Theme: orchestrator routing + discovery-search hardening.** Patch release fixing two friction points that surfaced during real `/workflow` runs: ambiguous "delegate to /plan" wording that led orchestrators to dispatch a non-existent `forgebee:plan` agent, and unbounded `grep -r` calls during the Plan phase stalling for 10+ minutes on WordPress theme / vendored subtrees.

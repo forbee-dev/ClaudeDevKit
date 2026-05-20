@@ -33,6 +33,7 @@ If unsure → `/workflow`. The ceremony catches things `/team` misses.
 - Never dispatch two agents to the same file in parallel
 - Never idle after dispatching — see Anti-Stop Rule
 - Never dispatch a slash-prefixed name (`/plan`, `/debug`, `/idea`, etc.) as a `subagent_type` — those are skills, not agents (see Routing reference below)
+- Never delegate to `scrum-master` unless the user passed `--scrum` or explicitly asked for sprint stories — default flow uses a lightweight Implementation Plan (see Step 1 table)
 
 ## Routing reference (skills vs agents)
 
@@ -60,11 +61,13 @@ Before anything else, determine the right pipeline depth. Propose to the user an
 |------------|--------|----------|
 | **Trivial** | Bug fix, typo, config change | Skip /workflow — use /team or do directly |
 | **Small** | 1-2 files, clear scope, no auth/payments/data | Plan → Delegate → Execute → Deliver |
-| **Medium** | 3-5 files, new feature | Plan → Req Debate → Architect → **Prompt** → Execute → Deliver |
-| **Large** | 5+ files, cross-cutting concerns | Full pipeline (all phases, **Prompt** before scrum) |
-| **Critical** | Auth, payments, data model, security | Full pipeline with mandatory debates (**Prompt** before scrum) |
+| **Medium** | 3-5 files, new feature | Plan → Req Debate → Architect → Implementation Plan → Execute → Deliver |
+| **Large** | 5+ files, cross-cutting concerns | Full pipeline (all phases, Implementation Plan after Architect) |
+| **Critical** | Auth, payments, data model, security | Full pipeline with mandatory debates (Implementation Plan after Architect) |
 
 If the task touches auth, payments, or data models — always route to Critical regardless of file count.
+
+**Implementation Plan vs full scrum:** `/workflow` defaults to a lightweight Implementation Plan after Architect (ordered workstreams, file scope, agent assignment, dependencies — no story files). Full scrum-master breakdown (story files in `docs/planning/stories/`, T-shirt sizing, dependency graph) is **opt-in only** via `/workflow --scrum` or when the user explicitly asks for sprint planning. The plugin still exposes `scrum-master` for direct invocation — it just isn't on the default `/workflow` path.
 
 ## Step 2: Execute the Pipeline
 
@@ -137,28 +140,30 @@ Delegate to `/architect` with:
 
 ---
 
-### Work Breakdown (user choice required)
+### Implementation Plan (default — no prompt)
 
-After architecture is ready, present:
+After architecture is ready, build a lightweight Implementation Plan directly from the architecture decisions. **Do not prompt the user**; do not delegate to `scrum-master`. The plan is just enough structure to feed the Execution Plan table below — ordered workstreams, file scope, dependencies, agent assignment, brief acceptance criteria pulled straight from the ADR. No story files written to `docs/planning/stories/`. No T-shirt sizing. No estimation ceremony.
 
 ```markdown
-## Work Breakdown
+## Implementation Plan
 
-Brief and architecture are ready. How do you want to proceed?
+### Order of work
+1. **<Workstream 1>** — <one-line scope>. Agent: <agent>. Files: <paths>. Depends on: none.
+2. **<Workstream 2>** — <one-line scope>. Agent: <agent>. Files: <paths>. Depends on: 1.
+3. **<Workstream 3>** — <one-line scope>. Agent: <agent>. Files: <paths>. Depends on: 1.
 
-1. **Full sprint planning** → scrum-master creates stories with estimates, acceptance criteria, dependency graph in `docs/planning/stories/`
-2. **Direct delegation** → I'll build an execution plan directly from the architecture decisions (no story files, no estimation ceremony)
+### Acceptance (per workstream, terse)
+- WS1: <criterion from ADR>
+- WS2: <criterion from ADR>
+- WS3: <criterion from ADR>
+
+### Risks / open questions
+- <one-liner if any; omit section if none>
 ```
 
-**Wait for user choice.**
+For **Small** complexity: skip this section entirely — jump straight to the Execution Plan table.
 
-**Option 1 — Full sprint planning:**
-Delegate to `scrum-master` with approved requirements, architecture decisions, and dependency constraints. Output: story files in `docs/planning/stories/`.
-
-**Option 2 — Direct delegation:**
-Build the execution plan yourself (next section) by decomposing the architecture decisions into workstreams. Each workstream gets: agent, files to modify, acceptance criteria derived from the ADR. No story files, no T-shirt sizing.
-
-For **Small** complexity: always use Option 2 (skip this prompt entirely).
+**Explicit full-scrum opt-in:** Delegate to `scrum-master` **only** if the user invoked `/workflow --scrum` or explicitly asked for sprint stories with estimates. That path produces full story files in `docs/planning/stories/` — useful when scope spans multiple sprints or multiple people. Otherwise the default Implementation Plan is sufficient and ~5-10x faster.
 
 ---
 
