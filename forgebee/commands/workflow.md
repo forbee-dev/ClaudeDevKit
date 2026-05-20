@@ -32,6 +32,15 @@ If unsure → `/workflow`. The ceremony catches things `/team` misses.
 - Never skip the quality mandate — reject specialist output that lacks self-review evidence
 - Never dispatch two agents to the same file in parallel
 - Never idle after dispatching — see Anti-Stop Rule
+- Never dispatch a slash-prefixed name (`/plan`, `/debug`, `/idea`, etc.) as a `subagent_type` — those are skills, not agents (see Routing reference below)
+
+## Routing reference (skills vs agents)
+
+Slash-prefixed names like `/plan`, `/debug`, `/idea`, `/seo`, `/launch` are **skills** — invoke them via the **Skill tool** (`Skill({ skill: "plan" })`). They live in `forgebee/commands/`.
+
+Plain names like `scrum-master`, `delivery-agent`, `backend-engineer`, `debugger-detective`, `security-auditor` are **agents** — dispatch them via the **Task tool** (`Task({ subagent_type: "scrum-master", ... })`). They live in `forgebee/agents/`.
+
+A few names exist as both (e.g. `architect` has both a command and an agent). When in doubt, check `forgebee/INDEX.md` or the file paths. `forgebee:plan` is **not** a valid `subagent_type` — only the `plan` skill exists.
 
 ## Step 0: Strict Mode Gate (opt-in)
 
@@ -69,7 +78,7 @@ Run the phases determined by Step 1. Complete each phase before starting the nex
 2. If artifacts exist → load them, summarize to user, confirm they're current
 3. **Check for existing decision log** at `docs/planning/requirements/<feature>.decision-log.md` — if present, read it and treat all prior decisions as binding context (don't re-litigate, only extend)
 4. If missing → ask: "No planning artifacts found. Run /plan first?"
-5. If user says yes → delegate to `/plan` → wait → continue
+5. If user says yes → invoke the `plan` skill via the Skill tool (`Skill({ skill: "plan" })`) → wait → continue. **Do NOT** dispatch `forgebee:plan` as a `subagent_type` — no such agent exists, `/plan` is skill-only (see Routing reference below).
 
 **Output required:** Problem Brief (minimum). Requirements doc (Medium+). **Decision log** (`YYYY-MM-DD-<feature>.decision-log.md` — date-prefixed to prevent slug collisions across iterations; append decisions made at each phase). **Addendum** (`YYYY-MM-DD-<feature>.addendum.md` — only if rejected alternatives, sizing data, or option matrices were considered worth keeping).
 
@@ -113,7 +122,7 @@ Stress-test planning artifacts before architecture or code.
 - [ ] Modify (provide alternative)
 ```
 
-Wait for user decisions. If routed back → re-delegate to `/plan` → re-run debate on fixes only.
+Wait for user decisions. If routed back → re-invoke the `plan` skill via the Skill tool → re-run debate on fixes only.
 
 ---
 

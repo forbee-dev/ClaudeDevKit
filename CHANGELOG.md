@@ -6,6 +6,31 @@ The format roughly follows [Keep a Changelog](https://keepachangelog.com/) and t
 
 ---
 
+## [5.1.2] — 2026-05-20
+
+**Theme: orchestrator routing + discovery-search hardening.** Patch release fixing two friction points that surfaced during real `/workflow` runs: ambiguous "delegate to /plan" wording that led orchestrators to dispatch a non-existent `forgebee:plan` agent, and unbounded `grep -r` calls during the Plan phase stalling for 10+ minutes on WordPress theme / vendored subtrees.
+
+### Fixed — Workflow routing
+
+- **`/plan` dispatch ambiguity.** `forgebee/commands/workflow.md` said "delegate to `/plan`" in two places. `/plan` is skill-only — no `plan` agent twin exists — so dispatching `forgebee:plan` as a `subagent_type` failed with `Agent type 'forgebee:plan' not found`. Now reads "invoke the `plan` skill via the Skill tool (`Skill({ skill: "plan" })`)" with an explicit "do NOT dispatch `forgebee:plan`" warning. Re-delegation path in the Requirements Debate escalation flow updated to match.
+- **Routing reference added to workflow.md.** New section explicitly distinguishing skills (slash-prefixed names like `/plan`, `/debug`, `/idea`, invoke via Skill tool) from agents (plain names like `scrum-master`, `delivery-agent`, dispatch via Task tool). Calls out that a few names exist as both (e.g. `architect`) and that `forgebee:plan` is not a valid `subagent_type`. Added matching "Never" rule.
+
+### Added — Tool Discipline (CLAUDE.md)
+
+New "Tool Discipline (always apply)" section between Core Principles and Agent Output Modes — inherited by every agent and orchestrator via CLAUDE.md injection. Five rules targeting the unbounded-discovery failure mode:
+
+- **T1 — Prefer `rg` over `grep -r`.** 10-50x faster; respects `.gitignore` so `vendor/`, `node_modules/`, `.git/`, build artifacts are excluded for free.
+- **T2 — Bound every discovery search.** Bare `grep -r pattern .` or unscoped `rg pattern` on an unfamiliar tree is a P3 violation. Pick one: scope, type filter, or `timeout N` cap.
+- **T3 — Map structure before searching content.** `Glob` (or `ls`/`fd`) the tree first, then `rg` on the narrowed scope. WordPress `wp-content/`, plugin folders, and monorepo roots routinely contain MBs of third-party PHP — blanket `grep -r` will hang for minutes.
+- **T4 — Explicit exclusions when no `.gitignore`.** `vendor/`, `node_modules/`, `.git/`, `build/`, `dist/`, `.next/`, `target/`, `__pycache__/`. Example: `rg pattern --glob '!vendor' --glob '!node_modules'`.
+- **T5 — Background or cancel after 60s.** A discovery command that hasn't returned in ~60s is almost certainly stuck on a vendored subtree — `ctrl+b` to background or cancel and re-scope. Never silently wait past 2 minutes for what should be sub-second work.
+
+### Why a patch, not a minor
+
+Both changes harden existing behavior rather than add functionality — no new skills, agents, or commands. The Tool Discipline rules formalize discipline that *should* have applied since 5.0, and the routing fix corrects a documentation bug. Pure corrective release.
+
+---
+
 ## [5.1.1] — 2026-05-19
 
 **Theme: post-release polish + permission-guard fixes.** Patch release addressing audit findings, defensive hook hardening, and friction in the permission system that surfaced after 5.1.0 shipped.

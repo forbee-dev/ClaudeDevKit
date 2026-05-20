@@ -3,7 +3,7 @@
   <img src="https://img.shields.io/badge/Codex-Compatible-10B981?style=for-the-badge&logoColor=white" alt="Codex" />
   <img src="https://img.shields.io/badge/Cursor-Compatible-1F2937?style=for-the-badge&logoColor=white" alt="Cursor" />
   <img src="https://img.shields.io/badge/Gemini-Compatible-4285F4?style=for-the-badge&logoColor=white" alt="Gemini" />
-  <img src="https://img.shields.io/badge/version-5.1.1-blue?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/version-5.1.2-blue?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License" />
 </p>
 
@@ -66,6 +66,7 @@ Claude Code and OpenClaw are powerful out of the box. ForgeBee makes them **opin
 | Agents make silent assumptions | Karpathy P1–P4 baked into every code-producing agent: trace test, senior-engineer check, YAGNI timing, orphan rule |
 | Orchestrators idle after dispatch | P5 Anti-Stop Rule in `/workflow` + `/team`: continue with next-step work immediately, the harness wakes you when sub-agents return |
 | Review reviewer drift | P6 Severity Standard (`Critical/High/Medium/Low`) across all review skills — enables cross-skill aggregation |
+| Discovery searches hang on vendored subtrees | T1–T5 Tool Discipline in `CLAUDE.md`: prefer `rg` over `grep -r`, bound every search (scope/type/timeout), `Glob` before `grep`, exclude `vendor`/`node_modules` — kills 10-minute stalls on `wp-content/` and monorepo roots |
 | Untrusted code can hijack agents | 6-line Adversarial Input Hardening preamble in all 48 agents — homoglyphs, urgency, role-play overrides flagged not executed |
 | Sub-agent reports waste orchestrator context | `terse-report` skill cuts ~65% of report tokens while preserving code/citations exact |
 | Decisions get lost between sessions | `/workflow` and `/plan` emit `.decision-log.md` + `addendum.md` — re-read on next run |

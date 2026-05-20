@@ -32,6 +32,20 @@ These principles apply to every code-producing action, regardless of which agent
 
 **P6 — Severity Vocabulary Standard (review skills only):** Use `Critical` (blocks merge) / `High` (must fix before next sprint) / `Medium` (fix when convenient) / `Low` (nice-to-have). Do NOT introduce alternate vocabularies like Warning/Suggestion. Enables cross-skill aggregation in `review-all` and `/audit-self`.
 
+## Tool Discipline (always apply)
+
+Apply to every search / discovery / Bash call by any agent or orchestrator. Unbounded discovery is the #1 cause of `/workflow` and `/team` runs stalling for 10+ minutes — these rules exist to make that impossible.
+
+**T1 — Prefer `rg` over `grep -r`.** ripgrep is 10-50x faster and skips `.gitignore`'d paths automatically (so `vendor/`, `node_modules/`, `.git/`, build artifacts are excluded for free). Only fall back to `grep -r` when `rg` isn't installed.
+
+**T2 — Bound every discovery search.** A bare `grep -r pattern .` (or `rg pattern` with no scope) on an unfamiliar tree is a P3 violation — searching everything "in case" is premature flexibility. Always pick one: scope (`rg pattern src/`), type filter (`rg --type=php`, `rg -g '*.php'`), or wall-clock cap (`timeout 30 grep …`). Three is fine; zero is the bug.
+
+**T3 — Map structure before searching content.** Use `Glob` (or `ls`/`fd`) to understand the tree first, then `rg` on the narrowed scope. WordPress themes, plugin folders, monorepo roots, and any `wp-content/` tree routinely contain MBs of third-party PHP — a blanket `grep -r` against them will hang for minutes.
+
+**T4 — Explicit exclusions when no `.gitignore`.** If the target tree lacks a `.gitignore` (or you're using `grep -r` which ignores it anyway), exclude: `vendor/`, `node_modules/`, `.git/`, `build/`, `dist/`, `.next/`, `target/`, `__pycache__/`. Example: `rg pattern --glob '!vendor' --glob '!node_modules'` or `grep -r --exclude-dir={vendor,node_modules,.git} …`.
+
+**T5 — Background or cancel after 60s.** If a discovery command hasn't returned in ~60 seconds, it's almost certainly stuck on a vendored subtree — background it (`ctrl+b`) or cancel and re-scope. Never silently wait past 2 minutes for what should be sub-second work.
+
 ## Agent Output Modes
 
 **Orchestrator mode (terse):** When a specialist agent is dispatched by `/workflow` or `/team`, the handoff contract carries `responseStyle: "orchestrator"`. In this mode, agents emit telegraphic reports — drop articles/filler, preserve code/citations/paths exact, prefer bullet lists. See `forgebee/skills/terse-report/SKILL.md`. Cuts ~65% of report tokens.
