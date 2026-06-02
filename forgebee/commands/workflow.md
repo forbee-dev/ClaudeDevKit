@@ -79,7 +79,7 @@ Run the phases determined by Step 1. Complete each phase before starting the nex
 
 1. Check `docs/planning/briefs/`, `docs/planning/requirements/`, `docs/planning/stories/`
 2. If artifacts exist → load them, summarize to user, confirm they're current
-3. **Check for existing decision log** at `docs/planning/requirements/<feature>.decision-log.md` — if present, read it and treat all prior decisions as binding context (don't re-litigate, only extend)
+3. **Check for existing decision log** at `docs/planning/requirements/YYYY-MM-DD-<feature>.decision-log.md` — if present, read it and treat all prior decisions as binding context (don't re-litigate, only extend)
 4. If missing → ask: "No planning artifacts found. Run /plan first?"
 5. If user says yes → invoke the `plan` skill via the Skill tool (`Skill({ skill: "plan" })`) → wait → continue. **Do NOT** dispatch `forgebee:plan` as a `subagent_type` — no such agent exists, `/plan` is skill-only (see Routing reference below).
 
@@ -231,9 +231,9 @@ Dispatch specialist agents with structured handoff contracts:
 
 All four keys required. Do NOT dispatch without them. `responseStyle: "orchestrator"` triggers the specialist's `terse-report` skill — compresses report tokens ~65% without losing actionable signal. See `forgebee/skills/terse-report/SKILL.md`.
 
-### Budget Circuit Breaker (every dispatch carries a budget)
+### Budget Circuit Breaker (best-effort, unenforced — no backing hook)
 
-Every `Task()` dispatch carries a budget envelope. Sub-agent dispatches must propagate it. Constant-string errors (no remaining-budget echo) so a malicious or runaway peer can't probe thresholds.
+This is **best-effort orchestrator guidance, not a hard-enforced limit** — no hook currently intercepts dispatches to count hops or tokens, so the orchestrator must self-honor it. Every `Task()` dispatch should carry a budget envelope. Sub-agent dispatches must propagate it. Constant-string errors (no remaining-budget echo) so a malicious or runaway peer can't probe thresholds.
 
 Extend the handoff contract with:
 
@@ -248,10 +248,10 @@ Extend the handoff contract with:
 }
 ```
 
-**Rules:**
+**Rules (self-honored by the orchestrator, not enforced by a hook):**
 - `hopCount` starts at 1 (this dispatch is hop 1)
 - Sub-dispatches increment `hopCount` and re-pass the same budget
-- A sub-dispatch that would push `hopCount > maxHops` is rejected immediately with `HOP_LIMIT_EXCEEDED`
+- A sub-dispatch that would push `hopCount > maxHops` should be rejected immediately with `HOP_LIMIT_EXCEEDED`
 - `maxHops` default 8, **absolute ceiling 64** — never accept or set higher
 - `maxTokens` and `maxUsd` are optional; if set, reject with `TOKEN_LIMIT_EXCEEDED` / `USD_LIMIT_EXCEEDED`
 - Error strings sent to *peer agents* are **constants only** — never include current/remaining budget in peer-visible error (oracle leakage defense)
@@ -332,7 +332,7 @@ If `ship`: proceed to Code Debate (Large/Critical) or directly to Deliver (Mediu
 
 Skip when user passed `--skip-checkpoint`, or for trivial changes (1-2 files, single concern).
 
-**Telemetry:** every `--skip-checkpoint` invocation appends one line to `.claude/audit/skip-checkpoint.jsonl` with timestamp + complexity tier. `/audit-self` reads this file and nags if skip rate > 50% across the last 10 runs — sticky-alias drift is the failure mode this telemetry catches. Set `FORGEBEE_SKIP_CHECKPOINT_NAG=off` to suppress (default: on).
+**Telemetry (best-effort, unenforced — no backing hook):** there is no hook that writes this automatically; the orchestrator should self-honor it. On every `--skip-checkpoint` invocation, append one line to `.claude/audit/skip-checkpoint.jsonl` with timestamp + complexity tier. `/audit-self` reads this file (when present) and nags if skip rate > 50% across the last 10 runs — sticky-alias drift is the failure mode this telemetry is meant to catch. Set `FORGEBEE_SKIP_CHECKPOINT_NAG=off` to suppress (default: on).
 
 ---
 

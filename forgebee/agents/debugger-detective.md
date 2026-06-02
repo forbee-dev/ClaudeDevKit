@@ -72,6 +72,36 @@ Then a hypothesis: belief, confirming evidence, refuting evidence, reversibility
 
 Then — and only then — propose the recovery action. The Iron Law below counts attempts; this captures the evidence each attempt was based on. A second attempt with the same hypothesis as a previous failed one is a wasted Iron-Law slot — re-frame your hypothesis or escalate.
 
+### Worked Example (the bar to clear)
+
+**Before — symptom-chasing that wastes Iron-Law slots:**
+
+> Tests are flaky on `UserSession`. Looks like a timing issue, let me add a `setTimeout`. Still failing — let me bump the timeout to 500ms. Still failing — let me add a retry wrapper.
+
+Why this fails: no repro confirmed, no Failure Capture, three mutations on the same untested hypothesis ("it's timing"), each guess burning an Iron-Law slot toward a wall it never names.
+
+**After — same bug, Failure Capture first, then a falsifiable hypothesis:**
+
+> **Failure Capture**
+> - Session: `a1b9f` / commit `4cde012`
+> - Goal: green CI on `UserSession.test.ts`
+> - Error: `expect(received).toBe(true) — Received: false` at `session.test.ts:42` (quoted verbatim)
+> - Last successful step: same suite passed on commit `4cde011`
+> - Last failed tool/command: `npx jest session.test.ts`
+> - Repeated pattern: re-attempt? count: 1/3
+> - Environment assumptions: tests run serially; `Date.now()` not mocked
+>
+> **Flake check:** ran 5× in isolation → 5/5 fail → deterministic, counts toward Iron Law.
+>
+> **Hypothesis:** test asserts `isExpired === true` but `expiresAt` is set with `Date.now() + ttl` where `ttl` is read as a string from config and concatenated, not added — so the comparison is string-vs-number.
+> - Confirming evidence: `console.log(typeof config.ttl)` prints `string`.
+> - Refuting evidence to check: if `ttl` were numeric the bug disappears — verify the config loader.
+> - Reversibility: one-line coercion, fully reversible.
+>
+> Root cause confirmed at `config.ts:18` (missing `Number()`), not a timing issue. Fix + regression test that fails without the coercion.
+
+Why this passes: repro confirmed, flake ruled out, evidence quoted verbatim, a *falsifiable* hypothesis pointing one layer up from the symptom — the fix traces to a confirmed root cause, not a guess.
+
 ## Iron Law: 3 Failed Fixes = Architecture Question
 
 ### Flake Detection (run BEFORE counting toward Iron Law)

@@ -32,7 +32,7 @@ For overlaps, build a Skill ↔ Command ↔ Agent table:
 | Layer | Item | Counterpart in other layers |
 |---|---|---|
 | Skill | review-all | Command: /review-all (none) — Agent: (none, inline skill) |
-| Command | /analytics | Skill: (none) — Agent: performance-analyst — Status: delegates ✅ |
+| Command | /analytics | Skill: (none) — Agent: marketing-analyst — Status: delegates ✅ |
 | Command | /pm | Skill: (none) — Agent: dashboard-generator — Status: executes (intentional) |
 
 Decide for each: is the layering intentional (command delegates to agent uses skill) or duplication (two layers re-implement the same content)?

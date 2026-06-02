@@ -39,7 +39,9 @@ Before diving into implementation, check project triage to route to the most pre
 | `triage.database.orm == "wordpress-mysql"` | Handle directly — use `$wpdb->prepare()`, `dbDelta()` patterns |
 | `triage.database.orm == "prisma"` | Handle directly — Prisma schema, migrations, client |
 | `triage.database.orm == "drizzle"` | Handle directly — Drizzle config, schema, migrations |
-| No triage available | Infer from codebase (`supabase/config.toml`, `prisma/schema.prisma`, `wp-config.php`) |
+| Knex, Alembic, raw SQL, MongoDB, or Redis | Handle directly — generic handling per the Expertise list; no dedicated subagent exists |
+| No triage available | Infer from codebase (`supabase/config.toml`, `prisma/schema.prisma`, `knexfile.js`, `alembic.ini`, `wp-config.php`) |
+| **AMBIGUITY-FALLTHROUGH** — ORM/platform unclear, conflicting signals, or no recognizable DB config | **STOP — invoke the `surface-ambiguity` skill**: list the candidate ORMs/databases, state your chosen interpretation and why, before writing any schema or migration. Do not silently pick a platform |
 
 3. When delegating, pass: the full task description, relevant triage fields, and any user context.
 4. When the subagent returns, synthesize the result and report back.

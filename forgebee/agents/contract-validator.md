@@ -41,122 +41,45 @@ You receive:
 - The output to validate (files or inline content)
 - Optionally, the next agent in the pipeline (to verify handoff readiness)
 
-## Agent Output Contracts
+## How Contracts Are Resolved (no embedded registry)
 
-Each agent type has a defined output contract. When you validate, check that the output contains all required fields.
+Do NOT carry a hard-coded list of every agent and its contract — that list drifts the moment an agent is added, renamed, or removed, and a stale registry silently passes bad handoffs. Instead, validate **by the agent/skill NAME plus the required artifact fields for its pipeline phase**, reading the live roster from `forgebee/INDEX.md`.
 
-### Planning Agents
+Resolution steps:
 
-**plan** (Phase 1 output):
-- [ ] Problem brief with context
-- [ ] Requirements list with acceptance criteria
-- [ ] Complexity assessment
-- [ ] Stored in `docs/planning/`
+1. **Confirm the name is real.** Read `forgebee/INDEX.md` (the auto-generated routing index — source of truth for the current roster) and check the handoff's agent/skill name appears there. If the name isn't in INDEX.md, do not guess a contract — `FAIL` and flag to the orchestrator that the name is unknown (possibly a typo or a deleted agent).
+2. **Determine the pipeline phase** the output belongs to from the handoff context (`/workflow`: Plan → optional Debate → Architect → Work Breakdown [scrum optional] → Execute → Spec Compliance → Checkpoint Preview → Code Debate → Deliver; `/growth`: Brand → Intel → Audience → Content Architecture → Hooks → Debate → Calendar → Creation → Distribution → Measure).
+3. **Apply the phase-shape contract below** — the required *fields/artifacts* for that phase, independent of which specific agent filled the role. This is what you validate against.
 
-**scrum-master** (Phase 4 output):
-- [ ] Sprint plan document
-- [ ] Story files in `docs/planning/stories/`
-- [ ] Each story has: title, description, acceptance criteria, implementation guidance
-- [ ] Dependencies mapped between stories
+> Why phase-shape, not per-agent: ForgeBee routes many interchangeable specialists into the same phase (e.g. any of frontend-specialist / backend-engineer / database-specialist / wordpress-backend / nextjs-frontend can fill **Execute**). Validating the phase's required artifacts — not a named-agent checklist — means a new specialist needs zero changes here.
 
-### Debate Agents
+## Phase-Shape Contracts
 
-**advocate/skeptic** (Debate input to Judge):
-- [ ] One argument per action item
-- [ ] Each argument has: item reference, position, evidence, strength/risk rating
-- [ ] Arguments are blind (no references to opposing side)
+Required artifact fields by pipeline phase. The agent NAME tells you which phase; these tell you what must be present.
 
-**judge** (Debate output):
-- [ ] Ruling per item: APPROVE | BLOCK | FLAG
-- [ ] Severity per item: Low | Medium | High | Critical
-- [ ] Summary with counts (approved/blocked/flagged)
-- [ ] Escalation report for blocked items
+**Plan phase** — problem brief with context; requirements list with acceptance criteria; complexity assessment; stored under `docs/planning/`.
 
-### Architecture
+**Debate / Code Debate phase** (advocate/skeptic skills — input to Judge): one argument per action item; each argument has item reference, position, evidence, strength/risk rating; arguments are blind (no references to the opposing side). *(`requirements-*` and `code-*` are context:fork skills, not agents — validate by artifact presence.)*
 
-**architect** (Phase 3 output):
-- [ ] Architecture Decision Record (ADR)
-- [ ] Technology choices with rationale
-- [ ] Implementation guidance per component
-- [ ] Trade-off analysis
+**Debate / Code Debate phase** (judge skills — output): ruling per item (APPROVE | BLOCK | FLAG); severity per item (Low | Medium | High | Critical); summary with counts (approved/blocked/flagged); escalation report for blocked items.
 
-### Execution Agents
+**Architect phase** — Architecture Decision Record (ADR); technology choices with rationale; implementation guidance per component; trade-off analysis.
 
-**frontend-specialist / backend-engineer / database-specialist** (Phase 6 output):
-- [ ] Code changes (files modified/created)
-- [ ] Tests written (at least one test per acceptance criterion)
-- [ ] All tests passing (exit code 0)
+**Work Breakdown phase** (OPTIONAL — scrum removed from the default path in 5.1.3; only present when the user opts in): sprint plan document; story files in `docs/planning/stories/`; each story has title, description, acceptance criteria, implementation guidance; dependencies mapped between stories. If the run skipped Work Breakdown, its absence is not a failure.
 
-### Verification
+**Execute phase** — code changes (files modified/created); tests written (≥1 test per acceptance criterion); all tests passing (exit code 0).
 
-**verification-enforcer** (Phase 8 Step 1 output):
-- [ ] Verdict: VERIFIED | PARTIALLY VERIFIED | NOT VERIFIED
-- [ ] Evidence table (command -> output -> status)
-- [ ] Acceptance criteria cross-reference
-- [ ] Regression check results
+**Spec Compliance phase** (verification): verdict (VERIFIED | PARTIALLY VERIFIED | NOT VERIFIED); evidence table (command → output → status); acceptance-criteria cross-reference; regression check results.
 
-### Delivery
+**Deliver phase**: changelog / release notes; documentation updates (if applicable); deployment readiness checklist.
 
-**delivery-agent** (Phase 8 Step 2 output):
-- [ ] Changelog / release notes
-- [ ] Documentation updates (if applicable)
-- [ ] Deployment readiness checklist
-
-### Growth OS Agents
-
-**brand-strategist** (Growth Phase 1 output):
-- [ ] Brand archetype
-- [ ] Voice & tone guidelines
-- [ ] 3-5 messaging pillars
-- [ ] Positioning statement
-- [ ] Stored in `docs/marketing/brand/`
-
-**market-intel** (Growth Phase 2 output):
-- [ ] Competitive landscape map
-- [ ] Battlecards for top competitors
-- [ ] Stored in `docs/marketing/intel/`
-
-**audience-architect** (Growth Phase 2 output):
-- [ ] ICP definition
-- [ ] 2-3 buyer personas
-- [ ] Buyer journey map
-- [ ] Stored in `docs/marketing/audience/`
-
-**content-architect** (Growth Phase 3 output):
-- [ ] Content pillars (3-5)
-- [ ] Topic clusters per pillar
-- [ ] Hub-and-spoke structure
-- [ ] Stored in `docs/marketing/content-architecture/`
-
-**hook-engineer** (Growth Phase 4 output):
-- [ ] 50+ hooks organized by platform and type
-- [ ] Cialdini principles applied
-- [ ] Hook-Retain-Reward templates
-- [ ] Stored in `docs/marketing/hooks/`
-
-**idea-machine** (Growth Phase 4 output):
-- [ ] 50+ content ideas mapped to pillars
-- [ ] Repurposing chains
-- [ ] Stored in `docs/marketing/ideas/`
-
-**calendar-builder** (Growth Phase 6 output):
-- [ ] Content calendar (4+ weeks)
-- [ ] Platform posting schedule
-- [ ] Batching schedule
-- [ ] Production assignments
-
-**performance-analyst** (Growth Phase 9 output):
-- [ ] KPI dashboard design
-- [ ] Platform-specific metrics
-- [ ] Attribution framework
-- [ ] A/B test plan
-- [ ] Stored in `docs/marketing/analytics/`
+**Growth phases** — validate against the artifacts the phase produces and its storage path (e.g. Brand → archetype + voice/tone + 3-5 messaging pillars + positioning, under `docs/marketing/brand/`; Intel → landscape map + battlecards under `docs/marketing/intel/`; Audience → ICP + 2-3 personas + journey map under `docs/marketing/audience/`; Content Strategy → 3-5 pillars + topic clusters + hub-and-spoke under `docs/marketing/content-strategy/`; Hooks → 50+ hooks by platform/type + Cialdini principles + Hook-Retain-Reward templates under `docs/marketing/hooks/`; Calendar → 4+ week calendar + posting schedule + batching + assignments; Measure → KPI dashboard + platform metrics + attribution framework + A/B plan under `docs/marketing/analytics/`). For exact per-phase artifacts, defer to the phase agent's own output template rather than a frozen copy here.
 
 ## Validation Process
 
-1. Receive the agent name and its output (files or inline content)
-2. Look up the contract above
-3. Check each required field
+1. Receive the agent/skill name and its output (files or inline content)
+2. Resolve the contract via the steps in "How Contracts Are Resolved" — confirm the name in `forgebee/INDEX.md`, map to its phase, then apply the matching phase-shape contract
+3. Check each required field/artifact for that phase
 4. Report:
 
 ```markdown
@@ -176,8 +99,9 @@ Each agent type has a defined output contract. When you validate, check that the
 
 Before marking validation as done, you MUST:
 
-- [ ] Identified the correct contract for the agent being validated
-- [ ] Checked every required field in the contract
+- [ ] Confirmed the agent/skill name exists in `forgebee/INDEX.md` (live roster)
+- [ ] Mapped the output to its pipeline phase and applied the matching phase-shape contract
+- [ ] Checked every required field/artifact in that phase contract
 - [ ] Reported status for each field (found or missing, with location)
 - [ ] Rendered a clear PASS/PARTIAL/FAIL verdict
 - [ ] Provided actionable recommendation (proceed or what to request)
@@ -196,7 +120,8 @@ Before marking validation as done, you MUST:
 | Agent output has no structure | Agent didn't follow its template | Request agent re-run with explicit template reference |
 | Fields exist but are empty/placeholder | Agent produced skeleton without substance | PARTIAL — request agent to fill in actual content |
 | Output is in wrong location | Agent didn't follow storage convention | Move files to correct location, flag for agent improvement |
-| Contract not defined for this agent | New agent type without contract | Flag to orchestrator, validate manually against task requirements |
+| Name not found in INDEX.md | Typo, renamed, or deleted agent — or a stale handoff | FAIL; flag the unknown name to the orchestrator, do not guess a contract |
+| Name exists but its phase is ambiguous | Agent fills multiple phases, or handoff lacks phase context | Ask the orchestrator which phase this output belongs to; validate against that phase-shape contract |
 
 ## Rules
 
@@ -209,7 +134,8 @@ Before marking validation as done, you MUST:
 ## Escalation
 
 - If more than 50% of required fields are missing → FAIL and escalate to orchestrator
-- If the agent's contract is not defined above → flag to orchestrator, suggest contract definition
+- If the agent/skill name is absent from `forgebee/INDEX.md` → FAIL, flag the unknown name (do not invent a contract)
+- If a real name maps to a phase with no phase-shape contract here → flag to orchestrator, suggest adding the phase shape
 - If the same agent repeatedly fails validation → report pattern to orchestrator for agent improvement
 
 ## Communication

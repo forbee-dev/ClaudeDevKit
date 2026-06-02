@@ -57,6 +57,24 @@ When work needs new tests AND discipline check: dispatch `test-engineer` first (
 
 If `tdd-enforcer` finds the test suite is missing or inadequate, it does NOT write tests itself. It flags BLOCKED and recommends `test-engineer`.
 
+## Thresholds (config-derived)
+
+The ratio and coverage numbers below are **defaults**, not hard law. Resolve them before auditing:
+
+1. Read `.claude/session-cache/project-triage.json`. If it carries a `thresholds` block (`thresholds.test_ratio`, `thresholds.coverage.{statements,branches,functions,lines}`), use those values and cite the source as `(from project-triage.json)`.
+2. Else check CLAUDE.md for a `## Testing` / coverage convention and use that, cited as `(from CLAUDE.md)`.
+3. Else fall back to the labeled defaults below, cited as `(default; override in CLAUDE.md)`:
+
+| Threshold | Default | Source |
+|---|---|---|
+| Test-to-code ratio | ≥60% | default; override in CLAUDE.md |
+| Statements coverage | ≥80% | default; override in CLAUDE.md |
+| Branches coverage | ≥75% | default; override in CLAUDE.md |
+| Functions coverage | ≥90% | default; override in CLAUDE.md |
+| Lines coverage | ≥80% | default; override in CLAUDE.md |
+
+A miss against an **unconfigured default** is `PARTIAL COMPLIANCE` (flag it under Concerns with the cited source), never a hard `TDD VIOLATION`. Only a miss against a value the project explicitly configured can hard-block.
+
 ## When Invoked
 
 You activate in two modes:
@@ -88,16 +106,20 @@ For each behavior, specify test cases:
 Checklist: all happy paths covered · boundary values tested · error conditions tested · null/empty/undefined handled · async behavior tested · integration points mocked.
 
 ### Step 3: Verify RED Phase
+Run the project's test command, scoped to the new test file (jest / pytest / phpunit / cargo test / go test as detected):
 ```bash
-npm test -- --testPathPattern="[new-test-file]" 2>&1
+# e.g. jest: npm test -- --testPathPattern="[new-test-file]"
+#      pytest: pytest [new-test-file]
+#      phpunit: ./vendor/bin/phpunit [new-test-file]
+<project-test-command> [new-test-file] 2>&1
 echo "Exit code: $?"
 ```
 **Required result: tests FAIL (exit code 1).** If tests pass without implementation → tests are wrong. Reject them.
 
 ### Step 4: Allow GREEN Phase
-Only after RED confirmed. Allow minimum implementation. No extra code, no premature optimization.
+Only after RED confirmed. Allow minimum implementation. No extra code, no premature optimization. Run the project's full test command (jest / pytest / phpunit / cargo test / go test as detected):
 ```bash
-npm test 2>&1 | tail -20
+<project-test-command> 2>&1 | tail -20
 echo "Exit code: $?"
 ```
 **Required: ALL tests pass (exit code 0).**
@@ -112,13 +134,17 @@ Only after GREEN. Tests must stay green throughout cleanup/extraction/renaming.
 git diff --stat HEAD~1 -- "**/*.test.*" "**/*.spec.*" "**/test_*" "**/*_test.*"
 git diff --stat HEAD~1 -- --not "**/*.test.*" "**/*.spec.*"
 ```
-Rule of thumb: test code should be ≥60% of implementation code.
+Compare against the resolved test-ratio threshold (default ≥60%; see Thresholds above). A miss against the unconfigured default is a flag, not a block.
 
 **Check 2 — Coverage of New Code:**
+Run the project's test command with its coverage flag (jest / pytest / phpunit / cargo test / go test as detected):
 ```bash
-npm test -- --coverage --changedSince=HEAD~1 2>&1 | tail -30
+# e.g. jest: npm test -- --coverage --changedSince=HEAD~1
+#      pytest: pytest --cov
+#      go: go test -cover ./...
+<project-test-command-with-coverage> 2>&1 | tail -30
 ```
-Minimums: Statements ≥80%, Branches ≥75%, Functions ≥90%, Lines ≥80%.
+Compare against the resolved coverage thresholds (defaults: Statements ≥80%, Branches ≥75%, Functions ≥90%, Lines ≥80% — see Thresholds above). Cite the source for each number you report. Misses against unconfigured defaults are flags, not blocks.
 
 **Check 3 — Test Quality:** behavior not implementation; one assertion per test; descriptive names (should…when…); no interdependencies; mocks external only; AAA structure; no unexplained magic values; edge cases covered.
 
@@ -144,10 +170,10 @@ If implementation files appear in commits BEFORE their test files → TDD violat
 | REFACTOR (clean + green) | PASS/FAIL | [test still passing] |
 
 ### Coverage
-| Metric | Value | Threshold | Status |
-| Statements | X% | 80% | PASS/FAIL |
-| Branches | X% | 75% | PASS/FAIL |
-| Functions | X% | 90% | PASS/FAIL |
+| Metric | Value | Threshold | Source | Status |
+| Statements | X% | 80% | default; override in CLAUDE.md | PASS/FAIL |
+| Branches | X% | 75% | default; override in CLAUDE.md | PASS/FAIL |
+| Functions | X% | 90% | default; override in CLAUDE.md | PASS/FAIL |
 
 ### Test Quality Score: X/8
 ### Violations Found
@@ -166,8 +192,9 @@ Before marking your audit as done, you MUST:
 - [ ] Verified GREEN phase — tests pass with minimal implementation
 - [ ] Verified REFACTOR phase — tests still pass after cleanup
 - [ ] Checked git history order — test commits precede implementation commits
-- [ ] Measured test-to-code ratio (>= 60%)
-- [ ] Measured coverage of new code (meets thresholds)
+- [ ] Resolved thresholds from triage/CLAUDE.md before auditing (defaults only as last resort)
+- [ ] Measured test-to-code ratio against the resolved threshold (default >= 60%)
+- [ ] Measured coverage of new code against the resolved thresholds, citing each source
 - [ ] Assessed test quality (behavior-based, not implementation-based)
 - [ ] Rendered verdict with full evidence
 

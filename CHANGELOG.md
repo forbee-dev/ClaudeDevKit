@@ -6,6 +6,63 @@ The format roughly follows [Keep a Changelog](https://keepachangelog.com/) and t
 
 ---
 
+## [5.2.0] — 2026-06-02
+
+**Theme: framework-wide quality overhaul + growth-roster consolidation.** The largest release since 5.0 — a full audit-and-improve pass across every agent, skill, command, hook, and the build/CI tooling. Two deep-research audits drove it: a defect audit (security-critical hook fixes, drift, broken commands) and a forward-looking improvement study (prompt quality, capability gaps, model/tool fit). Headline outcomes: a shared finding contract unifies the 12 review skills, a shared debate protocol with a full verdict lattice unifies the 9 debate skills, the growth roster is trimmed 15→11 by merging overlapping agents, and the framework's own JS finally has a CI gate.
+
+### Removed — Growth roster trimmed 15 → 11 (⚠️ breaking for direct agent invocation)
+
+Seven overlapping growth agents were merged into four. **If you invoke any of these by name, update your references:**
+
+| Removed | Now use |
+|---------|---------|
+| `content-architect`, `idea-machine`, `calendar-builder` | **`content-strategist`** (architecture + ideation + editorial calendar) |
+| `content-writer` | **`content-creator`** (now covers social-native *and* long-form) |
+| `growth-hacker`, `conversion-optimizer` | **`growth-engineer`** (growth loops + on-page/funnel CRO) |
+| `performance-analyst` | **`marketing-analyst`** (renamed — resolves the name collision with `performance-optimizer`) |
+
+`/growth` pipeline, router tables, and all cross-references repointed. Each merged agent is self-contained (inline methods, not reference-only) with a scope fence and a quality/evidence gate.
+
+### Added
+
+- **`content-strategist`, `growth-engineer`, `marketing-analyst`** agents (the merges above).
+- **`forgebee/skills/_review-finding-contract.md`** — canonical finding format (P6 severity + 0-100 score + machine-parseable `SCORE: … | {…} | verdict:` footer) so `review-all` and `/audit-self` can aggregate sub-skill output reliably.
+- **`forgebee/skills/_debate-protocol.md`** — shared debate spine: blind-debate rules, the full verdict lattice (Advocate `APPROVE`/`APPROVE-WITH-CAVEATS`/`CANNOT-DEFEND` ↔ Skeptic `BLOCK`/`FLAG`/`CLEAN` ↔ Judge), severity scale, judge input contract, and a blindness-leak guard.
+- **`.github/workflows/eval.yml`** — runs the eval harness (permission-guard suite + router scenarios) on every PR touching hooks/router/eval/scripts. These tests existed but no CI ran them.
+- **`package.json`** — `npm run check` (index + references + version + eval) as a single quality gate; no runtime deps.
+- **`scripts/sync-local-install.js`** + `npm run sync:local` — mirrors the canonical `forgebee/` source into the gitignored local `.claude/` install so the two can't drift.
+- **Few-shot exemplars** added to review skills, debate skills, and the knowledge-heavy agents (architect, debugger-detective, test-engineer, performance-optimizer, security-auditor).
+
+### Changed
+
+- **Review system:** every review skill adopts the shared finding contract; `review-code-style`/`review-api`/`review-database` gained "detect stack first" gates (no longer assume React/TS, REST, Postgres/RLS as universal); `review-security`/`review-performance`/`review-accessibility` gate static-impossible checks behind `[needs tool]` labels instead of asserting them.
+- **Debate system:** the 9 triad skills point to `_debate-protocol.md` and carry only domain payload; verdict asymmetry fixed (advocates can caveat/concede, skeptics can affirm clean).
+- **Quality/process agents:** config-derived thresholds with labeled defaults (tdd-enforcer, test-engineer, performance-optimizer, session-librarian) — unconfigured numbers no longer hard-`BLOCK`; `delivery-agent` Step 0↔1 contradiction resolved (consumes verification evidence, doesn't re-run); `verification-enforcer` uses exit-code/pass-count comparison + triage-derived commands; `contract-validator` reads the live roster from `INDEX.md` instead of an embedded registry; `session-librarian` gained its missing Verification section.
+- **Stack specialists (14):** each gained a "Targets: `<framework> <version>` + 2026 APIs" line; modernized WooCommerce Blocks checkout, WP Interactivity API + Block Bindings, n8n AI-Agent/RAG nodes, and nextjs-content (Velite/Fumadocs; Contentlayer flagged archived).
+- **security-auditor:** expanded to a mapped OWASP-2021 table (incl. SSRF, deserialization, SSTI, JWT, mass-assignment, proactive IDOR) + a CVE-from-memory ban (CVE claims require an actual audit-tool run).
+
+### Fixed
+
+- **`permission-denied-logger.js` command injection** — replaced `echo '…' | node` shell pipe (broken single-quote escaping over untrusted command text) with `spawnSync(…, {input})`.
+- **`permission-guard.js` over-broad Tier-0 regexes** — process-substitution now blocks only `<(curl…)`/`bash <(…)`-style network/exec wrapping (benign `diff <(…)` allowed); `--no-verify` anchored to real git invocations; `rm -rf .` no longer blocks `rm -rf ./build`; `find -exec` blocks only destructive verbs. Eval suite updated with regression tests for each.
+- **Dead `permission_denied` audit branch** added to `audit-trail.js` (denials were silently dropped).
+- **Broken secret-scan commands** in `security-auditor` + `/security` (`grep --include="*.{…}"` matched zero files) → bounded, case-insensitive `rg` covering `.env`/`yml`/`json` + `PRIVATE_KEY`.
+- **5 growth agents** had an unclosed ` ```markdown ` fence rendering their guardrails inert — removed; a fence-parity check added to `check-references.js` prevents recurrence.
+- **P6 severity vocab** normalized across 6 review skills, `contexts/review.md`, `/review`, and `strategy-skeptic` (no more `BLOCKER`/`MUST FIX`/`Warning`/`Nitpick`/UPPERCASE labels).
+- **Count drift** — all manifests + READMEs synced to 32 skills / 44 agents / 36 commands / 23 hooks; the false `README` claim that `bump-version.sh` syncs counts corrected.
+- **Scripts hygiene** — `inject-principles.js` docstring (P1/P3/P4), `bump-version.sh` path-anchored excludes, `check-references.js` full-stem heading match; removed the hazardous one-off `trim-agent-descriptions.js`.
+- **`context-guard.js`** dead (unreachable) SessionStart restore branch removed.
+
+### Root `.claude/` install
+
+The gitignored local `.claude/` install had drifted to a pre-5.x snapshot (69 agents, debate/review skills duplicated as agents, 0 skills) causing duplicate registration. Re-synced to mirror `forgebee/` (44 agents, 36 commands) via the new `sync-local-install.js`. **Reinstall the plugin to make hook fixes go live** in running sessions.
+
+### Why a minor, not a major
+
+The seven removed agents are an internal specialist toolkit reorganized within the v5 line, not a stable public API — consistent with the project's convention of shipping feature releases as minors (cf. 5.1.0). The breaking note above flags the direct-invocation impact for anyone who scripted those names.
+
+---
+
 ## [5.1.3] — 2026-05-20
 
 **Theme: lighter `/workflow` breakdown for ticket-driven work.** Patch release removing the `scrum-master` prompt from the default `/workflow` path. Solo devs (and anyone arriving with a ticket that already has brief + architecture in hand) no longer pay the sprint-ceremony tax — the default is now an ordered Implementation Plan produced directly by the orchestrator.

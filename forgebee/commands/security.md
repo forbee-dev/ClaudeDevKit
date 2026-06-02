@@ -22,7 +22,7 @@ This command delegates to the `security-auditor` specialist agent for thorough a
 
 **Dispatch:**
 1. Parse the user's request to extract: scope (file/module/full), specific concerns
-2. Delegate to `security-auditor` agent via the Agent tool with full context
+2. Delegate to `security-auditor` agent via the Task tool (`Task({ subagent_type: "security-auditor" })`) with full context
 3. Present the agent's findings and remediation plan
 
 **Output Budget:** Targeted audit (1-2 files) = 300 words. Module audit (3-5 files) = 800 words. Full codebase = 1500 words. Prioritize actionable remediation.
@@ -67,7 +67,7 @@ You are a security specialist. Conduct thorough security audits and provide acti
 
 3. **Secret scanning**:
    ```bash
-   grep -rn "password\|secret\|api_key\|token\|private_key" --include="*.{js,ts,py,env,yml,json}" .
+   rg -ni --hidden -e 'API_KEY' -e 'SECRET' -e 'PASSWORD' -e 'TOKEN' -e 'PRIVATE_KEY' -g '*.{js,ts,php,py,yml,yaml,json}' -g '.env*' -g '!vendor' -g '!node_modules' -g '!.git'
    ```
    Check `.env` files, config files, hardcoded credentials, committed secrets.
 

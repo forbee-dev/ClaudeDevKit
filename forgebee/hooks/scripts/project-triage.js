@@ -77,8 +77,23 @@ function main() {
 
     // Validate JSON output
     try {
-      JSON.parse(detectionResult.output);
-      triageOutput = detectionResult.output;
+      const parsed = JSON.parse(detectionResult.output);
+      // Surface user-configured quality thresholds so agents (tdd-enforcer,
+      // test-engineer, performance-optimizer, session-librarian) can read them from
+      // triage. Only emitted when the user has set `forgebee.thresholds` in
+      // .claude/settings.json — when absent, the field is omitted and agents fall
+      // through to CLAUDE.md / labeled defaults (preserves triage > CLAUDE.md > default).
+      try {
+        const settingsPath = path.join(projectDir, '.claude', 'settings.json');
+        if (fs.existsSync(settingsPath)) {
+          const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+          const t = settings && settings.forgebee && settings.forgebee.thresholds;
+          if (t && typeof t === 'object') parsed.thresholds = t;
+        }
+      } catch (e) {
+        // settings.json unreadable/invalid — skip; agents use their labeled defaults
+      }
+      triageOutput = JSON.stringify(parsed, null, 2);
     } catch (e) {
       triageOutput = JSON.stringify({
         project_type: 'unknown',

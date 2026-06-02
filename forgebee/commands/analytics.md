@@ -18,11 +18,11 @@ Set up event tracking, build dashboards, and extract actionable insights from da
 
 ## Delegation
 
-This command delegates to the **`performance-analyst`** agent. Methodology (stack selection → event taxonomy → implementation → dashboards → metrics framework → weekly review) and output shape live there — single source of truth.
+This command delegates to the **`marketing-analyst`** agent. Methodology (stack selection → event taxonomy → implementation → dashboards → metrics framework → weekly review) and output shape live there — single source of truth.
 
 **Dispatch:**
 1. Parse the user's request (target: product analytics vs marketing performance, existing stack, focus dashboard)
-2. Delegate to `performance-analyst` via the Agent tool with full context
+2. Delegate to `marketing-analyst` via the Task tool (`Task({ subagent_type: "marketing-analyst" })`) with full context
 3. Present the agent's findings to the user
 
 **Fallback:** If agent delegation fails, surface the failure to the user and ask whether to retry or escalate.

@@ -48,6 +48,16 @@ You receive one of:
 
 ## Verification Protocol
 
+### Step 0: Resolve the Project's Commands (do NOT assume npm)
+
+The `npm …` commands in this doc are illustrative defaults, not the contract. Derive the real ones first:
+
+1. Read `.claude/session-cache/project-triage.json`. Use its detected scripts/tools to pick the test, build, and lint commands (e.g. `triage.node.tools` → `npm`/`pnpm`/`yarn` test + the project's `scripts`; `triage.php.tools` containing `phpunit` → `./vendor/bin/phpunit`; `pytest`, `go test`, `cargo test`).
+2. No triage → infer from manifests: `package.json` `scripts`, `phpunit.xml`, `pyproject.toml`/`pytest.ini`, `go.mod`, `Cargo.toml`, `Makefile`.
+3. Still nothing → state "no test/build command discoverable" and mark `PARTIALLY VERIFIED` per Hard Rule 7. Do not invent a command and report its absence as a pass.
+
+Use the resolved commands everywhere below in place of the `npm …` placeholders.
+
 ### Step 1: Identify What Was Changed
 
 ```bash
@@ -64,13 +74,15 @@ Classify changes:
 
 ### Step 2: Demand Evidence by Type
 
-For EACH category of change, run the actual command and capture output:
+For EACH category of change, run the **resolved command from Step 0** and capture output. Always check `$?`, not just the printed text:
 
-- **Tests:** `npm test 2>&1 | tail -20` (or `pytest`, `go test`, etc.) — pass count + exit code 0
-- **Build:** `npm run build 2>&1 | tail -10` — clean output + exit code 0
-- **Lint/Type:** `npm run lint 2>&1 | tail -10`, `npm run typecheck 2>&1 | tail -10` — no errors
+- **Tests:** `<resolved-test-command> 2>&1 | tail -20; echo "EXIT=$?"` — record pass/fail counts + exit code 0
+- **Build:** `<resolved-build-command> 2>&1 | tail -10; echo "EXIT=$?"` — clean output + exit code 0
+- **Lint/Type:** `<resolved-lint-command> 2>&1 | tail -10; echo "EXIT=$?"` — no errors
 - **API:** `curl -s -w "\nHTTP_STATUS: %{http_code}\n" http://localhost:PORT/endpoint` — expected body + status
-- **DB:** `npm run db:migrate 2>&1` + schema verification
+- **DB:** `<resolved-migrate-command> 2>&1; echo "EXIT=$?"` + schema verification
+
+Record the baseline pass-count here so Step 4 can detect a drop.
 
 ### Step 3: Cross-Reference Against Requirements
 
@@ -82,9 +94,18 @@ Every criterion needs a specific piece of evidence. "Implied by other tests" is 
 
 ### Step 4: Check for Regressions
 
+Do NOT grep stdout for the string "PASS"/"FAIL" — runners differ, "0 failed" contains "fail", and a suite can print "PASS" on one line while exiting non-zero. Judge by **exit code first, pass/fail counts second**:
+
 ```bash
-npm test 2>&1 | grep -E "FAIL|fail|Error" | head -20
+<resolved-test-command> 2>&1 | tee /tmp/ve-test.out
+echo "EXIT=$?"   # 0 = suite green; non-zero = regression, full stop
 ```
+
+Then confirm the numbers against the baseline from Step 2 (counts, not string matches):
+- Exit code 0 AND failed-count == 0 AND passed-count ≥ the pre-change passed-count → no regression.
+- Exit code non-zero, OR any failed-count > 0, OR passed-count dropped → regression. Capture the failing test names from the runner's own summary (the structured failure list), not via a raw `grep "fail"`.
+
+A suite that prints reassuring text but exits non-zero is a regression (see Hard Rule 4).
 
 ### Step 5: Render Verdict
 

@@ -1,6 +1,6 @@
-# performance-analyst — Reference Material
+# marketing-analyst — Reference Material
 
-Sections extracted from `forgebee/agents/performance-analyst.md` to keep the persona file under the 250-line budget. The agent file holds discipline and Never rules — this file holds the working library.
+Sections extracted from `forgebee/agents/marketing-analyst.md` to keep the persona file under the 250-line budget. The agent file holds discipline and Never rules — this file holds the working library.
 
 ---
 
@@ -30,7 +30,6 @@ Sections extracted from `forgebee/agents/performance-analyst.md` to keep the per
 | Content consistency | Published vs. planned | >90% | <80% |
 | Response time | Engagement reply speed | <2 hours | >6 hours |
 | Brand sentiment | Positive vs. negative mentions | >80% positive | <70% positive |
-```
 
 ### 2. Platform-Specific Dashboards
 

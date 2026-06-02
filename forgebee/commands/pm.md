@@ -84,9 +84,12 @@ Regenerate all markdown views from state.yaml:
 **Origin:** [workflow | idea | plan]
 
 ## Status
-[Visual phase tracker showing current position in pipeline]
+[Visual phase tracker showing current position in pipeline — render the track that matches the feature's Origin]
 
-idea → idea-debate → mvp → mvp-debate → planning → req-debate → arch → sprint → exec → code-debate → delivery → done
+- **workflow** origin: plan → req-debate → arch → work-breakdown(optional) → exec → spec-compliance → checkpoint → code-debate → delivery → done
+- **idea** origin: idea → idea-debate → mvp → planning → exec → delivery → done
+- **plan** origin: brief → requirements → arch → stories → done
+
                                                           ▲ YOU ARE HERE
 
 ## Stories

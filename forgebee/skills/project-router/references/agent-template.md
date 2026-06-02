@@ -115,8 +115,8 @@ Called by `[parent-agent]` when triage detects [condition]. You receive the task
 | Agent | Delegates To |
 |-------|-------------|
 | `seo-specialist` | `wordpress-seo`, `nextjs-seo` |
-| `conversion-optimizer` | `woocommerce-cro`, `saas-cro` |
-| `content-writer` | `wordpress-content`, `nextjs-content` |
+| `growth-engineer` | `woocommerce-cro`, `saas-cro` |
+| `content-creator` | `wordpress-content`, `nextjs-content` |
 
 ### Tier 2 — Dev Specialists (no Task tool)
 | Agent | Called By | Stack |
@@ -133,10 +133,10 @@ Called by `[parent-agent]` when triage detects [condition]. You receive the task
 |-------|----------|-------|
 | `wordpress-seo` | `seo-specialist` | Yoast/RankMath + WP sitemaps + WP schema |
 | `nextjs-seo` | `seo-specialist` | Metadata API + sitemap.ts + OG images |
-| `woocommerce-cro` | `conversion-optimizer` | WC checkout + product pages + cart recovery |
-| `saas-cro` | `conversion-optimizer` | Pricing pages + signup flows + React patterns |
-| `wordpress-content` | `content-writer` | Gutenberg blocks + ACF content + WC products |
-| `nextjs-content` | `content-writer` | MDX + Contentlayer + React content components |
+| `woocommerce-cro` | `growth-engineer` | WC checkout + product pages + cart recovery |
+| `saas-cro` | `growth-engineer` | Pricing pages + signup flows + React patterns |
+| `wordpress-content` | `content-creator` | Gutenberg blocks + ACF content + WC products |
+| `nextjs-content` | `content-creator` | MDX + Contentlayer + React content components |
 
 ### Non-Routed Agents (No delegation needed)
 Debate agents (requirements-*, code-*, strategy-*), pure strategy agents (brand-strategist, audience-architect, etc.), delivery agents, and utility agents remain as-is — they don't need tech-specific routing.

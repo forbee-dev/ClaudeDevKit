@@ -68,7 +68,7 @@ forgebee/
 ### Counts
 - **36 slash commands** — orchestration, diagnosis, quality, growth, learning, meta
 - **48 specialist agents** — code, growth, debate, WordPress, Next.js, mobile, CRO, tool
-- **31 skills** — 14 inline + 17 context:fork
+- **32 skills** — 10 inline + 22 context:fork
 - **23 lifecycle hooks** across 10 events
 - **6 templates** — decision log, addendum, failure-capture, investigation case file, prompt-defense baseline, brainstorming/spec
 

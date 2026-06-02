@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * inject-principles.js
- * Bulk-inject Karpathy principles P1 (Trace Test) and P4 (Orphan Rule) into the
- * Principles section of every code-producing agent.
+ * Bulk-inject Karpathy principles P1 (Trace Test), P3 (trust-boundary carve-out),
+ * and P4 (Orphan Rule) into the Principles section of every code-producing agent.
  *
  * Implements part of W9 from docs/planning/5.1.0-comprehensive-plan.md.
  * Idempotent: re-running does nothing if the marker is already present.
@@ -41,7 +41,7 @@ const CODE_PRODUCING_AGENTS = [
 
 const MARKER = '<!-- karpathy-principles -->';
 
-const P1_P4_BLOCK = `
+const P1_P3_P4_BLOCK = `
 ${MARKER}
 ## Karpathy Principles (always apply)
 
@@ -69,7 +69,7 @@ function injectIntoAgent(file) {
   const principlesMatch = content.match(/(\n## Principles\n[\s\S]*?)(\n## )/);
   if (principlesMatch) {
     const [whole, principlesBlock, nextHeader] = principlesMatch;
-    next = content.replace(whole, principlesBlock + P1_P4_BLOCK + nextHeader);
+    next = content.replace(whole, principlesBlock + P1_P3_P4_BLOCK + nextHeader);
   } else {
     // Fall back: insert before the first of these section headers
     const fallbackHeaders = ['\n## Never', '\n## Status Reporting'];
@@ -77,14 +77,14 @@ function injectIntoAgent(file) {
     for (const h of fallbackHeaders) {
       const idx = content.indexOf(h);
       if (idx >= 0) {
-        next = content.slice(0, idx) + P1_P4_BLOCK + content.slice(idx);
+        next = content.slice(0, idx) + P1_P3_P4_BLOCK + content.slice(idx);
         inserted = true;
         break;
       }
     }
     if (!inserted) {
       // Last resort: append
-      next = content.replace(/\n+$/, '\n') + P1_P4_BLOCK;
+      next = content.replace(/\n+$/, '\n') + P1_P3_P4_BLOCK;
     }
   }
 

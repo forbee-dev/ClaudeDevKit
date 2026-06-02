@@ -60,6 +60,18 @@ else if (EVENT_TYPE === 'permission') {
   };
 }
 
+// ── PERMISSION DENIED (auto-mode classifier denial, from permission-denied-logger.js) ─
+else if (EVENT_TYPE === 'permission_denied') {
+  auditEntry = {
+    timestamp,
+    session: SESSION_ID,
+    type: 'permission_denied',
+    tool_name: inputData.tool_name || '',
+    command: inputData.command || '',
+    denial_reason: inputData.denial_reason || ''
+  };
+}
+
 // ── DEBATE RULING ──────────────────────────────────────────────────────
 else if (EVENT_TYPE === 'debate') {
   auditEntry = {
@@ -164,6 +176,8 @@ else if (EVENT_TYPE === 'query') {
 
       if (entry.type === 'permission') {
         output += `${entry.decision}: ${entry.command} (tier: ${entry.tier})`;
+      } else if (entry.type === 'permission_denied') {
+        output += `denied ${entry.tool_name}: ${entry.command} (${entry.denial_reason})`;
       } else if (entry.type === 'debate') {
         output += `${entry.ruling}: ${entry.item} (judge: ${entry.judge}, severity: ${entry.severity})`;
       } else if (entry.type === 'verification') {

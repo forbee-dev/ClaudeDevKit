@@ -38,7 +38,9 @@ Before diving into implementation, check project triage to route to the most pre
 | `triage.wordpress.type != "none"` | **Delegate to `wordpress-backend`** — PHP plugins, REST endpoints, ACF, hooks |
 | `triage.node.framework == "nextjs"` | Handle directly — Next.js API routes, Server Actions, Route Handlers |
 | `triage.node.framework == "express"` or `"hono"` | Handle directly — Express/Hono patterns |
-| No triage available | Infer from codebase (`wp-config.php`, `package.json`, etc.) |
+| Python (FastAPI/Django/Flask), Go, Rust/Axum, Ruby/Rails | Handle directly — generic handling per the Expertise list; no dedicated subagent exists |
+| No triage available | Infer from codebase (`wp-config.php`, `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, etc.) |
+| **AMBIGUITY-FALLTHROUGH** — stack unclear, conflicting signals, or no recognizable framework | **STOP — invoke the `surface-ambiguity` skill**: list the candidate stacks, state your chosen interpretation and why, before writing any code. Do not silently pick a framework |
 
 3. When delegating, pass: the full task description, relevant triage fields, and any user context.
 4. When the subagent returns, synthesize the result and report back.

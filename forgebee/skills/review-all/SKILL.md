@@ -12,6 +12,8 @@ Find bugs, security holes, performance issues, and quality problems in changed c
 
 **Success looks like:** A clear READY/NEEDS FIXES/BLOCKED verdict with actionable items.
 
+> Findings (own and delegated) use the shared format: `forgebee/skills/_review-finding-contract.md`. As the aggregator, sum the per-skill footer counts into one combined footer so `/audit-self` can parse the whole pass.
+
 ## Karpathy Principle (P2 — Senior Engineer Test)
 
 Before issuing a `READY` verdict, ask explicitly: **would a senior engineer call this overcomplicated?** If yes, the verdict is `NEEDS FIXES` — list the simplification as a `High` issue. Do not pass overcomplicated code on the grounds that it "works."
@@ -111,13 +113,27 @@ Synthesize their findings into your final report.
 3. Give your **recommended option and why**
 4. Assign severity (Critical/High/Medium/Low)
 
+## Example (Critical vs Low)
+
+```
+[Critical] Auth check missing on a state-changing route
+File: src/routes/admin.ts:14
+Issue: `POST /admin/users/:id/role` updates roles with no session/permission check — any caller can grant themselves admin.
+Fix: Require an authenticated session and `requireRole('admin')` before the handler runs.
+
+[Low] Console.log left in shipped code path
+File: src/lib/cart.ts:27
+Issue: `console.log(cart)` in the add-to-cart path leaks state to the browser console.
+Fix: Remove it or route through the project logger gated to dev.
+```
+
 ## Final Summary
 
 ```markdown
 ## Review: [Target]
 
 ### Verdict: READY | NEEDS FIXES | BLOCKED
-**Quality score:** N/10
+**Quality score:** <0-100> (per `_review-finding-contract.md` — same scale as the footer below)
 
 ### Blocking Issues (Critical + High)
 | # | Issue | File:Line | Severity | Fix |
@@ -130,6 +146,14 @@ Synthesize their findings into your final report.
 ### Positive Notes
 [What's done well — always include at least 2]
 ```
+
+End with the combined machine-parseable footer from the shared contract (counts summed across all sections and any delegated review skills):
+
+```
+SCORE: <0-100> | {critical:N, high:N, medium:N, low:N} | verdict: <pass|block>
+```
+
+`READY` maps to `verdict: pass`; `NEEDS FIXES`/`BLOCKED` map to `verdict: block`.
 
 ## Communication
 

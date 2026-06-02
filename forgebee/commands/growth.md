@@ -1,6 +1,6 @@
 ---
 name: growth
-description: Growth OS orchestrator — delegates through Brand → Intel → Audience → Content Architecture → Hooks → Debate → Calendar → Creation → Distribution → Measure. Never executes tasks directly; connects the dots and ships requirements to marketing specialist agents.
+description: Growth OS orchestrator — delegates through Brand → Intel → Audience → Content Strategy → Hooks → Debate → Creation → Distribution → Measure. Never executes tasks directly; connects the dots and ships requirements to marketing specialist agents.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, WebSearch
 ---
 
@@ -59,17 +59,19 @@ Both receive brand outputs from Phase 1. Run in parallel.
 
 ---
 
-### Phase 3: Content Architecture → `content-architect`
+### Phase 3: Content Strategy → `content-strategist`
 
-Receives brand pillars + audience personas + competitive gaps.
+Receives brand pillars + audience personas + competitive gaps. Covers content architecture, idea generation, and editorial calendar.
 
-**Output required:** 3-5 content pillars, topic clusters per pillar (8-12 each), hub-and-spoke structure, content pyramid (long → medium → short → micro), platform-content mapping, SEO keyword clusters.
+**Output required:**
+- **Architecture:** 3-5 content pillars, topic clusters per pillar (8-12 each), hub-and-spoke structure, content pyramid (long → medium → short → micro), platform-content mapping, SEO keyword clusters.
+- **Ideas:** 50+ content ideas mapped to pillar, format, platform, hook type; repurposing chains (1 long-form piece → 10+ derivative pieces); trending angle opportunities; content series concepts (recurring formats).
 
-**Store in:** `docs/marketing/content-architecture/`
+**Store in:** `docs/marketing/content-strategy/`
 
 ---
 
-### Phase 4: Hook & Idea Engine (parallel) → `hook-engineer` + `idea-machine`
+### Phase 4: Hook Engine → `hook-engineer`
 
 **hook-engineer outputs:**
 - Hook library organized by:
@@ -80,13 +82,7 @@ Receives brand pillars + audience personas + competitive gaps.
 - Hook-Retain-Reward templates (Hormozi framework)
 - Emotional trigger matrix (which emotions drive shares per platform)
 
-**idea-machine outputs:**
-- 50+ content ideas mapped to: pillar, format, platform, hook type
-- Repurposing chains (1 long-form piece → 10+ derivative pieces)
-- Trending angle opportunities
-- Content series concepts (recurring formats)
-
-**Store in:** `docs/marketing/hooks/` + `docs/marketing/ideas/`
+**Store in:** `docs/marketing/hooks/`
 
 ---
 
@@ -106,7 +102,7 @@ BLOCKs → route back to originating agent for revision. Critical → escalate t
 
 ---
 
-### Phase 6: Execution Plan (user approval required) → `calendar-builder`
+### Phase 6: Execution Plan (user approval required) → `content-strategist`
 
 Present before dispatching production:
 
@@ -134,13 +130,11 @@ Present before dispatching production:
 
 Dispatch four agents, each with calendar assignments + brand voice + hooks + persona context:
 
-- **content-creator** — platform-native short/medium:
+- **content-creator** — platform-native short/medium plus long-form:
   - LinkedIn posts (story format, data insights, contrarian takes)
   - X/Twitter threads (hook → story → insight → CTA)
   - Instagram captions (with hook + CTA)
   - Video scripts (hook-retain-reward structure)
-
-- **content-writer** — long-form:
   - Blog posts (SEO-optimized, pillar/cluster structure)
   - Landing pages (hero, features, social proof, CTA)
   - Case studies (situation → solution → results)
@@ -171,13 +165,11 @@ Dispatch four agents, each with calendar assignments + brand voice + hooks + per
   - Reciprocity loop design (give value → receive engagement → compound)
   - DM sequence templates (welcome, nurture, conversion)
 
-- **growth-hacker** outputs:
+- **growth-engineer** outputs:
   - Growth loop design (content-led, community-led, or product-led)
   - Flywheel mechanics (action → output → feeds back as input)
   - Audience growth playbook (platform-specific tactics)
   - Cross-promotion strategy
-
-- **conversion-optimizer** outputs:
   - CRO audit of landing pages and conversion points (ResearchXL framework)
   - Funnel analysis with drop-off diagnosis per step
   - Conversion Framework (Trust, FUDs, Incentives, Engagement, Temperament, Buying Stage, Complexity)
@@ -189,7 +181,7 @@ Dispatch four agents, each with calendar assignments + brand voice + hooks + per
 
 ---
 
-### Phase 9: Measure & Optimize → `performance-analyst`
+### Phase 9: Measure & Optimize → `marketing-analyst`
 
 **Output required:**
 - KPI dashboard design (North Star metric + Input metrics + Health metrics)
@@ -215,18 +207,14 @@ Present full Growth OS package to user as final output.
 | `brand-strategist` | Brand positioning, archetypes, voice |
 | `market-intel` | Competitive intelligence, battlecards |
 | `audience-architect` | ICPs, personas, buyer journeys |
-| `content-architect` | Pillars, topic clusters, hub-and-spoke |
+| `content-strategist` | Pillars, topic clusters, hub-and-spoke, content ideas, repurposing chains, content calendars, batching |
 | `hook-engineer` | Stop-scrolling hooks, viral formulas |
-| `idea-machine` | Content ideas, repurposing chains |
-| `content-creator` | Platform-native posts, threads, scripts |
-| `content-writer` | Blog posts, guides, case studies → `wordpress-content`, `nextjs-content` |
+| `content-creator` | Platform-native posts, threads, scripts, blog posts, guides, case studies → `wordpress-content`, `nextjs-content` |
 | `seo-specialist` | Keywords, technical SEO → `wordpress-seo`, `nextjs-seo` |
 | `email-strategist` | Email flows, segmentation, deliverability |
 | `engagement-strategist` | Community, reciprocity, DM flows |
-| `growth-hacker` | Growth loops, flywheels, funnels |
-| `calendar-builder` | Content calendars, batching |
-| `performance-analyst` | KPIs, attribution, A/B testing |
-| `conversion-optimizer` | CRO, funnel optimization → `woocommerce-cro`, `saas-cro` |
+| `growth-engineer` | Growth loops, flywheels, funnels, CRO, funnel optimization → `woocommerce-cro`, `saas-cro` |
+| `marketing-analyst` | KPIs, attribution, A/B testing |
 | `strategy-advocate/skeptic/judge` | Adversarial strategy debate |
 
 ## Rules

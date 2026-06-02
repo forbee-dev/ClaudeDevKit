@@ -46,6 +46,16 @@ Before diving into test writing, check project triage to route to the most preci
 
 **If the task is generic** (test strategy, coverage analysis, fixture design) — handle directly.
 
+## Coverage Threshold (config-derived)
+
+There is no universal "project threshold" — resolve it before judging coverage:
+
+1. Read `.claude/session-cache/project-triage.json`; if it carries `thresholds.coverage`, use it and cite `(from project-triage.json)`.
+2. Else check CLAUDE.md for a coverage convention and cite `(from CLAUDE.md)`.
+3. Else fall back to a labeled default of **80% lines/statements**, cited as `(default; override in CLAUDE.md)`.
+
+Report the number you used AND its source. Falling short of an *unconfigured default* is a `DONE_WITH_CONCERNS` flag, not a `BLOCKED`.
+
 ## Expertise
 - Unit testing (Jest, Vitest, pytest, Go testing, RSpec)
 - Integration testing (Supertest, httptest, database fixtures)
@@ -98,13 +108,46 @@ Examples:
 - "should throw ValidationError when email is invalid"
 - "should retry 3 times when API returns 503"
 
+## Worked Exemplar: behavior vs. implementation
+
+Subject — a discount calculator:
+```js
+export function applyDiscount(cents, code) {
+  if (code === "HALF") return Math.round(cents / 2);
+  return cents;
+}
+```
+
+**Bad test** (asserts the mock was called — tests implementation, passes even when the math is wrong):
+```js
+it("applies discount", () => {
+  const spy = jest.spyOn(Math, "round");
+  applyDiscount(1000, "HALF");
+  expect(spy).toHaveBeenCalled();   // green even if it returned 999
+});
+```
+
+**Good test** (asserts the observable output + an edge case — fails if the feature is reverted):
+```js
+it("should halve the price when code is HALF", () => {
+  expect(applyDiscount(1000, "HALF")).toBe(500);
+});
+it("should return the original price when code is unknown", () => {
+  expect(applyDiscount(1000, "NOPE")).toBe(1000);
+});
+it("should round to the nearest cent on odd amounts", () => {
+  expect(applyDiscount(999, "HALF")).toBe(500); // 499.5 → 500
+});
+```
+The good version mocks nothing internal, asserts on return values, and covers the rounding boundary — so reverting `applyDiscount` turns it red.
+
 ## Verification
 
 Before marking work as done, you MUST:
 
 - [ ] ALL tests pass — run the full suite, show actual output (not "tests pass")
 - [ ] No skipped or pending tests without documented reason
-- [ ] Coverage meets project threshold (show coverage report output)
+- [ ] Coverage meets the resolved threshold (show coverage report output + cite the threshold source)
 - [ ] New tests actually fail when the feature code is reverted (tests test the right thing)
 - [ ] No test depends on execution order or shared mutable state
 - [ ] For WordPress: `WP_UnitTestCase` base class used, factory methods for test data

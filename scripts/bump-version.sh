@@ -153,14 +153,17 @@ cmd_audit() {
   echo "Audit: scanning repo for version string '$current_version'..."
   echo ""
 
-  # Build grep exclude args
-  local -a exclude_args=()
+  # Read config excludes into an array; these are matched as path-anchored
+  # prefixes against the repo-relative path below (NOT grep --exclude, which
+  # matches by basename only and would skip excluded names anywhere in the tree).
+  local -a config_excludes=()
   while IFS= read -r pattern; do
-    exclude_args+=("--exclude=$pattern" "--exclude-dir=$pattern")
+    [[ -z "$pattern" ]] && continue
+    config_excludes+=("$pattern")
   done < <(audit_excludes)
 
-  # Also always exclude binary files and .git
-  exclude_args+=("--exclude-dir=.git" "--exclude-dir=node_modules" "--binary-files=without-match")
+  # Prune .git/node_modules dirs at the grep level (genuine dir names) and skip binaries.
+  local -a exclude_args=("--exclude-dir=.git" "--exclude-dir=node_modules" "--binary-files=without-match")
 
   # Get list of declared paths for comparison (both file and pattern entries)
   local -a declared_paths=()
@@ -179,6 +182,17 @@ cmd_audit() {
     match_file=$(echo "$match" | cut -d: -f1)
     # Make path relative to repo root
     local rel_path="${match_file#$REPO_ROOT/}"
+
+    # Path-anchored exclude: skip if rel_path equals an exclude or sits under it
+    # (exclude "docs/planning" matches "docs/planning/x.md" but not "other/docs/planning").
+    local is_excluded=0
+    for ex in "${config_excludes[@]}"; do
+      if [[ "$rel_path" == "$ex" || "$rel_path" == "$ex"/* ]]; then
+        is_excluded=1
+        break
+      fi
+    done
+    [[ "$is_excluded" -eq 1 ]] && continue
 
     # Check if this file is in the declared list
     local is_declared=0
