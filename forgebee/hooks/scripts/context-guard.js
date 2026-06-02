@@ -166,32 +166,10 @@ async function main() {
       process.exit(0);
     }
 
-    // SESSION START (after compact): Restore context
-    if (hookEvent === 'SessionStart') {
-      try {
-        const files = fs.readdirSync(backupDir);
-        const backupFiles = files
-          .filter(f => f.startsWith('pre-compact-') && f.endsWith('.md'))
-          .map(f => ({
-            name: f,
-            path: path.join(backupDir, f),
-            time: fs.statSync(path.join(backupDir, f)).mtimeMs,
-          }))
-          .sort((a, b) => b.time - a.time);
-
-        if (backupFiles.length > 0) {
-          const latestBackup = backupFiles[0];
-          const backupContent = readFile(latestBackup.path);
-          if (backupContent) {
-            output('=== Restored Context (pre-compaction) ===\n' + backupContent + '\n=== End Restored Context ===');
-          }
-        }
-      } catch (e) {
-        // Ignore backup directory errors
-      }
-
-      process.exit(0);
-    }
+    // NOTE: context-guard is wired only under PreCompact (see hooks.json). A prior
+    // SessionStart "restore" branch was removed as dead code — it could never fire here.
+    // Restoring a backup belongs on SessionStart gated to source === 'compact'; wire that
+    // deliberately (and register the SessionStart matcher) if the restore feature is wanted.
 
     process.exit(0);
   } catch (error) {

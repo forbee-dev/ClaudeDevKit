@@ -22,7 +22,7 @@ This command delegates to the **`seo-specialist`** agent. Methodology, output sh
 
 **Dispatch:**
 1. Parse the user's request (target site/pages, focus area: technical / on-page / keyword / content gap)
-2. Delegate to `seo-specialist` via the Agent tool with full context
+2. Delegate to `seo-specialist` via the Task tool (`Task({ subagent_type: "seo-specialist" })`) with full context
 3. Present the agent's findings to the user
 
 **Fallback:** If agent delegation fails, surface the failure to the user and ask whether to retry or escalate.

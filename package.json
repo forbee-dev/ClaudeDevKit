@@ -1,0 +1,14 @@
+{
+  "name": "forgebee",
+  "private": true,
+  "description": "ForgeBee — internal scripts and quality gates (not a published npm package)",
+  "type": "commonjs",
+  "scripts": {
+    "index": "node scripts/build-index.js",
+    "index:check": "node scripts/build-index.js --check",
+    "check:references": "node scripts/check-references.js",
+    "check:version": "bash scripts/bump-version.sh --check",
+    "eval": "node forgebee/eval/harness/run.js",
+    "check": "npm run index:check && npm run check:references && npm run check:version && npm run eval"
+  }
+}

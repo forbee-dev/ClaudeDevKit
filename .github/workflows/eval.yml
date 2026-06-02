@@ -1,0 +1,39 @@
+name: Eval Harness
+
+# Runs the deterministic eval harness on every change to the framework's
+# safety-critical JS — the permission-guard blocklist/allowlist suite and the
+# project-router scenarios. The harness exits non-zero on any failure, so this
+# job gates merges. Previously these tests existed but no CI ran them.
+
+on:
+  pull_request:
+    paths:
+      - 'forgebee/hooks/**'
+      - 'forgebee/skills/project-router/**'
+      - 'forgebee/eval/**'
+      - 'scripts/**'
+      - '.github/workflows/eval.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'forgebee/hooks/**'
+      - 'forgebee/skills/project-router/**'
+      - 'forgebee/eval/**'
+  workflow_dispatch:
+
+jobs:
+  eval:
+    name: Run eval harness (permission-guard + router scenarios)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run eval harness
+        run: node forgebee/eval/harness/run.js

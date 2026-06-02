@@ -12,7 +12,7 @@ Active when reviewing PRs, auditing code, or providing feedback on implementatio
 ## Behavior Rules
 
 - Be specific — cite line numbers, show examples, suggest fixes
-- Distinguish blocking issues from suggestions (MUST FIX vs CONSIDER)
+- Distinguish blocking issues from suggestions (High vs Low)
 - Check tests exist for new behavior
 - Verify error paths, not just happy paths
 - Look for missing validation on inputs (especially user-facing)
@@ -33,14 +33,14 @@ For every review, check:
 
 | Level | Meaning | Action |
 |-------|---------|--------|
-| BLOCKER | Security hole, data loss, crash | Must fix before merge |
-| MUST FIX | Bug, missing validation, broken behavior | Must fix before merge |
-| SHOULD FIX | Tech debt, poor naming, missing edge case | Fix in this PR or file follow-up |
-| CONSIDER | Style preference, minor optimization | Author's discretion |
+| Critical | Security hole, data loss, crash | Must fix before merge |
+| High | Bug, missing validation, broken behavior | Must fix before merge |
+| Medium | Tech debt, poor naming, missing edge case | Fix in this PR or file follow-up |
+| Low | Style preference, minor optimization | Author's discretion |
 
 ## Do NOT
 
-- Nitpick style if the project has no style guide
+- Raise Low style issues if the project has no style guide
 - Block PRs over personal preferences
 - Approve without actually reading the diff
 - Forget to check the test file, not just the source

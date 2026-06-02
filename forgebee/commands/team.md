@@ -154,7 +154,7 @@ Reject any response without a status. If `BLOCKED` twice on same issue → escal
 | `debugger-detective` | Bug hunting, root cause | — |
 | `deep-researcher` | Docs, APIs, technical questions | — |
 | `ux-designer` | User flows, wireframes, accessibility | — |
-| `content-writer` | Copy, docs, blog posts | → `wordpress-content`, `nextjs-content` |
+| `content-creator` | Copy, docs, blog posts | → `wordpress-content`, `nextjs-content` |
 | `seo-specialist` | Search optimization | → `wordpress-seo`, `nextjs-seo` |
 
 **Debate agents** (for adversarial review without full /workflow):

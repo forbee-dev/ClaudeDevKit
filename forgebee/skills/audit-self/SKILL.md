@@ -1,7 +1,7 @@
 ---
 name: audit-self
 description: Use to re-run the ForgeBee self-audit on demand — scores every skill, agent, and command against the scorecard. Writes timestamped findings and surfaces regressions since the last run.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Audit Self
@@ -33,6 +33,7 @@ Read these BEFORE auditing. They are the canonical rubric.
 - List all skills in `forgebee/skills/` (count)
 - List all agents in `forgebee/agents/` (count)
 - List all commands in `forgebee/commands/` (count)
+- Read live counts from `forgebee/INDEX.md` going forward — treat it as the authoritative surface inventory
 - Compare to prior audit counts — flag added/removed
 
 ### Step 2: Score against rubrics
@@ -89,6 +90,21 @@ Output to `docs/planning/audit-YYYY-MM-DD.md`:
 - Total commands: N
 - Audit timestamp: YYYY-MM-DD
 ```
+
+## Completion Rule (when the audit is done)
+
+This is a single-pass regression audit, not an iterative fix loop. The audit is complete — write the file and stop — when ALL of these hold:
+
+1. **Full coverage once:** every skill, agent, and command in `forgebee/INDEX.md` has been scored against its scorecard exactly once. No re-scoring of items already marked FINE.
+2. **Regression step run:** the most recent prior audit was read and every prior issue is classified Fixed / Persistent (Step 4). Skipping this is the one failure that invalidates the whole run.
+3. **Findings written:** the timestamped `docs/planning/audit-YYYY-MM-DD.md` exists with the Inventory Delta and the Snapshot section populated.
+
+Do NOT loop:
+- **Don't re-audit to "double-check" FINE items** — one pass is the contract. Detail is capped at the top ~20 problematic items.
+- **Don't fix what you find** — recommend in the Top 10, never implement (that's a separate `/workflow` or `/review` run on the recommendations).
+- **Don't re-run because new issues appeared mid-audit** — capture them in the current file; the *next* scheduled audit catches anything that lands after you start.
+
+If coverage can't be completed (e.g., INDEX.md is stale or a scorecard is missing), stop and report the blocker rather than auditing a partial surface as if it were whole.
 
 ## Never
 

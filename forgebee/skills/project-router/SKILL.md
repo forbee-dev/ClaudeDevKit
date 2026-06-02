@@ -1,7 +1,7 @@
 ---
 name: project-router
 description: Use at session start or when switching projects — detects stack (WordPress, Next.js, PHP, Node), tooling, styling system, database, and routes to the right conventions and guardrails.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Project Router
@@ -72,6 +72,29 @@ Based on the classification, read the appropriate convention reference(s):
 
 ### Step 3: Present Triage Summary
 
+**Output mode branch (per `terse-report`):** if the invoking command set `responseStyle: "orchestrator"` in the handoff contract (`/workflow`, `/team`, `/plan` consuming the triage), emit the terse JSON shape below and skip the human prose summary. If `responseStyle` is absent or any other value, emit the human-readable Markdown summary. Orchestrators parse signal, not prose.
+
+**Terse JSON (orchestrator mode):**
+
+```json
+{
+  "status": "DONE",
+  "project_type": "wordpress-plugin",
+  "stack": ["PHP 8.2", "Node 20", "TypeScript"],
+  "styling": ["SCSS", "Tailwind"],
+  "database": "MySQL",
+  "testing": ["PHPUnit", "Jest", "Playwright"],
+  "ci": ["GitHub Actions", "Docker"],
+  "conventions_loaded": ["wordpress", "styling"],
+  "guardrails": ["WPCS", "nonce + capability checks on writes"],
+  "recommendations": ["no CLAUDE.md — suggest forgebee-setup"]
+}
+```
+
+Field values come straight from the detection JSON (Step 0) — never invent. Use `"project_type": "unknown"` and a `recommendations` note when detection is inconclusive. The `status` line is required in both modes.
+
+**Human-readable summary (direct mode):**
+
 Show the user a compact summary of what was detected:
 
 ```markdown
@@ -95,7 +118,7 @@ Show the user a compact summary of what was detected:
 ### Step 4: Inject Context
 
 If the triage is being consumed by another command (e.g., `/workflow`, `/team`, `/plan`),
-provide the triage JSON and loaded conventions as context for downstream agents.
+provide the terse triage JSON (Step 3) and loaded conventions as context for downstream agents.
 
 Every agent dispatched should receive:
 - The triage JSON (so they know what tools/frameworks are available)

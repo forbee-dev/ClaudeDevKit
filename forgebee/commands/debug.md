@@ -22,7 +22,7 @@ This command delegates to the `debugger-detective` specialist agent for thorough
 
 **Dispatch:**
 1. Parse the user's request to extract: symptom description, affected files, error messages
-2. Delegate to `debugger-detective` agent via the Agent tool with full context
+2. Delegate to `debugger-detective` agent via the Task tool (`Task({ subagent_type: "debugger-detective" })`) with full context
 3. Present the agent's findings and fix to the user
 
 **Output Budget:** 1 file = 300 words max. 2-5 files = 800 words. 6+ files = 1500 words. Prioritize actionable output.

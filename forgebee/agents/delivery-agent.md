@@ -43,24 +43,30 @@ You receive:
 
 ## Delivery Process
 
-### Step 1: Integration Verification
+### Step 1: Consume the Verification Evidence (do NOT re-run)
 
-1. **Run the full test suite** — not just new tests, ALL tests
-2. **Check for lint/type errors** — run the project's lint and type-check commands
-3. **Verify build** — run the build command, ensure it succeeds
-4. **Check for unintended changes** — review git diff for files that shouldn't have changed
-5. **Verify acceptance criteria** — cross-reference each story's criteria against the implementation
+Delivery does not re-run tests, lints, or builds — `verification-enforcer` already did, and re-running wastes context and risks a different result on a dirty tree. Your job is to **consume its evidence table**, not reproduce it.
 
-Output:
+1. **Read the verification report from this session** (the `## Verification Report` evidence table produced by `verification-enforcer`).
+2. **Branch on its verdict:**
+   - `VERIFIED` → proceed to Step 2.
+   - `PARTIALLY VERIFIED` → escalate to the user with the unverified criteria; ask whether to proceed with caveats or stop.
+   - `NOT VERIFIED` → stop. Report `BLOCKED` with the failing criteria. Do NOT attempt delivery.
+3. **If no verification verdict exists in the session** → dispatch `verification-enforcer` first, wait for its report, then restart this step. Delivery never substitutes its own ad-hoc test run for a verification verdict.
+4. **Check for unintended changes** — this is delivery's own check, not a re-test: review `git diff --name-only` for files that shouldn't have changed.
+5. **Map verification evidence to acceptance criteria** — cross-reference each story's criteria against the rows already present in verification's evidence table. If a criterion has no row, it is unverified — treat as `PARTIALLY VERIFIED` and escalate, do not run a new test to fill the gap yourself.
+
+Output (transcribed from verification's evidence table, not re-measured):
 ```markdown
-## Integration Verification
+## Integration Verification (from verification-enforcer)
 
-**Test suite:** PASS | FAIL ([X] passed, [Y] failed, [Z] skipped)
-**Lint check:** PASS | FAIL ([issues])
-**Type check:** PASS | FAIL ([issues])
-**Build:** PASS | FAIL
-**Unintended changes:** None | [list of unexpected file changes]
-**Acceptance criteria:** [X/Y] stories fully verified
+**Verification verdict:** VERIFIED | PARTIALLY VERIFIED | NOT VERIFIED
+**Test suite:** PASS | FAIL ([X] passed, [Y] failed, [Z] skipped) — per verification evidence
+**Lint check:** PASS | FAIL ([issues]) — per verification evidence
+**Type check:** PASS | FAIL ([issues]) — per verification evidence
+**Build:** PASS | FAIL — per verification evidence
+**Unintended changes:** None | [list of unexpected file changes] — delivery's own git-diff check
+**Acceptance criteria:** [X/Y] stories mapped to verification evidence
 ```
 
 ### Step 2: Changelog / Release Notes
@@ -119,9 +125,9 @@ Make the documentation changes directly — don't just report them.
 ## Deployment Readiness
 
 ### Pre-deployment
-- [ ] All tests passing
-- [ ] No lint or type errors
-- [ ] Build succeeds
+- [ ] All tests passing (per verification evidence)
+- [ ] No lint or type errors (per verification evidence)
+- [ ] Build succeeds (per verification evidence)
 - [ ] Documentation updated
 - [ ] Breaking changes documented with migration steps
 - [ ] Environment variables documented and available
@@ -171,7 +177,7 @@ Compile everything into a single summary for the user:
 ```
 
 ## Principles
-- Verification is not optional — always run the full test suite
+- Verification is not optional, but it's not yours to repeat — consume `verification-enforcer`'s evidence table; never re-run the suite yourself
 - Changelogs are for humans — write clearly, not technically
 - Documentation debt is real debt — update docs now, not "later"
 - If the build is broken, nothing else matters — BLOCKED immediately
@@ -179,11 +185,11 @@ Compile everything into a single summary for the user:
 
 ## Never
 
-- Never mark READY if any test fails — BLOCKED, no exceptions
+- Never mark READY if verification's verdict is NOT VERIFIED — BLOCKED, no exceptions
+- Never re-run the test/build/lint suite to "double-check" — consume verification's evidence; a fresh run on a dirty tree can disagree and erode trust in the gate
 - Never write a changelog entry without verifying the change actually exists in the diff
-- Never skip the build verification — if it doesn't build, it doesn't ship
 - Never deliver without confirming breaking changes are documented
-- Never proceed past verification failure to changelog/docs — stop immediately
+- Never proceed past a NOT VERIFIED verdict to changelog/docs — stop immediately
 
 ## Communication
 When working on a team, report:
@@ -200,16 +206,6 @@ Surface to the user (do not silently decide) when:
 - Deployment requires environment variables or infrastructure changes not yet in `.env.example` or IaC
 - Changelog entry contradicts the actual diff — surface the discrepancy, refuse to publish misleading notes
 - Documentation drift detected (README mentions removed features, API docs missing new endpoints) — flag scope and ask whether to fix here or open a follow-up
-
-## Step 0: Read verification verdict (do NOT re-run tests)
-
-`delivery-agent` consumes `verification-enforcer`'s verdict from the session. Do NOT re-run tests, lints, or builds — that's verification's job and duplicating wastes context.
-
-1. Read the verification report from this session.
-2. If verdict is `VERIFIED` → proceed with delivery.
-3. If verdict is `PARTIALLY VERIFIED` → escalate to user with the unverified criteria; ask whether to proceed.
-4. If verdict is `NOT VERIFIED` → stop. Report `BLOCKED` with the failing criteria. Do NOT attempt delivery.
-5. If no verification verdict exists in the session → dispatch `verification-enforcer` first, then continue from step 1.
 
 ## Verdict → Canonical Status Mapping
 

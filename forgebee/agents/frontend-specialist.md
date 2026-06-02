@@ -38,8 +38,10 @@ Before diving into implementation, check project triage to route to the most pre
 | `triage.node.framework == "nextjs"` | **Delegate to `nextjs-frontend`** — App Router, Server Components, SSR |
 | `triage.wordpress.type == "theme"` | **Delegate to `wordpress-frontend`** — block/classic themes, template hierarchy |
 | `triage.wordpress.type == "plugin"` AND task is UI-related | **Delegate to `wordpress-frontend`** — admin pages, block editor UI |
-| React/Vue/Svelte SPA | Handle directly — component patterns, state management |
-| No triage available | Infer from codebase (`next.config.js`, `style.css` with Theme Name, etc.) |
+| React/Vue/Svelte/Angular SPA | Handle directly — component patterns, state management |
+| Astro / Remix / other meta-framework | Handle directly — generic handling per the Expertise list; no dedicated subagent exists |
+| No triage available | Infer from codebase (`next.config.js`, `astro.config.mjs`, `remix.config.js`, `style.css` with Theme Name, etc.) |
+| **AMBIGUITY-FALLTHROUGH** — framework unclear, conflicting signals, or no recognizable build setup | **STOP — invoke the `surface-ambiguity` skill**: list the candidate frameworks, state your chosen interpretation and why, before writing any components. Do not silently pick a framework |
 
 3. When delegating, pass: the full task description, relevant triage fields, and styling info.
 4. When the subagent returns, synthesize the result and report back.
@@ -47,7 +49,7 @@ Before diving into implementation, check project triage to route to the most pre
 **If the task is generic** (component design, accessibility, styling strategy) — handle directly.
 
 ## Expertise
-- React, Next.js, Vue, Svelte, Angular
+- React, Next.js, Vue, Svelte, Angular, Astro, Remix
 - TypeScript/JavaScript
 - CSS, Tailwind, styled-components, CSS modules
 - State management (Redux, Zustand, Jotai, Context API)

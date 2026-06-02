@@ -1,7 +1,7 @@
 ---
 name: investigate
 description: Use when handed a crash log, stack trace, or "this used to work" report — produces a forensic case file with evidence grading before code changes. Complements debugger-detective.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Investigate
@@ -86,6 +86,17 @@ When stronghold is established and hypothesis is testable: hand the case file to
 7. **Pick the highest-leverage next observation.** Not a fix — an observation that would confirm or refute the strongest hypothesis.
 8. **Update the file as observations come back.** Promote H-NNN to F-NNN when confirmed. Mark refuted ones with status update (never delete).
 9. **When a hypothesis becomes a confirmed finding with a clear fix:** hand the case file to `debugger-detective`. The fix is a separate handoff.
+
+## Stopping Rule (when to stop investigating)
+
+Investigation is bounded, not open-ended. Stop and hand off — or stop and escalate — as soon as any of these holds:
+
+- **Converged:** one hypothesis is promoted to a Confirmed finding (F-NNN with citation) that fully accounts for the stronghold symptom, and a fix is obvious from it. → Hand off to `debugger-detective`.
+- **All hypotheses refuted:** every H-NNN is marked REFUTED and no observation suggests a new one. → Stop, report the dead ends, ask the user for a fresh stronghold (new error text, log, or repro). Do not invent a sixth hypothesis to keep going.
+- **Diminishing returns:** the last 2 observations produced no new Confirmed/Deduced findings and didn't move any hypothesis's confirm/refute status. → Stop; the evidence trail has gone cold. Report current state and the single most useful observation the user could still gather.
+- **Out of scope:** the cause is confirmed to live in a system you can't observe (third-party service, infra you lack access to). → Escalate with the case file; mark the boundary finding Confirmed.
+
+Do NOT keep gathering evidence past convergence "to be thorough" — that's the investigation analogue of a P3 violation. The case file, not exhaustiveness, is the deliverable. If you cannot meet any stopping condition after a reasonable pass, say so explicitly rather than looping.
 
 ## Never
 

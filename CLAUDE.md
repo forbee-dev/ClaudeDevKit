@@ -181,7 +181,7 @@ npm run deploy:production # Deploy to production
 
 *Strategy Debate (context:fork skills):* strategy-advocate, strategy-skeptic, strategy-judge
 
-*Growth OS:* brand-strategist, market-intel, audience-architect, content-architect, hook-engineer, idea-machine, engagement-strategist, content-creator, growth-hacker, calendar-builder, performance-analyst, conversion-optimizer, email-strategist
+*Growth OS:* brand-strategist, market-intel, audience-architect, content-strategist, hook-engineer, engagement-strategist, content-creator, growth-engineer, marketing-analyst, email-strategist
 
 *WordPress:* wordpress-backend, wordpress-frontend, wordpress-content, wordpress-security, wordpress-seo, phpunit-engineer, woocommerce-cro
 

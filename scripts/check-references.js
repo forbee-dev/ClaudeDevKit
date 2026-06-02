@@ -9,6 +9,8 @@
  *   2. Every persona with a `## Reference Library` block points to a real file.
  *   3. References that exist are not silently empty (>=20 lines).
  *   4. Reference file's first heading matches its filename.
+ *   5. Agent/skill markdown files have balanced code fences (even ``` count).
+ *   6. SKILL.md files that point to a forgebee/skills/_<shared>.md include reference a real file.
  *
  * Usage:
  *   node scripts/check-references.js          → exit 1 if any problems
@@ -21,6 +23,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const AGENTS_DIR = path.join(ROOT, 'forgebee', 'agents');
 const REFS_DIR = path.join(AGENTS_DIR, 'references');
+const SKILLS_DIR = path.join(ROOT, 'forgebee', 'skills');
 
 const fixMode = process.argv.slice(2).includes('--fix');
 
@@ -55,6 +58,14 @@ function main() {
   // Checks 2-4
   for (const agentFile of agents) {
     const content = fs.readFileSync(path.join(AGENTS_DIR, agentFile), 'utf8');
+
+    // Check 5: fence parity — an odd number of ``` lines means an unclosed code
+    // fence (this catches the growth-agent unclosed-fence bug).
+    const fenceCount = content.split('\n').filter(l => l.startsWith('```')).length;
+    if (fenceCount % 2 !== 0) {
+      problems.push({ type: 'fence-parity', file: `forgebee/agents/${agentFile}`, msg: `Odd number of code fences (${fenceCount}) — unclosed \`\`\` block` });
+    }
+
     if (!content.includes('## Reference Library')) continue;
     const referenced = personaReferencesName(content);
     if (!referenced) {
@@ -71,9 +82,31 @@ function main() {
       problems.push({ type: 'empty-reference', file: `forgebee/agents/references/${referenced}`, msg: `Only ${nonBlank} non-blank lines — likely stub` });
     }
     const heading = refContent.match(/^#\s+([^\n]+)/m);
-    const expected = referenced.replace(/\.md$/, '').split('-')[0].toLowerCase();
-    if (heading && !heading[1].toLowerCase().includes(expected)) {
+    // Match the FULL filename stem (e.g. "wordpress-backend"), not just the first
+    // token. Normalize both sides to space-separated lowercase words so a heading
+    // like "WordPress Backend" matches "wordpress-backend".
+    const expected = referenced.replace(/\.md$/, '').replace(/-/g, ' ').toLowerCase();
+    if (heading && !heading[1].toLowerCase().replace(/-/g, ' ').includes(expected)) {
       problems.push({ type: 'heading-mismatch', file: `forgebee/agents/references/${referenced}`, msg: `Heading "${heading[1]}" doesn't reference "${expected}"` });
+    }
+  }
+
+  // Check 6: skill shared-include integrity — SKILL.md files that point to a
+  // forgebee/skills/_<name>.md shared include (e.g. _debate-protocol.md,
+  // _review-finding-contract.md) must reference a file that exists.
+  const skillDirs = fs.existsSync(SKILLS_DIR)
+    ? fs.readdirSync(SKILLS_DIR, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name)
+    : [];
+  for (const dir of skillDirs) {
+    const skillPath = path.join(SKILLS_DIR, dir, 'SKILL.md');
+    if (!fs.existsSync(skillPath)) continue;
+    const content = fs.readFileSync(skillPath, 'utf8');
+    const includes = new Set(content.match(/forgebee\/skills\/(_[\w-]+\.md)/g) || []);
+    for (const inc of includes) {
+      const incFile = inc.replace('forgebee/skills/', '');
+      if (!fs.existsSync(path.join(SKILLS_DIR, incFile))) {
+        problems.push({ type: 'missing-shared-include', file: `forgebee/skills/${dir}/SKILL.md`, msg: `Points to forgebee/skills/${incFile} — shared include does not exist` });
+      }
     }
   }
 

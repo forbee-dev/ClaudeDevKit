@@ -37,7 +37,7 @@ Check for existing marketing artifacts:
 docs/marketing/brand/      → Brand voice, messaging pillars
 docs/marketing/hooks/      → Hook library
 docs/marketing/audience/   → Personas, ICP
-docs/marketing/content-architecture/ → Pillars, clusters
+docs/marketing/content-strategy/ → Pillars, clusters
 ```
 
 If found → load and use them as context for the content agents.
@@ -61,11 +61,11 @@ Determine:
 | Instagram caption/carousel | `content-creator` | — |
 | TikTok/Reels script | `content-creator` | — |
 | YouTube script | `content-creator` | — |
-| Blog post | `content-writer` | `seo-specialist` |
-| Landing page | `content-writer` | `seo-specialist` |
+| Blog post | `content-creator` | `seo-specialist` |
+| Landing page | `content-creator` | `seo-specialist` |
 | Email sequence | `content-creator` | — |
-| Case study | `content-writer` | — |
-| Newsletter | `content-writer` | — |
+| Case study | `content-creator` | — |
+| Newsletter | `content-creator` | — |
 | Ad copy | `content-creator` | — |
 
 **Context to provide to every agent:**
@@ -86,28 +86,27 @@ Determine:
 
 For multiple pieces:
 1. List all pieces with their type, platform, and topic
-2. Group by agent (content-creator pieces together, content-writer pieces together)
+2. Group by agent (short-form content-creator pieces together, long-form content-creator pieces together)
 3. Dispatch each group in parallel
 4. Collect and present all outputs
 
 ## Repurposing Mode
 
 When the user provides a single piece and asks to repurpose:
-1. Delegate to `idea-machine` to generate a repurposing chain
+1. Delegate to `content-strategist` to generate a repurposing chain
 2. Present the chain to the user for approval
 3. Dispatch `content-creator` for short-form derivatives
-4. Dispatch `content-writer` for long-form derivatives
+4. Dispatch `content-creator` for long-form derivatives
 5. Dispatch `seo-specialist` for any blog/web content
 
 ## Available Agents
 
 | Agent | Specialty |
 |-------|-----------|
-| `content-creator` | Platform-native short/medium content (posts, threads, scripts, emails) |
-| `content-writer` | Long-form content (blogs, landing pages, case studies, newsletters) |
+| `content-creator` | Platform-native short/medium content (posts, threads, scripts, emails) plus long-form (blogs, landing pages, case studies, newsletters) |
 | `seo-specialist` | Search optimization (keywords, meta, schema, internal links) |
 | `hook-engineer` | Generate new hooks if the library doesn't have what you need |
-| `idea-machine` | Content ideas and repurposing chains |
+| `content-strategist` | Content ideas and repurposing chains |
 
 ## Output Format
 

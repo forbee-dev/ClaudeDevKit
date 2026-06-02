@@ -6,7 +6,7 @@
  */
 
 const { readStdinJson, log } = require('./_common.js');
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const path = require('path');
 
 async function main() {
@@ -29,7 +29,11 @@ async function main() {
   try {
     const scriptDir = path.dirname(process.argv[1]);
     const auditScript = path.join(scriptDir, 'audit-trail.js');
-    execSync(`echo '${auditPayload.replace(/'/g, "\\'")}' | node "${auditScript}"`, {
+    // Pass the payload via stdin — never through a shell. Interpolating untrusted
+    // command text into `echo '...' | node` was a command-injection vector
+    // (POSIX single-quote escaping with \\' does not actually escape the quote).
+    spawnSync('node', [auditScript], {
+      input: auditPayload,
       timeout: 5000,
       stdio: ['pipe', 'pipe', 'ignore'],
     });

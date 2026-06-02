@@ -107,9 +107,9 @@ Based on project type, prefer these Tier 1 agents (they auto-delegate to Tier 2 
 
 | Project Type | SEO Routes To | CRO Routes To | Content Routes To |
 |-------------|--------------|--------------|-------------------|
-| WordPress (any) | seo-specialist → wordpress-seo | conversion-optimizer → woocommerce-cro (if WC) | content-writer → wordpress-content |
-| Next.js (any) | seo-specialist → nextjs-seo | conversion-optimizer → saas-cro | content-writer → nextjs-content |
-| Headless WP + Next.js | seo-specialist → nextjs-seo (frontend SEO) | conversion-optimizer → saas-cro | content-writer → nextjs-content |
-| Generic / other | seo-specialist (direct) | conversion-optimizer (direct) | content-writer (direct) |
+| WordPress (any) | seo-specialist → wordpress-seo | growth-engineer → woocommerce-cro (if WC) | content-creator → wordpress-content |
+| Next.js (any) | seo-specialist → nextjs-seo | growth-engineer → saas-cro | content-creator → nextjs-content |
+| Headless WP + Next.js | seo-specialist → nextjs-seo (frontend SEO) | growth-engineer → saas-cro | content-creator → nextjs-content |
+| Generic / other | seo-specialist (direct) | growth-engineer (direct) | content-creator (direct) |
 
 **Note:** Tier 1 agents handle delegation automatically via their Delegation Strategy section. Orchestrators (team.md, workflow.md, growth.md) just spawn the Tier 1 agent — routing to Tier 2 happens internally.

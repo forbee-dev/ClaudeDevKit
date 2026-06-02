@@ -1,7 +1,7 @@
 ---
 name: terse-report
 description: Use when reporting to an orchestrator (/workflow, /team), not the user — emit telegraphic format keeping code/citations exact, dropping prose filler. Cuts ~65% of report tokens.
-version: 1.0.0
+version: 1.0.1
 ---
 
 # Terse-Report Mode
@@ -107,4 +107,4 @@ Status: <STATUS>
 - Never compress when `responseStyle` is not `orchestrator` — user-facing output stays verbose
 - Never omit the Status line — orchestrators parse for it
 - Never reword error messages — quote them exactly
-- Never drop scope deviations — flag them under Concerns
+- Never omit the `Scope-Delta` section — report deviations there (literal `none` if there were none); `Concerns` is for DONE_WITH_CONCERNS quality caveats, not scope

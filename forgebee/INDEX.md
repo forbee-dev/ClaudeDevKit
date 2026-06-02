@@ -4,10 +4,10 @@
 > Source of truth: frontmatter in `forgebee/skills/*`, `forgebee/agents/*`, `forgebee/commands/*`.
 > Regenerate with: `node scripts/build-index.js`
 
-> Loaded on SessionStart so Claude routes user intent to the right surface in one read instead of scanning 116 frontmatter blocks.
+> Loaded on SessionStart so Claude routes user intent to the right surface in one read instead of scanning 112 frontmatter blocks.
 
 
-**Stats:** 32 skills · 48 agents · 36 commands
+**Stats:** 32 skills · 44 agents · 36 commands
 
 ---
 
@@ -90,7 +90,7 @@
 
 ---
 
-## Agents (48)
+## Agents (44)
 
 ### Code Core
 
@@ -133,7 +133,7 @@
 
 ### Next.js Stack
 
-- `nextjs-content` — Use when creating MDX content, Contentlayer/Velite patterns, or static generation in Next.js. Invoked by content-writer when Next.js is d...
+- `nextjs-content` — Use when creating MDX content, Contentlayer/Velite patterns, or static generation in Next.js. Invoked by content-creator when Next.js is ...
 - `nextjs-frontend` — Use when building Next.js App Router pages, Server/Client Components, SSR patterns, middleware, or Supabase SSR integration.
 - `nextjs-seo` — Use when implementing Next.js Metadata API, sitemap.ts, robots.ts, OG image generation, next-seo, or React-based structured data.
 
@@ -144,7 +144,6 @@
 
 ### CRO
 
-- `conversion-optimizer` — Use when auditing funnels, optimizing landing pages/forms/checkout, designing A/B tests, or applying behavioral psychology to lift conver...
 - `saas-cro` — Use when optimizing SaaS landing pages, pricing pages, or signup flows. Covers React/Next.js-based conversion patterns.
 - `woocommerce-cro` — Use when optimizing WooCommerce checkout, product pages, cart recovery, or e-commerce funnels. Covers WooCommerce-specific hooks and filt...
 
@@ -157,18 +156,18 @@
 
 - `audience-architect` — Use when defining ICP, building personas, mapping buyer journeys, running Jobs-to-be-Done analysis, or segmenting audiences.
 - `brand-strategist` — Use when defining brand strategy, positioning, voice/tone, or messaging frameworks — archetypes, voice guidelines, messaging pillars.
-- `calendar-builder` — Use when planning editorial calendars, batching schedules, posting frequency, or cross-platform distribution. Organizes content productio...
-- `content-architect` — Use when designing content strategy structure — pillars, topic clusters, hub-and-spoke models, content pyramids, and platform-content map...
-- `content-creator` — Use when creating ready-to-publish social content — LinkedIn posts, X threads, Instagram carousels, video scripts, email sequences. Adapt...
-- `content-writer` — Use for landing pages, documentation, blog posts, READMEs, changelogs, or launch copy. Writing that converts.
+- `content-creator` — Use to produce ready-to-publish content across the full spectrum — social-native (LinkedIn posts, X threads, IG carousels, Reels/TikTok/Y...
+- `content-strategist` — Use to design the content engine end-to-end — pillars/clusters/pyramid/platform-map (architecture), angle mining + repurposing chains + s...
 - `email-strategist` — Use when designing email automation flows, segmentation, subject lines, deliverability, or lifecycle sequences (welcome, nurture, cart re...
 - `engagement-strategist` — Use when growing engagement, building communities, or creating engagement playbooks — comment strategies, reciprocity loops, DM flows.
-- `growth-hacker` — Use when designing growth systems, optimizing funnels, or building audience-growth strategies — growth loops, flywheels, viral mechanics.
 - `hook-engineer` — Use when creating stop-scrolling hooks, viral formulas, pattern interrupts, engagement triggers, or platform-specific hook libraries.
-- `idea-machine` — Use when brainstorming content ideas, finding new angles, or building content pipelines — angle mining, repurposing chains, trend surfing...
 - `market-intel` — Use when researching competitors, building Fact-Impact-Act battlecards, comparing positioning, or analyzing niches and market trends.
-- `performance-analyst` — Use when measuring marketing performance — KPI dashboards, campaign analysis, attribution modeling, A/B test design, and optimization rec...
+- `marketing-analyst` — Use to measure marketing performance — North-Star → input → health metric frameworks, KPI dashboards, campaign analysis, attribution mode...
 - `seo-specialist` — Use for keyword research, on-page optimization, technical SEO audits, content strategy, and search ranking improvement.
+
+### Other
+
+- `growth-engineer` — Use to engineer compounding growth AND lift conversion — growth loops, flywheels, viral mechanics, funnel diagnosis (acquisition side) pl...
 
 ---
 
@@ -213,7 +212,7 @@
 - `/analytics` — Analytics setup and analysis — event tracking, dashboards, funnel analysis, and data-driven insights
 - `/competitive` — Competitive intelligence — research competitors, build battlecards, compare positioning, and identify differentiation opportunities
 - `/content` — Quick content production — write a single piece or small batch without the full Growth OS pipeline. Uses brand voice and hooks if availab...
-- `/growth` — Growth OS orchestrator — delegates through Brand → Intel → Audience → Content Architecture → Hooks → Debate → Calendar → Creation → Distr...
+- `/growth` — Growth OS orchestrator — delegates through Brand → Intel → Audience → Content Strategy → Hooks → Debate → Creation → Distribution → Measu...
 - `/gtm` — Go-to-market planning — launch checklists, positioning, channel strategy, and timeline
 - `/landing` — Landing page builder — conversion-optimized pages with hero, features, social proof, pricing, and CTA sections
 - `/launch` — Product launch execution — Product Hunt, Hacker News, press outreach, and launch day coordination

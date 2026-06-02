@@ -227,7 +227,7 @@ async function main() {
     /rm -rf \/$/i,
     /rm -rf ~/i,
     /rm -rf \/\*/i,
-    /rm -rf \./i,
+    /rm\s+-rf\s+\.\/?(\s|$)/i,                 // `rm -rf .` / `rm -rf ./` — but NOT `rm -rf ./build`
     /rm -rf \/home/i,
     /rm -rf \/etc/i,
     /rm -rf \/usr/i,
@@ -239,7 +239,7 @@ async function main() {
     /git push .* -f$/i,
     /git reset --hard origin/i,
     /git clean -fd/i,
-    /git.*--no-verify/i,
+    /^\s*git\s+(commit|push|merge|rebase)\b[^"']*--no-verify\b/i,  // anchored: real git invocation, not the string in a message/quote
     // Database destructive
     /DROP TABLE/i,
     /DROP DATABASE/i,
@@ -278,13 +278,12 @@ async function main() {
     /php -r /i,
     // Environment hijacking
     /^export\s+(PATH|LD_PRELOAD|LD_LIBRARY_PATH|PYTHONPATH|NODE_PATH|RUBYLIB)=/i,
-    // Process substitution (exfiltration vector)
-    />\s*\(/,
-    /<\s*\(/,
-    // find with dangerous flags
-    /find\s.*-exec/i,
-    /find\s.*-execdir/i,
+    // Process substitution wrapping a network/exec command (RCE / exfiltration vector).
+    // Benign read-only forms — diff/comm/cat/sort/tee <(...) — are intentionally allowed.
+    /[<>]\s*\(\s*(curl|wget|nc|ncat|fetch|ssh|scp|bash|sh|zsh)\b/i,
+    // find with destructive actions (benign -exec cat/wc/grep falls through to "ask")
     /find\s.*-delete/i,
+    /find\s.*-exec(dir)?\s+(rm|mv|dd|chmod|chown|unlink|shred|truncate|sh|bash|zsh|eval)\b/i,
   ];
 
   // ── Helper functions ────────────────────────────────────────────────

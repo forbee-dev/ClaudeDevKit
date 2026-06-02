@@ -3,26 +3,26 @@
   <img src="https://img.shields.io/badge/Codex-Compatible-10B981?style=for-the-badge&logoColor=white" alt="Codex" />
   <img src="https://img.shields.io/badge/Cursor-Compatible-1F2937?style=for-the-badge&logoColor=white" alt="Cursor" />
   <img src="https://img.shields.io/badge/Gemini-Compatible-4285F4?style=for-the-badge&logoColor=white" alt="Gemini" />
-  <img src="https://img.shields.io/badge/version-5.1.3-blue?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/version-5.2.0-blue?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License" />
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/agents-48-orange?style=for-the-badge" alt="Agents" />
+  <img src="https://img.shields.io/badge/agents-44-orange?style=for-the-badge" alt="Agents" />
   <img src="https://img.shields.io/badge/commands-36-red?style=for-the-badge" alt="Commands" />
   <img src="https://img.shields.io/badge/hooks-23-blueviolet?style=for-the-badge" alt="Hooks" />
   <img src="https://img.shields.io/badge/skills-32-teal?style=for-the-badge" alt="Skills" />
 </p>
 
 <p align="center">
-  <sub>48 agents = <strong>30 framework-agnostic</strong> (code, growth, debate, planning) + <strong>18 stack specialists</strong> (WordPress, Next.js, Supabase, mobile, n8n, WooCommerce)</sub>
+  <sub>44 agents = <strong>26 framework-agnostic</strong> (code, growth, debate, planning) + <strong>18 stack specialists</strong> (WordPress, Next.js, Supabase, mobile, n8n, WooCommerce)</sub>
 </p>
 
 <h1 align="center">ForgeBee</h1>
 
 <p align="center">
   <strong>A colony of AI agents forging your product</strong><br/>
-  48 specialist agents. 31 skills. 36 slash commands. 23 lifecycle hooks.<br/>
+  44 specialist agents. 32 skills. 36 slash commands. 23 lifecycle hooks.<br/>
   Three execution modes: inline skills, context:fork, subagents.<br/>
   Adaptive pipeline. Karpathy principles. Adversarial debate. Continuous learning.<br/>
   <em>Works with Claude Code, Codex, Cursor, Gemini, and OpenClaw.</em>
@@ -49,9 +49,9 @@ Claude Code and OpenClaw are powerful out of the box. ForgeBee makes them **opin
 |:--|:--|
 | Agent jumps straight into coding | Agent plans, debates requirements, then codes |
 | "It should work" | Evidence-based verification with actual test output |
-| Single-agent, single-pass | 48 agents + 24 skills working in parallel with blind review |
+| Single-agent, single-pass | 44 agents + 32 skills working in parallel with blind review |
 | Manual project tracking | Automated state.yaml + markdown dashboards |
-| No marketing workflow | Full 9-phase Growth OS with 13 marketing agents + 3 strategy debate agents |
+| No marketing workflow | Full 9-phase Growth OS with 11 marketing agents + 3 strategy debate agents |
 | Every session starts from scratch | Continuous learning — heuristic pattern detection + pending instinct approval |
 | Edits break silently | Auto-format, typecheck, and lint on every edit |
 | Permission prompts everywhere | Mode-aware permissions — fully yields to auto-mode's classifier; enforces blocklist in default and bypass |
@@ -67,7 +67,7 @@ Claude Code and OpenClaw are powerful out of the box. ForgeBee makes them **opin
 | Orchestrators idle after dispatch | P5 Anti-Stop Rule in `/workflow` + `/team`: continue with next-step work immediately, the harness wakes you when sub-agents return |
 | Review reviewer drift | P6 Severity Standard (`Critical/High/Medium/Low`) across all review skills — enables cross-skill aggregation |
 | Discovery searches hang on vendored subtrees | T1–T5 Tool Discipline in `CLAUDE.md`: prefer `rg` over `grep -r`, bound every search (scope/type/timeout), `Glob` before `grep`, exclude `vendor`/`node_modules` — kills 10-minute stalls on `wp-content/` and monorepo roots |
-| Untrusted code can hijack agents | 6-line Adversarial Input Hardening preamble in all 48 agents — homoglyphs, urgency, role-play overrides flagged not executed |
+| Untrusted code can hijack agents | 6-line Adversarial Input Hardening preamble in all 44 agents — homoglyphs, urgency, role-play overrides flagged not executed |
 | Sub-agent reports waste orchestrator context | `terse-report` skill cuts ~65% of report tokens while preserving code/citations exact |
 | Decisions get lost between sessions | `/workflow` and `/plan` emit `.decision-log.md` + `addendum.md` — re-read on next run |
 | Recursive debate fan-out runs away | Budget circuit breaker (`maxHops`, `maxTokens`, `maxUsd`) on every dispatch with constant-string errors |
@@ -145,7 +145,7 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 
 | Command | Description |
 |:--------|:------------|
-| `/growth` | **9-phase Growth OS** with adversarial debate (18 agents) |
+| `/growth` | **9-phase Growth OS** with adversarial debate (16 agents) |
 | `/content` | Quick content production without full pipeline |
 | `/gtm` | Go-to-market planning with launch checklists |
 | `/seo` | Technical SEO audit + keyword research |
@@ -183,9 +183,9 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 
 ## Agents
 
-48 specialist agents + 24 skills for Claude Code's Agent Teams. Use them directly or let `/team` and `/workflow` orchestrate automatically.
+44 specialist agents + 32 skills for Claude Code's Agent Teams. Use them directly or let `/team` and `/workflow` orchestrate automatically.
 
-> **v5.1 highlights:** Karpathy P1–P6 principles baked into every code-producing agent (trace test, senior-engineer check, YAGNI timing, orphan rule, anti-stop rule, severity standard). Seven new skills: `brainstorming` (opt-in via `--strict`), `surface-ambiguity`, `terse-report`, `checkpoint-preview`, `investigate`, `elicitation` (18 methods), `audit-self`. Three new commands: `/investigate`, `/elicit`, `/audit-self`. Adversarial Input Hardening preamble on all 48 agents. Budget circuit breaker on dispatch (maxHops/maxTokens/maxUsd). Decision logs, failure-capture templates, learnings compression. Bloat trim: 6 over-budget agents trimmed to ≤200 lines via references/. **Auto-generated `forgebee/INDEX.md`** — Claude reads one indexed routing map on SessionStart instead of scanning every skill description. See [`CHANGELOG.md`](./CHANGELOG.md) for full release notes.
+> **v5.1 highlights:** Karpathy P1–P6 principles baked into every code-producing agent (trace test, senior-engineer check, YAGNI timing, orphan rule, anti-stop rule, severity standard). Seven new skills: `brainstorming` (opt-in via `--strict`), `surface-ambiguity`, `terse-report`, `checkpoint-preview`, `investigate`, `elicitation` (18 methods), `audit-self`. Three new commands: `/investigate`, `/elicit`, `/audit-self`. Adversarial Input Hardening preamble on all 44 agents. Budget circuit breaker on dispatch (maxHops/maxTokens/maxUsd). Decision logs, failure-capture templates, learnings compression. Bloat trim: 6 over-budget agents trimmed to ≤200 lines via references/. **Auto-generated `forgebee/INDEX.md`** — Claude reads one indexed routing map on SessionStart instead of scanning every skill description. See [`CHANGELOG.md`](./CHANGELOG.md) for full release notes.
 >
 > **v5.0 highlights:** Multi-platform manifests (Codex/Cursor/Gemini), brainstorming hard-gate skill (opt-in via `/workflow --strict`), two-stage review (spec compliance before code debate), `debugger-detective` Iron Law (3 failed fixes → escalate), auto-learn SessionStart nudge, "Use when..." skill descriptions, and `.version-bump.json` drift detection.
 >
@@ -246,36 +246,32 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 </details>
 
 <details>
-<summary><strong>Growth OS</strong> (13 agents)</summary>
+<summary><strong>Growth OS</strong> (11 agents)</summary>
 
 | Agent | Use when... |
 |:------|:------------|
 | `brand-strategist` | Brand positioning, archetypes, voice |
 | `market-intel` | Competitive research, battlecards |
 | `audience-architect` | ICPs, personas, buyer journeys |
-| `content-architect` | Pillars, topic clusters, hub-and-spoke |
+| `content-strategist` | Pillars, topic clusters, hub-and-spoke, content ideas, angle mining, editorial calendar |
 | `hook-engineer` | Scroll-stopping hooks, pattern interrupts |
-| `idea-machine` | Content ideas, angle mining, repurposing |
 | `engagement-strategist` | Community, reciprocity loops, DM flows |
-| `content-creator` | Platform-native posts, threads, scripts |
-| `growth-hacker` | Growth loops, flywheels, funnels |
-| `calendar-builder` | Content calendars, batching, distribution |
-| `performance-analyst` | Marketing KPIs, attribution, A/B testing |
-| `conversion-optimizer` | CRO audits, funnel optimization, pricing pages |
+| `content-creator` | Platform-native posts, threads, scripts, long-form blogs, landing copy |
+| `growth-engineer` | Growth loops, flywheels, funnels, CRO audits, conversion optimization |
+| `marketing-analyst` | Marketing KPIs, attribution, A/B testing |
+| `seo-specialist` | Keyword strategy, pillar/cluster SEO |
 | `email-strategist` | Automation flows, segmentation, deliverability |
 
 </details>
 
 <details>
-<summary><strong>Design, Research & Platform</strong> (10 agents)</summary>
+<summary><strong>Design, Research & Platform</strong> (8 agents)</summary>
 
 | Agent | Use when... |
 |:------|:------------|
 | `ux-designer` | User flows, wireframes, accessibility |
 | `scrum-master` | Sprint planning, story decomposition |
 | `deep-researcher` | Documentation, APIs, technical questions |
-| `content-writer` | Landing copy, docs, blog posts |
-| `seo-specialist` | Keyword strategy, pillar/cluster SEO |
 | `session-librarian` | Session history, context management |
 | `supabase-specialist` | Supabase auth, RLS, edge functions |
 | `ios-expert` | Swift, SwiftUI, Xcode, App Store |
@@ -345,7 +341,7 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 
 ## Hooks
 
-26 hooks run automatically on Claude Code lifecycle events across 10 event types. No invocation needed.
+23 hooks run automatically on Claude Code lifecycle events across 10 event types. No invocation needed.
 
 **Session & state management:**
 
@@ -560,7 +556,7 @@ The `self-improve` hook appends patterns to the **Learned Patterns** section aut
 
 ## OpenClaw
 
-ForgeBee is fully compatible with [OpenClaw](https://github.com/openclaw/openclaw). All 48 agents and 33 commands convert to OpenClaw skills.
+ForgeBee is fully compatible with [OpenClaw](https://github.com/openclaw/openclaw). All 44 agents and 36 commands convert to OpenClaw skills.
 
 ```bash
 # Clone ForgeBee
@@ -592,7 +588,7 @@ Contributions welcome! ForgeBee is markdown files and Node.js scripts — easy t
 1. Fork the repo
 2. Add your command (`forgebee/commands/your-command.md`) or agent (`forgebee/agents/your-agent.md`) or skill (`forgebee/skills/your-skill/SKILL.md`)
 3. Run `node scripts/build-index.js` to regenerate the routing index — CI fails the PR otherwise
-4. Run `./scripts/bump-version.sh <new-version>` if you're shipping a release; counts/descriptions in manifests stay in sync
+4. Run `./scripts/bump-version.sh <new-version>` if you're shipping a release; it keeps the version string in sync across manifests (it does not sync the surface counts)
 5. Open a PR
 
 **Release notes:** see [`CHANGELOG.md`](./CHANGELOG.md). The `v5.1.0` entry is the canonical reference for all the discipline patterns (Karpathy P1-P6, prompt defense, budget circuit breaker, terse-report, etc.).

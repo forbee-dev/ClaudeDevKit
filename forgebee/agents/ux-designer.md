@@ -1,7 +1,7 @@
 ---
 name: ux-designer
 description: Use when designing user flows, wireframes, interaction patterns, or running accessibility audits. Produces UX specs — does NOT write code; hand off to frontend-specialist.
-tools: Read, Write, Edit, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep
 model: opus
 color: magenta
 ---

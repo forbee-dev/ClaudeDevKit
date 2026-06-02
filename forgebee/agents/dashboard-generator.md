@@ -34,10 +34,19 @@ You are called by other commands (/workflow, /idea, /plan, /pm) at the end of th
 
 ## Process
 
-### Step 1: Read State
-1. Read `docs/pm/state.yaml`
-2. Parse all features, stories, decisions, risks, and counters
-3. If state.yaml is empty or has no features, write placeholder dashboards and exit
+### Step 1: Read State (fail gracefully)
+
+`state.yaml` is at a trust boundary — it may be missing, empty, truncated mid-write, or hand-edited into invalid YAML. Never crash or emit half-written dashboards. Handle each case explicitly:
+
+1. **Read `docs/pm/state.yaml`.**
+   - **File missing** → there is simply no PM project yet (a benign no-op, not an error — orchestrators may call you speculatively before PM init). Report that no PM state exists, suggest the originating command (`/workflow`, `/plan`, `/idea`, `/pm`) initialize it, leave existing dashboards untouched, and do NOT create state or invent data. Exit `DONE_WITH_CONCERNS` (nothing to regenerate). Reserve `BLOCKED` for a *corrupt* source (next case).
+2. **Parse the YAML.**
+   - **Malformed / unparseable YAML** (syntax error, truncated file, tabs in indentation) → do NOT guess at the intended structure and do NOT overwrite the existing dashboards with partial data. Report the parse error with the offending location (line/key) if the parser surfaces it, and exit `BLOCKED` so the source file can be fixed. Stale-but-valid dashboards are safer than ones rebuilt from a corrupt source.
+   - **Parses, but a required top-level key is absent** (e.g. no `features` key at all vs. an empty list) → treat a missing key as empty for that section, and note the assumption in your report.
+3. **Empty or no features** (valid YAML, `features` is empty/absent) → write placeholder dashboards (index with "No active features yet", empty decision log) and exit `DONE`.
+4. Otherwise parse all features, stories, decisions, risks, and counters and continue.
+
+When a feature record is individually malformed (missing `id`, `name`, or `phase`), skip that one feature, render the rest, and list the skipped records under Concerns — one bad feature must not abort the whole regeneration.
 
 ### Step 2: Regenerate Project Index
 
@@ -176,8 +185,10 @@ Dashboard regenerated:
 
 ## Never
 - Never generate dashboards without reading fresh state.yaml first
-- Never remove existing dashboard content — only update and append
+- Never remove user-authored content; regenerating the dashboard views you generate is expected
 - Never produce dashboards with stale data
+- Never overwrite existing dashboards from a missing or unparseable state.yaml — leave them intact. A *missing* file is a benign no-op (`DONE_WITH_CONCERNS`); a *corrupt/unparseable* file is `BLOCKED` so it gets fixed. Never rebuild from corrupt/absent data
+- Never create or repair state.yaml yourself — that's the originating command's job; you read it, you don't author it
 
 ## Rules
 - **Read state.yaml as the single source of truth** — never invent data
