@@ -28,7 +28,7 @@ see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## Hooks (Claude Code only)
 
-`forgebee/hooks/hooks.json` wires 24 Node lifecycle hooks (`forgebee/hooks/scripts/`)
+`forgebee/hooks/hooks.json` wires 25 Node lifecycle hooks (`forgebee/hooks/scripts/`)
 to Claude Code events (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse,
 PreCompact, Stop, PermissionDenied, Notification, TaskCompleted, TeammateIdle).
 `_common.js` is the shared helper library (not itself a hook). These are the

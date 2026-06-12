@@ -6,6 +6,19 @@ The format roughly follows [Keep a Changelog](https://keepachangelog.com/) and t
 
 ---
 
+## [5.3.1] — 2026-06-12
+
+**Patch: the `checkpoint` hook is revived and wired.** Follow-up to 5.3.0.
+
+### Fixed
+
+- **`checkpoint.js` had broken `_common` imports** — it destructured `PROJECT_DIR`, `initDirs`, and `readStdinSync`, none of which `_common.js` exports. That (not just the missing `hooks.json` entry) is why it was dead code. Repointed to the real APIs (`getProjectDir`, `initializeProjectDirs`, `readStdinJsonSync`) and added a crash guard so it can't fail the event.
+
+### Changed
+
+- **`checkpoint.js` wired into `hooks.json` on `PreCompact`** (alongside `context-guard`): before context compaction it saves the active pipeline phase — derived from `docs/pm/state.yaml` when invoked as a lifecycle hook, so a long-running `/workflow` survives a compact/crash and can resume. Explicit orchestrator calls (`feature`/`phase`/`pipeline` via stdin) still work. Wired hook count **24 → 25**; the README hooks table and parity matrix updated.
+- README marketplace install line kept as `forbee-dev/ForgeBee` pending the planned GitHub repo rename (the local-install `git clone` URLs already point at the real `ClaudeDevKit` remote).
+
 ## [5.3.0] — 2026-06-12
 
 **Theme: orchestrator hardening + framework self-testing + an exhaustive agent/skill polish pass.** Three deep-research passes drove this release: a defect audit of the executable surface, a forward-looking capability study, and a per-file review of all 44 agents + 33 skills read in full (55 A / 22 B / 0 C). Headlines: `/workflow`'s review-all gate is now an actually-executed step, the framework finally tests its own prompts (golden-task eval), a commit-time secret scanner lands, and the permission-guard is hardened against the bypasses it used to miss.

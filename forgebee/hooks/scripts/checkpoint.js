@@ -7,18 +7,52 @@
 
 const fs = require('fs');
 const path = require('path');
-const { PROJECT_DIR, initDirs, readStdinSync } = require('./_common.js');
+const { getProjectDir, initializeProjectDirs, readStdinJsonSync } = require('./_common.js');
+const PROJECT_DIR = getProjectDir();
 
-initDirs();
+// Wired as a PreCompact lifecycle hook (forgebee/hooks/hooks.json) — it must never
+// fail the event. Any error (missing/unparseable state, I/O) exits 0.
+process.on('uncaughtException', () => process.exit(0));
 
-const input = readStdinSync();
-
-let inputData = {};
-try {
-  inputData = JSON.parse(input);
-} catch {
-  // empty
+// When invoked as a lifecycle hook (no explicit feature in stdin), derive the
+// active pipeline + phase from the PM state so the auto-save is meaningful.
+// Returns the most-recently-updated non-done feature, or null if none is active.
+function deriveActiveFeatureFromState() {
+  try {
+    const stateFile = path.join(PROJECT_DIR, 'docs', 'pm', 'state.yaml');
+    if (!fs.existsSync(stateFile)) return null;
+    const content = fs.readFileSync(stateFile, 'utf8');
+    const blocks = content.split(/\n  - id: /).slice(1); // each feature block
+    let best = null;
+    for (const raw of blocks) {
+      const block = '  - id: ' + raw;
+      const idM = block.match(/^  - id:\s*(\S+)/);
+      const nameM = block.match(/^ {4}name:\s*"?(.+?)"?\s*$/m);
+      const originM = block.match(/^ {4}origin:\s*(\S+)/m);
+      const updatedM = block.match(/^ {4}updated:\s*"?(\S+?)"?\s*$/m);
+      // feature-level phase lines are indented 4 spaces; last one wins (YAML semantics)
+      const phaseMatches = [...block.matchAll(/^ {4}phase:\s*(\S+)/gm)];
+      if (!idM || phaseMatches.length === 0) continue;
+      const phase = phaseMatches[phaseMatches.length - 1][1];
+      if (phase === 'done') continue;
+      const updated = updatedM ? updatedM[1] : '';
+      const entry = {
+        feature: nameM ? nameM[1] : idM[1],
+        phase,
+        pipeline: originM ? originM[1] : 'workflow',
+        updated,
+      };
+      if (!best || (updated && updated > best.updated)) best = entry;
+    }
+    return best;
+  } catch {
+    return null;
+  }
 }
+
+initializeProjectDirs();
+
+const inputData = readStdinJsonSync() || {};
 
 const CHECKPOINT_DIR = path.join(PROJECT_DIR, '.claude/checkpoints');
 fs.mkdirSync(CHECKPOINT_DIR, { recursive: true });
@@ -27,11 +61,18 @@ const ACTION = inputData.action || 'save';
 
 // ── SAVE ACTION ───────────────────────────────────────────────────────
 if (ACTION === 'save') {
-  const pipeline = inputData.pipeline || 'workflow';
-  const feature = inputData.feature || 'unknown';
-  const phase = inputData.phase || 'unknown';
+  // Lifecycle-hook invocation (e.g. PreCompact) carries no explicit feature —
+  // derive the active pipeline/phase from PM state, or skip if nothing is in progress.
+  let derived = null;
+  if (!inputData.feature && !inputData.pipeline) {
+    derived = deriveActiveFeatureFromState();
+    if (!derived) process.exit(0);
+  }
+  const pipeline = inputData.pipeline || (derived && derived.pipeline) || 'workflow';
+  const feature = inputData.feature || (derived && derived.feature) || 'unknown';
+  const phase = inputData.phase || (derived && derived.phase) || 'unknown';
   const phaseNum = inputData.phase_number || 0;
-  const status = inputData.status || 'completed';
+  const status = inputData.status || (derived ? 'in-progress' : 'completed');
   const artifacts = inputData.artifacts || [];
   const timestamp = new Date().toISOString();
 

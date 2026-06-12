@@ -141,6 +141,11 @@
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/context-guard.js",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/checkpoint.js",
+            "timeout": 5
           }
         ]
       }

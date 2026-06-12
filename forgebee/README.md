@@ -9,7 +9,7 @@ forgebee/
 ├── INDEX.md                     # Auto-generated routing index — loaded on SessionStart
 ├── hooks/
 │   ├── hooks.json               # Hook event wiring
-│   └── scripts/                 # 24 wired lifecycle hooks (+ _common.js shared helper)
+│   └── scripts/                 # 25 wired lifecycle hooks (+ _common.js shared helper)
 ├── agents/
 │   ├── *.md                     # 44 specialist agent personas
 │   └── references/              # Reference material extracted from agents (W16 bloat trim)
@@ -36,7 +36,7 @@ forgebee/
 └── eval/                        # Eval scenarios
 ```
 
-## Key Features (v5.3.0)
+## Key Features (v5.3.1)
 
 ### Behavioral discipline (Karpathy principles)
 - **P1 Trace test** — every changed line traces to the user's request; no drive-by edits
@@ -69,7 +69,7 @@ forgebee/
 - **37 slash commands** — orchestration, diagnosis, quality, growth, learning, meta
 - **44 specialist agents** — code, growth, debate, WordPress, Next.js, mobile, CRO, tool
 - **33 skills** — 11 inline + 22 context:fork
-- **24 lifecycle hooks** across 10 events
+- **25 lifecycle hooks** across 10 events
 - **6 templates** — decision log, addendum, failure-capture, investigation case file, prompt-defense baseline, brainstorming/spec
 
 ### Other capabilities

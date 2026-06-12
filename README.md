@@ -3,14 +3,14 @@
   <img src="https://img.shields.io/badge/Codex-Compatible-10B981?style=for-the-badge&logoColor=white" alt="Codex" />
   <img src="https://img.shields.io/badge/Cursor-Compatible-1F2937?style=for-the-badge&logoColor=white" alt="Cursor" />
   <img src="https://img.shields.io/badge/Gemini-Compatible-4285F4?style=for-the-badge&logoColor=white" alt="Gemini" />
-  <img src="https://img.shields.io/badge/version-5.3.0-blue?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/version-5.3.1-blue?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License" />
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/agents-44-orange?style=for-the-badge" alt="Agents" />
   <img src="https://img.shields.io/badge/commands-37-red?style=for-the-badge" alt="Commands" />
-  <img src="https://img.shields.io/badge/hooks-24-blueviolet?style=for-the-badge" alt="Hooks" />
+  <img src="https://img.shields.io/badge/hooks-25-blueviolet?style=for-the-badge" alt="Hooks" />
   <img src="https://img.shields.io/badge/skills-33-teal?style=for-the-badge" alt="Skills" />
 </p>
 
@@ -22,7 +22,7 @@
 
 <p align="center">
   <strong>A colony of AI agents forging your product</strong><br/>
-  44 specialist agents. 33 skills. 37 slash commands. 24 lifecycle hooks.<br/>
+  44 specialist agents. 33 skills. 37 slash commands. 25 lifecycle hooks.<br/>
   Three execution modes: inline skills, context:fork, subagents.<br/>
   Adaptive pipeline. Karpathy principles. Adversarial debate. Continuous learning.<br/>
   <em>Works with Claude Code, Codex, Cursor, Gemini, and OpenClaw.</em>
@@ -341,7 +341,7 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 
 ## Hooks
 
-24 hooks run automatically on Claude Code lifecycle events across 10 event types. No invocation needed.
+25 hooks run automatically on Claude Code lifecycle events across 10 event types. No invocation needed.
 
 **Session & state management:**
 
@@ -381,7 +381,7 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 |:-----|:------|:------------|
 | `skill-activator` | `UserPromptSubmit` | Intent detection + skill recommendations |
 | `self-improve` | `Stop` | Captures patterns + runs heuristic engine to flag pending instincts |
-| `checkpoint` | Phase transitions | Saves pipeline state for crash recovery |
+| `checkpoint` | `PreCompact` | Saves the active pipeline phase (derived from `state.yaml`) before context compaction, for crash recovery |
 | `audit-trail` | All governance events | Append-only JSONL log of permissions, debates, verifications |
 | `permission-denied-logger` | `PermissionDenied` | Logs auto-mode classifier denials to audit trail |
 
@@ -399,7 +399,7 @@ The **skills, agents, and commands** are portable — they ship to Claude Code, 
 | Capability | Claude Code | Codex / Cursor / Gemini |
 |:-----------|:-----------:|:-----------------------:|
 | Skills, agents, commands | ✅ | ✅ (via manifest) |
-| 24 lifecycle hooks (permission-guard, secret-scan, audit-trail, …) | ✅ | ❌ |
+| 25 lifecycle hooks (permission-guard, secret-scan, audit-trail, …) | ✅ | ❌ |
 | Governance / audit trail | ✅ | ❌ |
 | Continuous learning (observe → instincts) | ✅ | ❌ |
 | Auto project-triage routing | ✅ | ❌ |
