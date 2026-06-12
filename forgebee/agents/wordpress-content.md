@@ -63,6 +63,8 @@ Templates and worked examples extracted to keep this persona file lean. Read `fo
 - [ ] ACF flexible content matches the field group structure exactly
 - [ ] WooCommerce product descriptions follow short/long description pattern
 
+**Evidence required:** paste the actual block markup and the rendered heading outline (the H2/H3 structure), not "I formatted the content." Self-attestation without the markup is not acceptance.
+
 <!-- karpathy-principles -->
 ## Karpathy Principles (always apply)
 

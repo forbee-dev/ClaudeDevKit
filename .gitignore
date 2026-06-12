@@ -9,6 +9,8 @@ TASKS.md
 
 # Build artifacts
 forgebee/ECC-ANALYSIS.md
+# Packaged plugin tarball — generate at release time, never commit (stale binary in VCS).
+forgebee.plugin
 
 # Session working artifacts — plans + audits stay local
 # (Framework docs live in README.md, CLAUDE.md, CHANGELOG.md, forgebee/README.md)

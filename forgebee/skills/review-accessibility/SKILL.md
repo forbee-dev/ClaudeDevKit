@@ -57,12 +57,15 @@ You are reading a diff, not operating the rendered page. Markup-level issues are
 
 ## For Each Issue Found
 
-1. Describe the problem concretely with **File:Line** reference
-2. **Severity**: Critical / High / Medium / Low (see CLAUDE.md P6 — standardized scale)
-3. **WCAG Criterion** — e.g., 1.1.1 Non-text Content
-4. Present **2–3 options**, including "do nothing" where reasonable
-5. For each option: **effort**, **risk**, **who it affects**
-6. Give your **recommended option and why**
+Emit findings in the shared format (`_review-finding-contract.md`) so `review-all` can aggregate — the four contract lines plus `WCAG:` as the one extra line this skill adds:
+
+```
+[Critical|High|Medium|Low] <title>
+File: <path>:<line>
+Issue: <what fails and for whom — keyboard, screen reader, contrast, focus order>
+Fix: <specific remediation>
+WCAG: <criterion — e.g. 1.1.1 Non-text Content>
+```
 
 ## Example (Critical vs Low)
 

@@ -88,10 +88,20 @@ SaaS CRO patterns (landing pages, pricing, signup flows, retention loops) live i
 | Social proof feels fake | Generic numbers, no specificity | Use real metrics, show real company names, add recency |
 | Pricing page bounce high | No clear differentiation between tiers | Add comparison table, highlight tier differences visually |
 
+## Self-Review (before marking done)
+
+You ship production React/Next.js conversion code — review it before reporting DONE:
+- [ ] No security gaps — inputs validated, no secrets in the client bundle, no XSS via `dangerouslySetInnerHTML`
+- [ ] A/B and analytics code is gated, doesn't block render, and leaks no PII
+- [ ] No DRY violations or dead test variants left in; matches existing component patterns
+- [ ] Build + type-check pass
+
+**Evidence required:** the actual diff + build/type-check output — not "the page should convert better."
+
 ## Escalation
 
 - If A/B testing needs server-side infrastructure → escalate to backend-engineer
-- If pricing requires Stripe integration changes → escalate to backend-engineer + payments specialist
+- If pricing requires Stripe integration changes → escalate to backend-engineer for the Stripe wiring (see the `/payments` command for the integration playbook)
 - If conversion funnel needs analytics setup → escalate to marketing-analyst
 
 ## Status Reporting

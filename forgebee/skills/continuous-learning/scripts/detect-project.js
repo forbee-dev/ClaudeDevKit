@@ -71,6 +71,18 @@ function updateRegistry(pid, pname, proot, premote) {
   fs.renameSync(tmpFile, REGISTRY_FILE);
 }
 
+// Look up an existing registry entry by project root, so a known project can be
+// resolved without spawning `git remote get-url` (see detectProject fast path).
+function findRegistryByRoot(root) {
+  try {
+    const registry = JSON.parse(fs.readFileSync(REGISTRY_FILE, 'utf8'));
+    for (const [id, entry] of Object.entries(registry)) {
+      if (entry && entry.root === root) return { id, ...entry };
+    }
+  } catch (e) { /* no registry yet */ }
+  return null;
+}
+
 function detectProject(overrideCwd) {
   let projectRoot = '';
 
@@ -105,25 +117,42 @@ function detectProject(overrideCwd) {
 
   const projectName = path.basename(projectRoot);
 
-  // Derive project ID from git remote URL or path
-  const remoteUrl = runGit('remote get-url origin', projectRoot);
-  const hashSource = remoteUrl || projectRoot;
-  const projectId = crypto.createHash('sha256').update(hashSource).digest('hex').slice(0, 12);
+  // Fast path (GAP-4): observe.js runs this on every Edit/Write/Bash/Task (Pre +
+  // Post). If this root is already registered, reuse its id and remote instead
+  // of spawning `git remote get-url` every call, and only refresh last_seen at
+  // most hourly instead of rewriting projects.json each time.
+  const cached = findRegistryByRoot(projectRoot);
+  let remoteUrl;
+  let projectId;
+  let needsRegistryUpdate;
+  if (cached) {
+    remoteUrl = cached.remote || '';
+    projectId = cached.id;
+    const lastSeen = Date.parse(cached.last_seen || '');
+    needsRegistryUpdate = Number.isNaN(lastSeen) || (Date.now() - lastSeen) > 3600000;
+  } else {
+    // First sight this machine — derive project ID from git remote URL or path.
+    remoteUrl = runGit('remote get-url origin', projectRoot);
+    const hashSource = remoteUrl || projectRoot;
+    projectId = crypto.createHash('sha256').update(hashSource).digest('hex').slice(0, 12);
+    needsRegistryUpdate = true;
+  }
 
   const projectDir = path.join(PROJECTS_DIR, projectId);
 
-  // Ensure project directory structure
-  [
-    path.join(projectDir, 'instincts', 'personal'),
-    path.join(projectDir, 'instincts', 'inherited'),
-    path.join(projectDir, 'observations.archive'),
-    path.join(projectDir, 'evolved', 'skills'),
-    path.join(projectDir, 'evolved', 'commands'),
-    path.join(projectDir, 'evolved', 'agents'),
-  ].forEach(d => ensureDir(d));
-
-  // Update registry
-  updateRegistry(projectId, projectName, projectRoot, remoteUrl);
+  // Ensure project directory structure + refresh registry only on first sight
+  // (or hourly). observe.js re-ensures the observations dir itself before writing.
+  if (needsRegistryUpdate) {
+    [
+      path.join(projectDir, 'instincts', 'personal'),
+      path.join(projectDir, 'instincts', 'inherited'),
+      path.join(projectDir, 'observations.archive'),
+      path.join(projectDir, 'evolved', 'skills'),
+      path.join(projectDir, 'evolved', 'commands'),
+      path.join(projectDir, 'evolved', 'agents'),
+    ].forEach(d => ensureDir(d));
+    updateRegistry(projectId, projectName, projectRoot, remoteUrl);
+  }
 
   return {
     id: projectId,

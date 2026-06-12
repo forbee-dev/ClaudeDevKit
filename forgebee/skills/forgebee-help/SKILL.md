@@ -24,7 +24,7 @@ Answer "what commands / skills / agents does ForgeBee have, and which should I u
 2. **If the user's question is generic** ("what commands?"): surface the **Quick Triage** section + the relevant category from Skills/Agents/Commands.
 3. **If the user's question targets an intent** ("how do I add a feature?"): map the intent to a row in the Quick Triage table, and explain the recommended route in one paragraph.
 4. **If a specific surface is named** ("what does /elicit do?"): quote the description from INDEX.md and link to the source file (`forgebee/commands/elicit.md`, etc.).
-5. **For first-time users**: recommend running `/workflow` on a small task to feel the pipeline; ignore the other 35 commands until needed.
+5. **For first-time users**: recommend running `/workflow` on a small task to feel the pipeline; ignore the other commands until needed.
 
 ## Never
 

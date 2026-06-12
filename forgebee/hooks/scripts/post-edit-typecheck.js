@@ -80,12 +80,20 @@ function typecheckTs(file) {
     return;
   }
 
+  // Use the project's local tsc; do NOT fall back to `npx` (a missing package
+  // would trigger a network install and blow the hook timeout). Skip if absent.
+  const tscBin = path.join(tsconfigDir, 'node_modules', '.bin', 'tsc');
+  if (!fs.existsSync(tscBin)) {
+    return;
+  }
+
   let tscOutput = '';
   try {
-    tscOutput = execFileSync('npx', ['tsc', '--noEmit', '--pretty', 'false'], {
+    tscOutput = execFileSync(tscBin, ['--noEmit', '--pretty', 'false'], {
       encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'pipe'],
       cwd: tsconfigDir,
+      timeout: 30000,
     });
   } catch (e) {
     // tsc exits non-zero when there are type errors — capture stdout

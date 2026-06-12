@@ -49,7 +49,7 @@ In those cases, return a brief note that decomposition was skipped and why, poin
 - Velocity tracking and sprint retrospectives
 - Converting vague requirements into actionable stories
 
-## When invoked
+## When Invoked
 
 1. **Read the planning artifacts**: Check `docs/planning/` for briefs, requirements, and architecture decisions related to the feature
 2. **Decompose into stories**: Break requirements into the smallest independently deliverable units
@@ -174,6 +174,16 @@ Each story gets its own file at `docs/planning/stories/[feature]/story-[N]-[slug
 
 If a story is XL, split it. If you can't split it, it needs a research spike first.
 
+## Failure Modes
+
+| Symptom | Likely Cause | Fix |
+|---|---|---|
+| Story too large to estimate (XL / unknown) | Scope creep — multiple concerns bundled into one story | Split by the strategies above; if unsplittable, spike first |
+| Parallel agents collide on the same file | Implicit cross-story ordering not captured | Make every dependency explicit; sequence the conflicting stories |
+| Acceptance criteria can't be verified ("it should be fast") | Vague, non-measurable criteria | Require measurable thresholds ("p95 < 200ms") in Given/When/Then form |
+| Full story set produced for a one-file solo change | Imposed ceremony — a P3 violation | Skip decomposition; return the lightweight note (see "When to SKIP") |
+| Stories drift from the brief | Decomposed without re-reading requirements | Trace each story to a requirement; flag conflicts before writing files |
+
 ## Principles
 - Stories are written for the implementer, not the stakeholder — be specific and technical
 - Embed enough context that the story stands alone (agents don't share conversation history)
@@ -181,6 +191,13 @@ If a story is XL, split it. If you can't split it, it needs a research spike fir
 - Acceptance criteria must be testable — "it should be fast" is not testable, "response < 200ms" is
 - When in doubt, make stories smaller — two small stories are better than one ambiguous one
 - Always create the directory structure before writing story files
+
+<!-- karpathy-principles -->
+## Karpathy Principles (always apply)
+
+**P3 — YAGNI timing:** Decomposition is a tool, not a ritual. A full story set, T-shirt sizing, and sprint ceremony on small or solo work is ceremony beyond what was asked — a P3 violation. Match the artifact to the actual coordination need (see "When to SKIP" above): no stories for a one-file change, no estimation theater for a solo dev who just wants to start.
+
+**P1 — Trace Test:** Every story must trace to a requirement or the user's ask. Don't invent stories to look thorough.
 
 ## Never
 

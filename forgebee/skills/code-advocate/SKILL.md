@@ -47,6 +47,8 @@ For each item, produce a structured argument:
 **Strength Rating:** Strong | Moderate | Weak
 ```
 
+After all items, end with a one-line roll-up the Judge can scan: `Summary: N items — X APPROVE, Y APPROVE-WITH-CAVEATS, Z CANNOT-DEFEND`.
+
 ## Worked Exemplar (a strong argument)
 
 ```markdown

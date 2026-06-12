@@ -64,21 +64,25 @@ Before applying any checklist below, detect the project's actual stack and conve
 
 ## Output Format
 
-For each finding:
+For each finding (the four contract lines + `Convention:` as the one extra line this skill adds):
 ```
-[High|Medium|Low] <title>
+[Critical|High|Medium|Low] <title>
 File: <path>:<line>
-Convention: <which project convention is violated>
+Issue: <what is wrong, concretely>
 Fix: <specific change>
+Convention: <which project convention is violated>
 ```
 
-## Example (Critical vs Low)
+Reserve `Critical`/`High` for genuine correctness/security risk per the shared contract — most style findings are Medium/Low, so a pure style pass should rarely `verdict: block`.
+
+## Example (High vs Low)
 
 ```
-[Critical] `any` masks an unchecked external response shape
+[High] `any` masks an unchecked external response shape
 File: src/api/client.ts:18
 Issue: `const data: any = await res.json()` then `data.user.id` is read — a malformed response silently passes type checks and crashes at runtime.
 Fix: Type the response and narrow with a guard, or parse with the project's schema validator before access.
+Convention: project bans `any` on external boundaries — parse/validate before access.
 
 [Low] Boolean prop not prefixed per project convention
 File: src/components/Modal.tsx:7

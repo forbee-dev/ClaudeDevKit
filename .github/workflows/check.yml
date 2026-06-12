@@ -1,0 +1,31 @@
+name: Full Check
+
+# Aggregate gate: runs `npm run check` (index sync + persona references + version
+# sync + eval harness) on EVERY pull request with no path filter. The granular
+# workflows (eval, index-check, references-check, version-check) give fast
+# targeted feedback, but they are each path-filtered — so a change outside their
+# globs could ship without any of them firing. This job guarantees the full gate
+# the package.json advertises actually runs for every change. (GAP-5)
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: npm run check (index + references + version + eval)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run full check
+        run: npm run check

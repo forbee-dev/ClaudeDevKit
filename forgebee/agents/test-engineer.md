@@ -66,7 +66,7 @@ Report the number you used AND its source. Falling short of an *unconfigured def
 - Property-based testing and fuzzing
 - Performance and load testing
 
-## When invoked
+## When Invoked
 
 1. Identify the code to test and its test framework
 2. Read existing tests to match conventions exactly

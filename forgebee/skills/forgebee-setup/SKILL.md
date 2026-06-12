@@ -54,7 +54,7 @@ When a freshly-initialized user asks what they can run, point them at `forgebee-
 
 ## Permission Mode Recommendation
 
-For experienced users, recommend **auto mode** for the best ForgeBee experience:
+Experienced users may prefer **auto mode** (fewer prompts — the permission-guard's Tier-0 blocklist still enforces in every mode, so dangerous commands stay blocked regardless):
 
 ```bash
 claude --permission-mode auto

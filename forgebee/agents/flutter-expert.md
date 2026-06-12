@@ -42,7 +42,7 @@ You are a senior Flutter/Dart engineer specializing in cross-platform developmen
 - Testing (widget tests, integration tests, golden tests)
 - CI/CD (Fastlane, Codemagic, GitHub Actions)
 
-## When invoked
+## When Invoked
 
 1. Check existing project structure (`pubspec.yaml`, lib/, test/)
 2. Understand the feature and target platforms (iOS, Android, Web, Desktop)

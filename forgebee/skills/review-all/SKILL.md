@@ -99,10 +99,19 @@ Work through each section systematically.
 
 ## For Large Diffs (>500 lines changed)
 
-Delegate to specialized review skills with `context:fork` for parallel deep review:
-- `review-security` for auth/data changes
-- `review-performance` for database/query changes
-- `review-accessibility` for UI changes
+Delegate to specialized review skills with `context:fork` for parallel deep review.
+Map the change type to the skill so high-blast-radius areas (schema, public API, untested code) always get a deep pass — mirror checkpoint-preview's `[schema]` / `[public API]` hot-spot tags:
+
+| Change includes… | Delegate to |
+|---|---|
+| auth, sessions, secrets, user-data handling | `review-security` |
+| DB-heavy code, hot loops, render paths | `review-performance` |
+| SQL migrations, schema changes, RLS/policies, ORM access | `review-database` |
+| new/changed route handlers, REST/GraphQL endpoints, API contracts | `review-api` |
+| new code paths or changed test files (or new code with no tests) | `review-tests` |
+| UI components, markup, interaction | `review-accessibility` |
+| WordPress plugin/theme files | `review-wordpress` |
+| prompts, tool definitions, LLM calls, model output handling | `review-prompt` |
 
 Synthesize their findings into your final report.
 

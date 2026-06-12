@@ -40,7 +40,7 @@ You are a senior Supabase engineer and PostgreSQL expert.
 - Database functions, triggers, and extensions (pgvector, pg_cron, etc.)
 - Multi-tenant patterns and organization-based access
 
-## When invoked
+## When Invoked
 
 1. Check for existing Supabase config (`supabase/config.toml`, `.env` with Supabase URLs)
 2. Understand the data requirement and user auth flows

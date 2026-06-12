@@ -11,6 +11,27 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const { findProjectRoot, log } = require('./_common.js');
 
+const FORMAT_TIMEOUT_MS = 10000;
+
+// Resolve a tool from the project's local node_modules/.bin. Returns null if it
+// is not installed locally — we deliberately do NOT fall back to `npx`, which can
+// trigger a network install and blow the PostToolUse hook timeout. Skipping the
+// format is non-blocking.
+function localBin(root, name) {
+  const bin = path.join(root, 'node_modules', '.bin', name);
+  return fs.existsSync(bin) ? bin : null;
+}
+
+function runFormatter(bin, args, root) {
+  try {
+    execFileSync(bin, args, {
+      stdio: ['pipe', 'ignore', 'ignore'],
+      cwd: root,
+      timeout: FORMAT_TIMEOUT_MS,
+    });
+  } catch (e) { /* non-blocking */ }
+}
+
 async function main() {
   let input = '';
 
@@ -57,17 +78,13 @@ function formatJsTs(file) {
   const dir = path.dirname(path.resolve(file));
   const root = findProjectRoot(dir) || dir;
 
-  // Check for Biome
+  // Check for Biome (config present + tool installed locally)
   if (
     fs.existsSync(path.join(root, 'biome.json')) ||
     fs.existsSync(path.join(root, 'biome.jsonc'))
   ) {
-    try {
-      execFileSync('npx', ['@biomejs/biome', 'format', '--write', file], {
-        stdio: ['pipe', 'ignore', 'ignore'],
-        cwd: root,
-      });
-    } catch (e) { /* non-blocking */ }
+    const bin = localBin(root, 'biome');
+    if (bin) runFormatter(bin, ['format', '--write', file], root);
     return;
   }
 
@@ -86,12 +103,8 @@ function formatJsTs(file) {
 
   for (const config of prettierConfigs) {
     if (fs.existsSync(path.join(root, config))) {
-      try {
-        execFileSync('npx', ['prettier', '--write', file], {
-          stdio: ['pipe', 'ignore', 'ignore'],
-          cwd: root,
-        });
-      } catch (e) { /* non-blocking */ }
+      const bin = localBin(root, 'prettier');
+      if (bin) runFormatter(bin, ['--write', file], root);
       return;
     }
   }
@@ -106,12 +119,7 @@ function formatPhp(file) {
     fs.existsSync(path.join(root, 'pint.json')) ||
     fs.existsSync(path.join(root, 'vendor', 'bin', 'pint'))
   ) {
-    try {
-      execFileSync(path.join(root, 'vendor', 'bin', 'pint'), [file], {
-        stdio: ['pipe', 'ignore', 'ignore'],
-        cwd: root,
-      });
-    } catch (e) { /* non-blocking */ }
+    runFormatter(path.join(root, 'vendor', 'bin', 'pint'), [file], root);
     return;
   }
 
@@ -120,12 +128,7 @@ function formatPhp(file) {
     fs.existsSync(path.join(root, '.php-cs-fixer.php')) ||
     fs.existsSync(path.join(root, '.php-cs-fixer.dist.php'))
   ) {
-    try {
-      execFileSync(path.join(root, 'vendor', 'bin', 'php-cs-fixer'), ['fix', file], {
-        stdio: ['pipe', 'ignore', 'ignore'],
-        cwd: root,
-      });
-    } catch (e) { /* non-blocking */ }
+    runFormatter(path.join(root, 'vendor', 'bin', 'php-cs-fixer'), ['fix', file], root);
     return;
   }
 }
@@ -138,12 +141,8 @@ function formatCss(file) {
   const stylelintConfigs = ['.stylelintrc', '.stylelintrc.json', 'stylelint.config.js'];
   for (const config of stylelintConfigs) {
     if (fs.existsSync(path.join(root, config))) {
-      try {
-        execFileSync('npx', ['stylelint', '--fix', file], {
-          stdio: ['pipe', 'ignore', 'ignore'],
-          cwd: root,
-        });
-      } catch (e) { /* non-blocking */ }
+      const bin = localBin(root, 'stylelint');
+      if (bin) runFormatter(bin, ['--fix', file], root);
       return;
     }
   }
@@ -153,12 +152,8 @@ function formatCss(file) {
     fs.existsSync(path.join(root, '.prettierrc')) ||
     fs.existsSync(path.join(root, 'prettier.config.js'))
   ) {
-    try {
-      execFileSync('npx', ['prettier', '--write', file], {
-        stdio: ['pipe', 'ignore', 'ignore'],
-        cwd: root,
-      });
-    } catch (e) { /* non-blocking */ }
+    const bin = localBin(root, 'prettier');
+    if (bin) runFormatter(bin, ['--write', file], root);
     return;
   }
 }

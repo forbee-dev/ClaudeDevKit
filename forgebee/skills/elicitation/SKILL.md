@@ -46,7 +46,7 @@ Read `methods.csv` for the full list with descriptions, output patterns, and whe
 3. Let user pick one (or run a different one)
 
 ### `/elicit <method-name>` (e.g., `/elicit pre-mortem`)
-1. Look up the method in `methods.csv`
+1. Resolve the method: lowercase + hyphenate the slug and fuzzy-match it against the `method_name` column in `methods.csv` (e.g. `red-team` → "Red Team vs Blue Team", `shark-tank` → "Shark Tank Pitch", `five-whys` → "Five Whys", `stakeholder-round-table` → "Stakeholder Round Table"). On no match or an ambiguous match, list the candidate methods and ask — never silently pick.
 2. Identify the target artifact (most recent plan / spec / decision in the conversation)
 3. Apply the method to that artifact following its output pattern
 4. Output: structured findings + concrete actions to take

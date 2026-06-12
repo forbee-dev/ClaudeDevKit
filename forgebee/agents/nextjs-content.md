@@ -65,6 +65,9 @@ Next.js content patterns (MDX, Velite/Fumadocs schemas, deploy strategies, conte
 - [ ] OpenGraph metadata generates correctly (check page source)
 - [ ] Images are optimized and have alt text
 - [ ] Internal links use relative paths, external links have `rel="noopener"`
+- [ ] No security gaps in any custom MDX components (no unsanitized HTML, no secrets); changed code is DRY and matches existing patterns
+
+**Evidence required:** paste the `npm run build` output (MDX must compile) and the rendered OG metadata from page source — not "the post renders."
 - [ ] RSS feed includes the new post
 
 <!-- karpathy-principles -->
@@ -88,10 +91,10 @@ Next.js content patterns (MDX, Velite/Fumadocs schemas, deploy strategies, conte
 |---------|-------------|-----|
 | MDX build fails | Invalid JSX in MDX content | Check for unescaped `<`, `{`, or unclosed tags in content |
 | Custom component not rendering | Not in `mdxComponents` map | Add component to the MDX components export |
-| Blog post 404 | Missing from `generateStaticParams` | Ensure file path matches `filePathPattern` in Contentlayer config |
+| Blog post 404 | Missing from `generateStaticParams` | Verify the slug is produced by the content collection (Velite collection / Contentlayer `filePathPattern`) and returned by `generateStaticParams` |
 | Images not displaying | Wrong path or missing from public dir | Use `/public/blog/` for static images, or import for bundled images |
 | Frontmatter date parsing error | Wrong date format | Use ISO format: `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ssZ` |
-| RSS feed shows old content | Build cache not invalidated | Clear `.contentlayer` cache, rebuild |
+| RSS feed shows old content | Build cache not invalidated | Clear the content-collection build cache (`.velite` or `.contentlayer`) and rebuild |
 
 ## Escalation
 

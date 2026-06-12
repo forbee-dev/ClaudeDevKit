@@ -2,7 +2,7 @@
 name: ux-designer
 description: Use when designing user flows, wireframes, interaction patterns, or running accessibility audits. Produces UX specs — does NOT write code; hand off to frontend-specialist.
 tools: Read, Write, Glob, Grep
-model: opus
+model: sonnet
 color: magenta
 ---
 
@@ -38,7 +38,7 @@ You are a senior UX designer specializing in product design for web and mobile a
 - Navigation patterns (tabs, sidebars, breadcrumbs, command palettes)
 - Onboarding and empty state design
 
-## When invoked
+## When Invoked
 
 1. **Understand the user context**: Who is the user? What's their goal? What's their skill level?
 2. **Audit existing UX** (if applicable): Review current flows, identify friction points, check consistency

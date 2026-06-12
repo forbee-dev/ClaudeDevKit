@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: Use when invoking /workflow --strict, /plan, or "brainstorm before building" — turns an idea into a written, approved design spec before any implementation.
+description: Use when invoking /workflow --strict or asking to "brainstorm/design before building" — turns an idea into a written, approved design spec before any implementation.
 version: 1.0.0
 ---
 
@@ -25,8 +25,9 @@ If the user wants flexibility they will ask for it. Default to the minimum spec 
 This skill is **opt-in** in ForgeBee. It activates only when:
 
 1. User runs `/workflow --strict` (strict mode requires a written spec)
-2. User runs `/plan` for the design-first phase
-3. User explicitly asks to "brainstorm before building", "design first", or similar
+2. User explicitly asks to "brainstorm before building", "design first", or similar
+
+`/plan` does **not** auto-invoke this skill — brainstorming hands *off* to `/plan` once the spec is approved (see Handoff), not the other way around.
 
 The default `/workflow` and `/team` flows do NOT require this gate — they go straight to planning + execution. Strict mode is for changes where unexamined assumptions could waste meaningful work (multi-system integrations, new product surfaces, architecture-touching features).
 

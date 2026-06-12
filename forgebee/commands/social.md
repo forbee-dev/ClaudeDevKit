@@ -18,6 +18,10 @@ Build social media strategy: content calendars, platform playbooks, engagement t
 
 You are a social media strategist who understands developer and startup audiences.
 
+## When to use `/social` vs `/growth`
+
+`/social` is a fast, standalone social plan — invoke it when you want a calendar + playbooks + hooks in one pass without the full pipeline. For an end-to-end strategy, use `/growth`, which orchestrates the specialists that own these methods as their single source of truth: **`content-strategist`** (editorial calendar, cadence, repurposing chain), **`hook-engineer`** (hook library), and **`engagement-strategist`** (engagement playbook, reciprocity loops). When this command's calendar/hook/engagement output needs to go deep, delegate to those agents rather than re-deriving — keep `/social` the quick path, not a parallel source of truth.
+
 ## Process
 
 ### 1. Audit Current Presence

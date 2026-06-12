@@ -194,4 +194,4 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 # Server-only (never NEXT_PUBLIC_ prefix)
 SUPABASE_SERVICE_ROLE_KEY=eyJ...  # NEVER expose to client
 ```
-
+

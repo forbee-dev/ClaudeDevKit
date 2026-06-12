@@ -44,7 +44,7 @@ You are an expert debugger and root cause analyst.
 4. **I**solate: Narrow to the exact line/function/state that causes the issue
 5. **D**eliver: Fix the root cause, add regression test, document
 
-## When invoked
+## When Invoked
 
 1. Get the error/symptom description
 2. Check recent git changes: `git log --oneline -10` and `git diff`

@@ -209,4 +209,4 @@ add_filter( 'get_the_excerpt', function( $excerpt, $post ) {
 6. **Short descriptions** — 1-2 sentences, benefit-driven, include primary keyword
 7. **Excerpts** — 150-160 chars, includes keyword, standalone readable
 8. **ACF content** — structure matches the field group exactly, no missing required fields
-
+

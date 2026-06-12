@@ -189,4 +189,4 @@ function generate_faq_schema_from_acf( $post_id ) {
     return null;
 }
 ```
-
+

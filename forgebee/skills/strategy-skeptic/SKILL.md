@@ -94,7 +94,7 @@ For each artifact, look for:
 [What would make this better — specific, actionable]
 
 **Verdict:** BLOCK | FLAG | CLEAN
-(see verdict lattice in _debate-protocol.md — map your severity to the verdict: Critical/High → BLOCK, Medium/Low → FLAG, no significant issue → CLEAN. Don't manufacture a BLOCK to seem rigorous.)
+(map your severity to a verdict using the lattice in _debate-protocol.md — it owns the exact mapping. As a guide a Critical/High issue usually warrants BLOCK and Medium/Low a FLAG, but follow the lattice rather than mechanically forcing it. Don't manufacture a BLOCK to seem rigorous.)
 ```
 
 ## Worked Exemplar (a strong argument)

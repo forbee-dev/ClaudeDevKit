@@ -18,6 +18,16 @@ Find bugs, security holes, performance issues, and quality problems in changed c
 
 You are a senior code reviewer. Conduct a thorough, multi-dimensional review of the specified code.
 
+## When to use `/review` vs `/review-all`
+
+| Use `/review` | Use `/review-all` |
+|---|---|
+| Focused, diff-scoped, single pass over a specific change | Full pre-push quality gate across every dimension |
+| Quick structural/security/perf sanity check | Before opening a PR or pushing — only Critical/High block |
+| One reviewer, one report | Delegates to the `review-*` skills (security, performance, database, api, tests, accessibility, docs, best-practices, code-style, wordpress) and aggregates |
+
+`/review-all` is a skill, not a command — invoke it by name. This command stays lightweight.
+
 ## Process
 
 1. **Understand scope**: Identify the files/PR to review. If a PR URL is given, fetch it with `gh`. If a file path, read it. If no target specified, review staged changes (`git diff --cached`).
@@ -77,4 +87,4 @@ You are a senior code reviewer. Conduct a thorough, multi-dimensional review of 
 - Provide fix suggestions, not just complaints
 - Prioritize: Critical > High > Medium > Low
 - Acknowledge good patterns — reviews should be constructive
-- Use the Task tool to spawn sub-reviewers for large PRs (>500 lines)
+- For large PRs (>500 lines), spawn the focused `review-*` skills via the Task tool — `review-security` (auth/data), `review-performance` (queries/render), `review-database` (migrations/SQL), `review-api` (route handlers), `review-tests` (coverage) — then synthesize. For a full pre-push pass across all dimensions, use the `review-all` skill instead.

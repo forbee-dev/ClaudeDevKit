@@ -107,9 +107,9 @@ Every dispatch carries a budget that sub-dispatches must propagate:
 }
 ```
 
-Default `maxHops: 8`, ceiling 64. Sub-dispatches that would exceed return constant-string error (`HOP_LIMIT_EXCEEDED`, `TOKEN_LIMIT_EXCEEDED`, `USD_LIMIT_EXCEEDED`) — never echo remaining budget. Surface trip to user with the dispatch chain. Prevents runaway specialist fan-out.
+Default `maxHops: 8`, ceiling 64. Reject `hopCount > maxHops` with `HOP_LIMIT_EXCEEDED`; surface trips to the user with the dispatch chain. Prevents runaway specialist fan-out. Full rules + the oracle-leakage hardening (constant-string peer errors, `maxTokens`/`maxUsd`) — only needed for untrusted multi-tenant fan-out — are in `forgebee/skills/_budget-breaker.md`.
 
-**If 3+ agents:** Checkpoint after each agent completes for crash recovery. On failure, offer to resume from last completed agent.
+**If 3+ agents:** after each agent completes, record its workstream id + status + changed files to `docs/pm/state.yaml` (or a lightweight `.claude/team-progress.json` if no PM state exists) so progress survives a crash. On failure or a fresh session, read it and skip already-completed workstreams.
 
 **Agent Status Protocol:** Every specialist must report one of:
 
@@ -121,6 +121,8 @@ Default `maxHops: 8`, ceiling 64. Sub-dispatches that would exceed return consta
 | `NEEDS_CONTEXT` | Missing info from the session | Re-dispatch with additional context |
 
 Reject any response without a status. If `BLOCKED` twice on same issue → escalate to user.
+
+**No parseable Status line** (agent died, timed out, or returned off-format output) → treat as `BLOCKED`: surface the raw output tail to the user, re-dispatch **once** with a reminder of the required EOF-anchored `Status:` format, then escalate. Never silently stall on an unparseable return (Anti-Stop Rule).
 
 **Quality mandate:** Every specialist must self-review their output against review-all criteria (code quality, security, performance, accessibility) before reporting `DONE`. Reject output without evidence (test output, lint output, build output).
 
@@ -144,8 +146,8 @@ Reject any response without a status. If `BLOCKED` twice on same issue → escal
 
 | Agent | Best For | Routes To |
 |-------|----------|-----------|
-| `frontend-specialist` | UI, components, styling | → `nextjs-frontend`, `wordpress-frontend` |
-| `backend-engineer` | APIs, server logic, auth | → `wordpress-backend` |
+| `frontend-specialist` | UI, components, styling, mobile | → `nextjs-frontend`, `wordpress-frontend`, `flutter-expert`, `ios-expert` |
+| `backend-engineer` | APIs, server logic, auth, automation | → `wordpress-backend`, `n8n-builder` |
 | `database-specialist` | Schema, migrations, queries | → `supabase-specialist` |
 | `security-auditor` | Vulnerabilities, OWASP | → `wordpress-security` |
 | `test-engineer` | Test generation, coverage | → `phpunit-engineer` |

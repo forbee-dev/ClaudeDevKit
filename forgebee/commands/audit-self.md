@@ -19,7 +19,7 @@ Detect regressions in ForgeBee's skill/agent/command quality since the last audi
 
 ## Delegation
 
-This command invokes the `audit-self` skill (`forgebee/skills/audit-self/SKILL.md`). The skill reads three scorecards from `scorecards/`, applies them across all 25+ skills, 48 agents, and 33 commands, and writes findings.
+This command invokes the `audit-self` skill (`forgebee/skills/audit-self/SKILL.md`). The skill reads three scorecards from `forgebee/skills/audit-self/scorecards/`, applies them across every skill, agent, and command listed in `forgebee/INDEX.md`, and writes findings.
 
 **Dispatch:**
 1. Run the audit-self skill

@@ -61,7 +61,7 @@ Update your agent memory with:
 - Team conventions that emerge over time
 - Useful commands and workflows discovered
 
-## When invoked
+## When Invoked
 
 1. Read recent session files to understand recent activity
 2. Check CLAUDE.md for accuracy against current codebase

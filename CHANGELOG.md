@@ -6,6 +6,42 @@ The format roughly follows [Keep a Changelog](https://keepachangelog.com/) and t
 
 ---
 
+## [5.3.0] — 2026-06-12
+
+**Theme: orchestrator hardening + framework self-testing + an exhaustive agent/skill polish pass.** Three deep-research passes drove this release: a defect audit of the executable surface, a forward-looking capability study, and a per-file review of all 44 agents + 33 skills read in full (55 A / 22 B / 0 C). Headlines: `/workflow`'s review-all gate is now an actually-executed step, the framework finally tests its own prompts (golden-task eval), a commit-time secret scanner lands, and the permission-guard is hardened against the bypasses it used to miss.
+
+### Added
+
+- **`/release` command** — gated release flow wrapping `scripts/bump-version.sh` (pre-flight `npm run check` + `review-all` → bump → changelog → tag/PR).
+- **`review-prompt` skill** — LLM-app review (prompt-injection trust boundary, tool-call argument validation, output-schema validation, token/cost, eval coverage). Wired into `review-all`'s change-type→skill delegation map.
+- **`secret-scan` hook** (PreToolUse Bash) — blocks commits/pushes that introduce hardcoded secrets (AWS/Anthropic/GitHub/Stripe/Google/Slack keys, private-key blocks, `key = "…"` assignments); override with `FORGEBEE_ALLOW_SECRET=1`.
+- **`scripts/check-agent-contract.js`** (`npm run check:agents`) — enforces the load-bearing agent contract (Adversarial Input Hardening + Status protocol) on every agent; in the merge gate.
+- **`forgebee/eval/golden/`** — golden-task **prompt-output** regression eval: feeds planted fixtures to review skills and asserts the output catches the issue in P6 vocabulary. Opt-in (`npm run eval:golden`), CI-safe (SKIPs without the `claude` CLI). The framework's first test of its own prompts.
+- **`forgebee/eval/scenarios/build-scripts.test.js`** — coverage for `build-index`/`check-references`/`bump-version` + the inject-* idempotency invariant.
+- **`.github/workflows/check.yml`** — runs the full `npm run check` on every PR with no path filter (the aggregate merge gate).
+- **`CONTRIBUTING.md` + `ARCHITECTURE.md`** — surface contracts, the model-tier policy, output modes, source-of-truth/INDEX/mirror, CI matrix.
+- **`forgebee/skills/_budget-breaker.md`** (shared reference), **`.gitattributes`** (LF), and a README **platform-parity matrix** (hooks are Claude-Code-only).
+
+### Changed
+
+- **`/workflow`:** added the **Final Gate** — `review-all` on the diff before Deliver, so the "zero Critical/High" success metric is an executed step, not aspirational (load-bearing for Medium runs that skip Code Debate). Spec Compliance now dispatches the existing `verification-enforcer` agent instead of a hand-rolled rubric. Budget breaker slimmed to a one-line cite of `_budget-breaker.md`. Fixed the stale "Phase 7" reference and the "populate stories from scrum-master" line (now reads from the Implementation Plan). Trivial routing no longer bounces through `/team`.
+- **`/team`:** added an agent-death recovery path (no parseable Status → BLOCKED → re-dispatch once → escalate) and a named crash-recovery substrate (`state.yaml` / `.claude/team-progress.json`); budget reference.
+- **Agents:** `performance-optimizer` gained Write/Edit (it was told to apply fixes with no edit tools) + a Karpathy block; `ux-designer` opus→sonnet; the orphan `flutter-expert`/`ios-expert`/`n8n-builder` wired into `frontend-specialist`/`backend-engineer` + `/team` routing; `market-intel` +WebFetch; `marketing-analyst` broken `When Invoked` restored; `ios-expert` sample updated to the `@Observable` macro; `nextjs-content` Failure-Modes made tool-agnostic (Velite/Contentlayer); evidence/self-review gates and Failure-Modes/Karpathy parity added across `scrum-master`, `devops-engineer`, `dashboard-generator`, `saas-cro`, `audience-architect`, `nextjs-content`, `nextjs-seo`, `wordpress-content`.
+- **Skills:** `review-code-style` severity enum/example reconciled; `review-accessibility`/`review-best-practices` aligned to the shared 4-line finding contract; `review-prompt` gained Never/Communication; `brainstorming` dropped the false `/plan` trigger; `elicitation` gained a slug→`method_name` mapping rule; `code-advocate` summary roll-up; `strategy-skeptic` defers verdict mapping to the protocol; `forgebee-setup`/`forgebee-help` anti-drift wording.
+- **Consistency:** CRLF→LF across 54 files; `When Invoked` casing unified; surface counts → **37 commands / 33 skills / 24 hooks / 44 agents**; "frontmatter blocks" prose de-numbered so it can't drift.
+
+### Fixed
+
+- **`permission-guard` hardening** — Tier-0 now catches order-independent `rm` (`rm -fr`, `rm -r -f`, `rm --recursive --force`), chmod world-writable/setuid (`0777`/`u+s`/`a+rwx`/`4755`), and redirect-based persistence (`>> ~/.ssh/authorized_keys`, `/etc/cron*`); the allowlist no longer auto-approves arbitrary `node /tmp/x.js`, `cp /etc/passwd`, `mv .env`, or `sed -i /etc/…`. Patterns hoisted to module scope and exported via a pure `classify()` so the eval suite imports the **live** patterns (133 tests — no hand-copied snapshot to drift). Fixed the `/eval.*$(/ ` false-positive that blocked any command touching `forgebee/eval/` with a later `$(…)`. Honest doc framing (best-effort defense-in-depth, not a boundary).
+- **`openclaw/install-openclaw.js`** read the gitignored `.claude/` dir (broken on a fresh clone, silently converting 0 agents) — now reads canonical `forgebee/`; emitted version 2.3.0→5.2.0. README clone URLs corrected to the real `ClaudeDevKit` remote.
+- **Hook robustness:** `self-improve` no longer crashes the Stop hook on a write failure; 4 SessionStart/PreCompact hooks `exit(1)→exit(0)`; `post-edit-format`/`-typecheck` use the project's local `node_modules/.bin` + timeouts (no `npx` network stall); `observe`/`detect-project` memoize project detection (no per-tool-call `git remote` subprocess + registry rewrite); `task-sync` invalid `\Z` regex + non-atomic rewrite fixed; `session-save` `lstat`/symlink logic + portable fallback; `compress-learnings` guarded + atomic write; `inject-escalation` `existsSync` guard.
+- **Scripts:** `build-index --check` surfaces injection-scan rejections (no longer launders the `[REJECTED]` placeholder); `bump-version` treats `null`/missing JSON fields as drift.
+
+### Security
+
+- New commit/push-time `secret-scan` hook (above). Permission-guard bypass-class fixes (above). The guard's test suite can no longer pass while the shipped guard allows what the tests claim is blocked.
+- Removed the stale committed `forgebee.plugin` build artifact from version control (gitignored).
+
 ## [5.2.0] — 2026-06-02
 
 **Theme: framework-wide quality overhaul + growth-roster consolidation.** The largest release since 5.0 — a full audit-and-improve pass across every agent, skill, command, hook, and the build/CI tooling. Two deep-research audits drove it: a defect audit (security-critical hook fixes, drift, broken commands) and a forward-looking improvement study (prompt quality, capability gaps, model/tool fit). Headline outcomes: a shared finding contract unifies the 12 review skills, a shared debate protocol with a full verdict lattice unifies the 9 debate skills, the growth roster is trimmed 15→11 by merging overlapping agents, and the framework's own JS finally has a CI gate.

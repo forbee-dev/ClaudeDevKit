@@ -97,14 +97,21 @@ async function main() {
     // Maintain symlink to latest session
     const latestFile = path.join(sessionsDir, 'latest.json');
     try {
-      // Remove old symlink if it exists
-      if (fs.existsSync(latestFile) || fs.lstatSync(latestFile)) {
-        fs.unlinkSync(latestFile);
-      }
+      // Remove any existing latest.json — including a DANGLING symlink, which
+      // fs.existsSync() reports as false. lstat (no symlink follow) detects it;
+      // it throws when nothing is there, which the catch treats as "nothing to do".
+      fs.lstatSync(latestFile);
+      fs.unlinkSync(latestFile);
     } catch (e) {
-      // Ignore if file doesn't exist
+      // Not present — nothing to remove.
     }
-    fs.symlinkSync(`${filename}.json`, latestFile);
+    try {
+      fs.symlinkSync(`${filename}.json`, latestFile);
+    } catch (e) {
+      // Symlinks may be unsupported (e.g. Windows without privilege) — fall back
+      // to a real copy so latest.json still points at the newest session.
+      try { fs.copyFileSync(sessionFile, latestFile); } catch (e2) { /* best-effort */ }
+    }
 
     // Cleanup: keep only last 20 sessions
     try {

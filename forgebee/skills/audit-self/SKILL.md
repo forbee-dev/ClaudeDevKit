@@ -20,10 +20,10 @@ Writes findings to `docs/planning/audit-YYYY-MM-DD.md` (timestamped, never overw
 
 ## Scorecards
 
-The three scorecards live in `scorecards/`:
-- `scorecards/skills-scorecard.md` — 9 questions per skill
-- `scorecards/agents-scorecard.md` — 10 questions per agent
-- `scorecards/commands-scorecard.md` — 9 questions per command + cross-cutting
+The three scorecards live in `forgebee/skills/audit-self/scorecards/`:
+- `forgebee/skills/audit-self/scorecards/skills-scorecard.md` — 9 questions per skill
+- `forgebee/skills/audit-self/scorecards/agents-scorecard.md` — 10 questions per agent
+- `forgebee/skills/audit-self/scorecards/commands-scorecard.md` — 9 questions per command + cross-cutting
 
 Read these BEFORE auditing. They are the canonical rubric.
 

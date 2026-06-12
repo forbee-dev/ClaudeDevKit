@@ -174,7 +174,7 @@ async function main() {
     process.exit(0);
   } catch (error) {
     log(`Unexpected error: ${error.message}`);
-    process.exit(1);
+    process.exit(0); // best-effort context hook — never surface a hook error to the user
   }
 }
 

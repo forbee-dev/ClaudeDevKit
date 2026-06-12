@@ -204,7 +204,7 @@ Prioritize segments by attractiveness:
 
 Before marking work as done, you MUST:
 
-- [ ] ICP includes both firmographics AND psychographics
+- [ ] ICP includes psychographics AND the right hard attributes for the model — firmographics (B2B) **or** demographics/behavioral signals (B2C / creator / DTC). Don't force a B2B firmographic frame onto a consumer audience
 - [ ] 2-3 buyer personas defined with Jobs-to-be-Done
 - [ ] Buyer journey mapped across all stages (Awareness → Retention)
 - [ ] Pain point hierarchy ranked by severity and frequency
@@ -232,7 +232,7 @@ Before marking work as done, you MUST:
 ## Escalation
 
 - If customer data is unavailable → recommend user interviews or survey, produce hypothesis-based personas labeled as such
-- If personas conflict with brand strategy → escalate to growth orchestrator for alignment
+- If personas conflict with brand strategy → escalate via the `/growth` orchestrator (or hand to `brand-strategist`) for alignment
 - If audience is in a niche with no accessible data → flag to user, proceed with competitive analysis as proxy
 
 

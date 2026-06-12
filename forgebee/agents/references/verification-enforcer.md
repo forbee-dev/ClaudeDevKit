@@ -117,4 +117,4 @@ npm test 2>&1 | grep -E "FAIL|fail|Error" | head -20
 - "I reviewed the code and it looks correct" → **Rejected.** That's code review, not verification.
 - "The user said it works" → **Rejected.** Run the commands yourself.
 - Skipping lint because "it's just a small change" → **Rejected.** Lint everything.
-
+

@@ -67,7 +67,7 @@ try {
 
   // ── Convert agents to OpenClaw skills ────────────────────────────────
   console.log('📦 Converting agents...');
-  const agentsDir = path.join(FORGEBEE_DIR, '.claude', 'agents');
+  const agentsDir = path.join(FORGEBEE_DIR, 'forgebee', 'agents');
   let agentCount = 0;
 
   if (fs.existsSync(agentsDir)) {
@@ -99,7 +99,7 @@ try {
       const skillContent = `---
 name: forgebee-${agentName}
 description: "[ForgeBee] ${desc}"
-version: 2.3.0
+version: 5.2.0
 metadata:
   openclaw:
     emoji: "🐝"
@@ -119,7 +119,7 @@ ${body}
 
   // ── Convert commands to OpenClaw skills ──────────────────────────────
   console.log('📦 Converting commands...');
-  const commandsDir = path.join(FORGEBEE_DIR, '.claude', 'commands');
+  const commandsDir = path.join(FORGEBEE_DIR, 'forgebee', 'commands');
   let cmdCount = 0;
 
   if (fs.existsSync(commandsDir)) {
@@ -142,7 +142,7 @@ ${body}
       const skillContent = `---
 name: forgebee-cmd-${cmdName}
 description: "[ForgeBee] ${desc}"
-version: 2.3.0
+version: 5.2.0
 user-invocable: true
 metadata:
   openclaw:

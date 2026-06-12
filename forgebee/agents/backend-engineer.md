@@ -39,6 +39,7 @@ Before diving into implementation, check project triage to route to the most pre
 | `triage.node.framework == "nextjs"` | Handle directly — Next.js API routes, Server Actions, Route Handlers |
 | `triage.node.framework == "express"` or `"hono"` | Handle directly — Express/Hono patterns |
 | Python (FastAPI/Django/Flask), Go, Rust/Axum, Ruby/Rails | Handle directly — generic handling per the Expertise list; no dedicated subagent exists |
+| Task is an n8n workflow, no-code automation, or webhook/integration pipeline | **Delegate to `n8n-builder`** — n8n nodes, API integrations, webhook handling, data pipelines |
 | No triage available | Infer from codebase (`wp-config.php`, `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, etc.) |
 | **AMBIGUITY-FALLTHROUGH** — stack unclear, conflicting signals, or no recognizable framework | **STOP — invoke the `surface-ambiguity` skill**: list the candidate stacks, state your chosen interpretation and why, before writing any code. Do not silently pick a framework |
 
@@ -58,7 +59,7 @@ Before diving into implementation, check project triage to route to the most pre
 - Error handling and logging
 - API documentation (OpenAPI/Swagger)
 
-## When invoked
+## When Invoked
 
 1. Understand the API or business logic requirement
 2. Check existing patterns (routing, middleware, error handling)

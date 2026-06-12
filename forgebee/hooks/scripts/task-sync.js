@@ -86,7 +86,9 @@ function archiveOldTasks() {
     const content = fs.readFileSync(TASKS_FILE, 'utf8');
 
     // Extract done section using regex
-    const doneMatch = content.match(/## Done\n([\s\S]*?)(?=\n## |\Z)/);
+    // `$` (no `m` flag) anchors at end-of-string; JS has no `\Z`, which would be
+    // read as a literal 'Z' and truncate the Done section at the first 'Z'.
+    const doneMatch = content.match(/## Done\n([\s\S]*?)(?=\n## |$)/);
     if (!doneMatch) {
       return;
     }
@@ -120,12 +122,13 @@ function archiveOldTasks() {
 
       // Update TASKS.md
       const newDone = keep.join('\n');
-      const newContent =
-        content.slice(0, doneMatch.index + doneMatch[0].indexOf(doneSection)) +
-        newDone +
-        '\n' +
-        content.slice(doneMatch.index + doneMatch[0].length);
-      fs.writeFileSync(TASKS_FILE, newContent, 'utf8');
+      // Replace the matched Done block wholesale (function replacement so any
+      // $-sequences in the content aren't interpreted). Only write if the result
+      // still has a Done section — guards against a bad match mangling TASKS.md.
+      const newContent = content.replace(doneMatch[0], () => `## Done\n${newDone}\n`);
+      if (newContent.includes('## Done')) {
+        fs.writeFileSync(TASKS_FILE, newContent, 'utf8');
+      }
     }
   } catch (e) {
     // Ignore archiving errors

@@ -1,7 +1,7 @@
 ---
 name: market-intel
 description: Use when researching competitors, building Fact-Impact-Act battlecards, comparing positioning, or analyzing niches and market trends.
-tools: Read, Write, Edit, Glob, Grep, Bash, WebSearch
+tools: Read, Write, Edit, Glob, Grep, Bash, WebSearch, WebFetch
 model: sonnet
 color: cyan
 ---

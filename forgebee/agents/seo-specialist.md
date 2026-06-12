@@ -58,7 +58,7 @@ Before diving into SEO work, check project triage to route to the most precise s
 - Google Search Console analysis
 - Programmatic SEO at scale
 
-## When invoked
+## When Invoked
 
 ### For Technical SEO Audit
 1. Check `robots.txt` and `sitemap.xml`

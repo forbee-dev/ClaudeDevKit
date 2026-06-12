@@ -1,0 +1,30 @@
+[
+  {
+    "id": "sec-sqli",
+    "skill": "review-security",
+    "fixture": "fixtures/vulnerable-login.js",
+    "expectAll": ["sql injection"],
+    "expectAny": ["hardcoded", "secret", "api key", "xss"],
+    "mustUseSeverity": true,
+    "mustHaveFooter": true,
+    "note": "Planted: SQLi via string concat, hardcoded key, reflected XSS."
+  },
+  {
+    "id": "perf-nplus1",
+    "skill": "review-performance",
+    "fixture": "fixtures/n-plus-one.js",
+    "expectAny": ["n+1", "n + 1", "per-iteration", "batched", "join"],
+    "mustUseSeverity": true,
+    "mustHaveFooter": true,
+    "note": "Planted: N+1 query inside a loop."
+  },
+  {
+    "id": "prompt-injection",
+    "skill": "review-prompt",
+    "fixture": "fixtures/prompt-injection.js",
+    "expectAny": ["prompt injection", "untrusted", "trust boundary", "validate", "allowlist"],
+    "mustUseSeverity": true,
+    "mustHaveFooter": true,
+    "note": "Planted: untrusted input in system prompt, unvalidated tool action, no token cap."
+  }
+]

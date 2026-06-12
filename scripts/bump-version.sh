@@ -90,6 +90,14 @@ cmd_check() {
     fi
     local ver
     ver=$(read_json_field "$fullpath" "$field")
+    # jq prints the literal string "null" for a missing/mis-declared field path
+    # (and "" on error). Treat both as not-found instead of reporting a phantom
+    # version — mirrors the PATTERN-NOT-FOUND branch and prevents a silent pass.
+    if [[ -z "$ver" || "$ver" == "null" ]]; then
+      printf "  %-45s  FIELD-NOT-FOUND\n" "$path ($field)"
+      has_drift=1
+      continue
+    fi
     printf "  %-45s  %s\n" "$path ($field)" "$ver"
     versions+=("$ver")
   done < <(declared_files)

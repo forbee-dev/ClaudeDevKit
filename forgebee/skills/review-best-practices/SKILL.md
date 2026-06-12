@@ -37,12 +37,15 @@ Own cross-file and architectural smells: SOLID violations spanning modules, leak
 
 ## For Each Issue Found
 
-1. Describe the problem concretely with **File:Line** reference
-2. **Severity**: Critical / High / Medium / Low (see CLAUDE.md P6 — standardized scale)
-3. **Principle** — which best practice is violated
-4. Present **2–3 options**, including "do nothing" where reasonable
-5. For each option: **effort**, **risk**, **impact on other code**, **maintenance burden**
-6. Give your **recommended option and why**
+Emit findings in the shared format (`_review-finding-contract.md`) so `review-all` can aggregate — the four contract lines plus `Principle:` as the one extra line this skill adds:
+
+```
+[Critical|High|Medium|Low] <title>
+File: <path>:<line>
+Issue: <which best practice is violated and why it bites here>
+Fix: <specific remediation>
+Principle: <the principle/pattern — e.g. SRP, DRY, dependency inversion, leaky abstraction>
+```
 
 ## Example (Critical vs Low)
 

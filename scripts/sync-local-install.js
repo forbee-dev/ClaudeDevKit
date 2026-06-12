@@ -6,7 +6,14 @@
  * Background: .claude/{agents,commands} are project-level copies Claude Code
  * auto-loads. They had drifted to a pre-5.x snapshot (e.g. debate/review/strategy
  * skills duplicated as AGENTS), causing duplicate registration + stale behavior.
- * The source of truth is forgebee/. This makes .claude/ exactly mirror it.
+ * The source of truth is forgebee/. This makes .claude/ exactly mirror it —
+ * overwriting changed files and pruning stale ones. That is safe because .claude/
+ * is a gitignored, regenerable mirror.
+ *
+ * CANONICAL local-mirror sync. Do NOT also run forgebee/sync.js against
+ * .claude/{agents,commands}: it uses preserve-newer (skip-if-target-newer)
+ * semantics for a different manifest-based workflow, so running both yields
+ * conflicting results. Pick one tool per task. Neither is wired into CI.
  *
  * Syncs agents + commands only (skills are provided by the installed plugin under
  * the forgebee: namespace; adding them to .claude/skills would add duplication).

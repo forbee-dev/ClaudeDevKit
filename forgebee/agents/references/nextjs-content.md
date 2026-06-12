@@ -247,4 +247,4 @@ export async function GET() {
 5. **Headings** — H2 for sections, H3 for subsections (H1 is the post title in the layout)
 6. **Code blocks** — use language annotation and title for context
 7. **CTAs** — use custom CTA component, not raw links, for conversion tracking
-
+

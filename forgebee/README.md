@@ -9,11 +9,11 @@ forgebee/
 ├── INDEX.md                     # Auto-generated routing index — loaded on SessionStart
 ├── hooks/
 │   ├── hooks.json               # Hook event wiring
-│   └── scripts/                 # 23 Node.js lifecycle hook scripts
+│   └── scripts/                 # 24 wired lifecycle hooks (+ _common.js shared helper)
 ├── agents/
-│   ├── *.md                     # 48 specialist agent personas
+│   ├── *.md                     # 44 specialist agent personas
 │   └── references/              # Reference material extracted from agents (W16 bloat trim)
-├── commands/                    # 36 slash commands
+├── commands/                    # 37 slash commands
 ├── contexts/                    # Session modes (dev, research, review)
 ├── rules/                       # Language-specific conventions (common, TS, PHP, Python)
 ├── skills/
@@ -36,7 +36,7 @@ forgebee/
 └── eval/                        # Eval scenarios
 ```
 
-## Key Features (v5.1.0)
+## Key Features (v5.3.0)
 
 ### Behavioral discipline (Karpathy principles)
 - **P1 Trace test** — every changed line traces to the user's request; no drive-by edits
@@ -54,22 +54,22 @@ forgebee/
 - **Verification-enforcer + delivery-agent contract** — Step 0 reads verdict, does NOT re-run
 
 ### Token efficiency
-- **Routing index** (`INDEX.md`) — Claude reads 1 file once per session vs. scanning 115 frontmatter blocks
+- **Routing index** (`INDEX.md`) — Claude reads 1 file once per session vs. scanning every agent/skill/command frontmatter block
 - **Terse-report mode** — sub-agent reports compress ~65% via `responseStyle: "orchestrator"` contract
 - **Learnings compression** — `/learn` ages entries >14 days, archives originals
 - **Bloat-trimmed agents** — 6 worst offenders moved to `references/` (1,733 lines extracted)
 
 ### Safety
-- **Adversarial Input Hardening** preamble on all 48 agents (homoglyphs, urgency, role-play overrides flagged)
+- **Adversarial Input Hardening** preamble on all 44 agents (homoglyphs, urgency, role-play overrides flagged)
 - **Budget circuit breaker** on every `Task()` dispatch (maxHops default 8, ceiling 64) with constant-string errors
 - **Defensive hooks** — `safeWriteFlag` (O_NOFOLLOW symlink defense), `validateHookFields` (settings.json guard)
 - **Sensitive-path refusal** in compression (`.env`, credentials, `.ssh/`, `.aws/`, private keys)
 
 ### Counts
-- **36 slash commands** — orchestration, diagnosis, quality, growth, learning, meta
-- **48 specialist agents** — code, growth, debate, WordPress, Next.js, mobile, CRO, tool
-- **32 skills** — 10 inline + 22 context:fork
-- **23 lifecycle hooks** across 10 events
+- **37 slash commands** — orchestration, diagnosis, quality, growth, learning, meta
+- **44 specialist agents** — code, growth, debate, WordPress, Next.js, mobile, CRO, tool
+- **33 skills** — 11 inline + 22 context:fork
+- **24 lifecycle hooks** across 10 events
 - **6 templates** — decision log, addendum, failure-capture, investigation case file, prompt-defense baseline, brainstorming/spec
 
 ### Other capabilities

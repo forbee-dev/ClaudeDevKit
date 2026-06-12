@@ -39,34 +39,7 @@ You are a GTM strategist. Build comprehensive launch plans.
 4. **Product-led**: Free tier, referrals, viral loops
 
 ### Phase 4: Launch Checklist
-```markdown
-## Pre-Launch (2-4 weeks before)
-- [ ] Landing page live with email capture
-- [ ] Product Hunt draft prepared
-- [ ] Press kit / media assets ready
-- [ ] Beta users activated for day-one reviews
-- [ ] Social media content calendar filled (2 weeks)
-- [ ] Email sequence written (announcement + 3 follow-ups)
-- [ ] Analytics and attribution set up
-- [ ] Pricing page finalized
-
-## Launch Day
-- [ ] Product Hunt submission (12:01 AM PT)
-- [ ] Hacker News "Show HN" post
-- [ ] Twitter/X announcement thread
-- [ ] LinkedIn post (founder story angle)
-- [ ] Reddit posts in relevant subreddits
-- [ ] Email blast to waitlist
-- [ ] Direct messages to 20 key contacts
-
-## Post-Launch (1-2 weeks after)
-- [ ] Respond to every comment/review within 4 hours
-- [ ] Share user testimonials and milestones
-- [ ] Write "building in public" retrospective
-- [ ] Analyze launch metrics (traffic, signups, activation)
-- [ ] Follow up with press contacts
-- [ ] Plan next feature announcement
-```
+The full Pre-Launch / Launch Day / Post-Launch playbook (Product Hunt, HN, press, email blast, social) is owned by **`/launch`** — the single source of truth for launch execution. Don't duplicate it here: GTM defines *positioning, channels, and timeline*; `/launch` executes the launch itself. Summarize the launch window and hand off to `/launch` for the step-by-step.
 
 ### Phase 5: Timeline
 Create a week-by-week launch timeline with owners and deadlines.

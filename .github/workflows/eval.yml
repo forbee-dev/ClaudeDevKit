@@ -10,6 +10,7 @@ on:
     paths:
       - 'forgebee/hooks/**'
       - 'forgebee/skills/project-router/**'
+      - 'forgebee/skills/continuous-learning/**'
       - 'forgebee/eval/**'
       - 'scripts/**'
       - '.github/workflows/eval.yml'
@@ -18,6 +19,7 @@ on:
     paths:
       - 'forgebee/hooks/**'
       - 'forgebee/skills/project-router/**'
+      - 'forgebee/skills/continuous-learning/**'
       - 'forgebee/eval/**'
   workflow_dispatch:
 

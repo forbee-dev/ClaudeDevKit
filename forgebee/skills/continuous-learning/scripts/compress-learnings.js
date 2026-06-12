@@ -200,7 +200,11 @@ function main() {
 
   if (compressed_n > 0) {
     const archivePath = archiveOriginal(original);
-    fs.writeFileSync(LEARNINGS_FILE, finalContent);
+    // Atomic write: stage to a temp file then rename, so a crash mid-write can
+    // never truncate learnings.md (the original is already safely archived above).
+    const tmpFile = `${LEARNINGS_FILE}.tmp.${process.pid}`;
+    fs.writeFileSync(tmpFile, finalContent);
+    fs.renameSync(tmpFile, LEARNINGS_FILE);
     console.log(`Original archived to: ${archivePath}`);
     console.log(`Compressed file written to: ${LEARNINGS_FILE}`);
   } else {
@@ -208,4 +212,11 @@ function main() {
   }
 }
 
-main();
+try {
+  main();
+} catch (e) {
+  // The atomic rename above guarantees learnings.md is never half-written;
+  // report the failure and exit non-zero so /learn surfaces it.
+  console.error(`compress-learnings failed: ${e.message}`);
+  process.exit(1);
+}

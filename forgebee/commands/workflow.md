@@ -59,7 +59,7 @@ Before anything else, determine the right pipeline depth. Propose to the user an
 
 | Complexity | Signal | Pipeline |
 |------------|--------|----------|
-| **Trivial** | Bug fix, typo, config change | Skip /workflow — use /team or do directly |
+| **Trivial** | Bug fix, typo, config change | Skip orchestration — make the change directly (or `/team` only if it spans 2-5 files) |
 | **Small** | 1-2 files, clear scope, no auth/payments/data | Plan → Delegate → Execute → Deliver |
 | **Medium** | 3-5 files, new feature | Plan → Req Debate → Architect → Implementation Plan → Execute → Deliver |
 | **Large** | 5+ files, cross-cutting concerns | Full pipeline (all phases, Implementation Plan after Architect) |
@@ -233,32 +233,7 @@ All four keys required. Do NOT dispatch without them. `responseStyle: "orchestra
 
 ### Budget Circuit Breaker (best-effort, unenforced — no backing hook)
 
-This is **best-effort orchestrator guidance, not a hard-enforced limit** — no hook currently intercepts dispatches to count hops or tokens, so the orchestrator must self-honor it. Every `Task()` dispatch should carry a budget envelope. Sub-agent dispatches must propagate it. Constant-string errors (no remaining-budget echo) so a malicious or runaway peer can't probe thresholds.
-
-Extend the handoff contract with:
-
-```json
-{
-  "budget": {
-    "hopCount": 1,
-    "maxHops": 8,
-    "maxTokens": null,
-    "maxUsd": null
-  }
-}
-```
-
-**Rules (self-honored by the orchestrator, not enforced by a hook):**
-- `hopCount` starts at 1 (this dispatch is hop 1)
-- Sub-dispatches increment `hopCount` and re-pass the same budget
-- A sub-dispatch that would push `hopCount > maxHops` should be rejected immediately with `HOP_LIMIT_EXCEEDED`
-- `maxHops` default 8, **absolute ceiling 64** — never accept or set higher
-- `maxTokens` and `maxUsd` are optional; if set, reject with `TOKEN_LIMIT_EXCEEDED` / `USD_LIMIT_EXCEEDED`
-- Error strings sent to *peer agents* are **constants only** — never include current/remaining budget in peer-visible error (oracle leakage defense)
-- The user-facing surface IS allowed full state: when the breaker trips, surface "circuit breaker tripped at hop N (maxHops=X, started=Y): <reason>" to the user with the originating dispatch chain — full state goes to the user + the audit log at `.claude/audit/`, never to the peer agent that triggered it
-- `/workflow --debug-budget` flag: dump the full budget envelope to the user on every dispatch (debugging only — leaves the oracle gap open for the run)
-
-This guards against runaway debate fan-out (e.g., code-skeptic finding an issue, dispatching a sub-debate on it, which dispatches another, etc).
+Each `Task()` dispatch carries a budget envelope `{ hopCount, maxHops: 8, maxTokens: null, maxUsd: null }`; sub-dispatches increment `hopCount` and re-pass it. Reject `hopCount > maxHops` with `HOP_LIMIT_EXCEEDED` (ceiling 64); surface trips to the user with the dispatch chain. This guards runaway debate fan-out (a skeptic spawning a sub-debate that spawns another). On a solo single-user pipeline the hop counter alone suffices — the oracle-leakage hardening (constant-string peer errors), `maxTokens`/`maxUsd`, and `--debug-budget` are documented in **`forgebee/skills/_budget-breaker.md`** and only matter for untrusted multi-tenant fan-out.
 
 **Coordination:**
 - Two agents same file → sequence, never parallel
@@ -276,40 +251,19 @@ This guards against runaway debate fan-out (e.g., code-skeptic finding an issue,
 
 Reject any response that doesn't include a status. If an agent reports `BLOCKED` twice on the same issue, escalate to the user.
 
-**Quality mandate:** Every specialist MUST self-review before reporting `DONE` — same criteria as review-all: code quality (DRY, error handling), security (no injection, no secrets, input validation), performance (no N+1), accessibility (if UI). Reject output without self-review evidence. Phase 7 validates — it should not discover basic quality issues.
+**Quality mandate:** Every specialist MUST self-review before reporting `DONE` — same criteria as review-all: code quality (DRY, error handling), security (no injection, no secrets, input validation), performance (no N+1), accessibility (if UI). Reject output without self-review evidence. The later review phases (Spec Compliance, Checkpoint, Code Debate, and the Final Gate) validate — they should not discover basic quality issues.
 
 ---
 
 ### Spec Compliance Check (Medium / Large / Critical)
 
-Before the code debate fires, run a single **spec compliance reviewer**. This is a distinct check from code-quality review — it asks one question only: *did the implementer build what we asked for?*
+Before the code debate fires, confirm the implementer built what we asked for. This is a distinct check from code-quality review — one question only: *does the delivered diff match what was specified?*
 
-Dispatch a sub-agent (or run inline) with this prompt:
+Dispatch the **`verification-enforcer`** agent (single source of truth — it is evidence-based, anti-rationalization, and ships a Verdict→Status mapping built for this) with: the requirements doc (`docs/planning/requirements/<feature>.md` or the user's original ask), the agreed scope from Step 1, and `git diff <merge-base>`. Frame it as spec-compliance only — *not* code quality, style, or coverage (that's the next stage). Instruct it to be skeptical of the implementer's self-report and read the actual diff, not the agent's summary.
 
-```
-You are the Spec Compliance Reviewer for /workflow.
-
-You are NOT evaluating code quality, style, or test coverage — that's the next stage.
-Your single question: does the delivered diff match what was specified?
-
-Read:
-1. Requirements: docs/planning/requirements/<feature>.md (or the user's original ask)
-2. Stories / scope agreed at Step 1
-3. The current diff: `git diff <merge-base>`
-
-For each story / requirement, report one of:
-  - COMPLIANT        — built as specified
-  - PARTIAL          — built but with documented gaps (list them)
-  - NONCOMPLIANT     — built something else, or scope was silently changed
-  - SCOPE-EXPANDED   — built more than asked (flag as risk)
-
-End with: VERDICT: PASS | FAIL.
-Be skeptical of the implementer's self-report — they may have rationalized scope cuts. Read the actual diff and requirements, not the agent's summary.
-```
-
-Decision:
-- VERDICT: PASS → proceed to Code Debate (or directly to Deliver for Medium)
-- VERDICT: FAIL → return to Execute with explicit gap list. Do NOT proceed to Code Debate until compliance passes.
+Map its verdict:
+- `VERIFIED` → PASS → proceed to Code Debate (or to the Final Gate / Deliver for Medium)
+- `PARTIALLY VERIFIED` / `NOT VERIFIED` → FAIL → return to Execute with the explicit gap list. Do NOT proceed until compliance passes.
 
 **Why two stages:** spec compliance and code quality fail in different ways. A code-quality review pass on noncompliant code still ships the wrong thing. Catching scope drift before debate avoids spending debate cycles arguing about quality of a solution that solves the wrong problem.
 
@@ -352,6 +306,17 @@ Same batching as Requirements Debate, with code-focused agents:
 
 ---
 
+### Final Gate (review-all) — required before Deliver
+
+This is the gate the whole pipeline is measured against (Objective, line 13) — so it must actually run, not just be a success metric. Invoke the **`review-all`** skill on `git diff <merge-base>`.
+
+- **Critical or High findings → block delivery.** Return to Execute with the specific file:line findings as constraints. Do not proceed to Deliver until a clean pass (or an explicit user override).
+- **Clean (Medium/Low only) → proceed to Deliver.**
+
+For **Medium** runs that skip the Code Debate, this is the *only* adversarial check before ship — so it is load-bearing, not optional. Skip only for **Small** complexity (where the specialist self-review + spec compliance already covered the diff) or on explicit user override.
+
+---
+
 ### Deliver
 
 Delegate to `delivery-agent` with:
@@ -378,4 +343,4 @@ Present delivery package to user as final output.
 
 ## State Tracking
 
-At start: read `docs/pm/state.yaml`, resume or create feature entry. At every phase transition: update phase + timestamp + write immediately. Record decisions with sequential IDs. Populate stories array from scrum-master output. On completion: set phase to done, regenerate dashboards (`docs/pm/index.md`, `docs/pm/features/`, `docs/pm/decisions.md`), sync to TASKS.md. Always increment counters after generating IDs.
+At start: read `docs/pm/state.yaml`, resume or create feature entry. At every phase transition: update phase + timestamp + write immediately. Record decisions with sequential IDs. Populate the stories/workstreams array from the Implementation Plan (or from scrum-master output when `--scrum` was used). On completion: set phase to done, regenerate dashboards (`docs/pm/index.md`, `docs/pm/features/`, `docs/pm/decisions.md`), sync to TASKS.md. Always increment counters after generating IDs.

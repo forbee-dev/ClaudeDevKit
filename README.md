@@ -3,15 +3,15 @@
   <img src="https://img.shields.io/badge/Codex-Compatible-10B981?style=for-the-badge&logoColor=white" alt="Codex" />
   <img src="https://img.shields.io/badge/Cursor-Compatible-1F2937?style=for-the-badge&logoColor=white" alt="Cursor" />
   <img src="https://img.shields.io/badge/Gemini-Compatible-4285F4?style=for-the-badge&logoColor=white" alt="Gemini" />
-  <img src="https://img.shields.io/badge/version-5.2.0-blue?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/version-5.3.0-blue?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License" />
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/agents-44-orange?style=for-the-badge" alt="Agents" />
-  <img src="https://img.shields.io/badge/commands-36-red?style=for-the-badge" alt="Commands" />
-  <img src="https://img.shields.io/badge/hooks-23-blueviolet?style=for-the-badge" alt="Hooks" />
-  <img src="https://img.shields.io/badge/skills-32-teal?style=for-the-badge" alt="Skills" />
+  <img src="https://img.shields.io/badge/commands-37-red?style=for-the-badge" alt="Commands" />
+  <img src="https://img.shields.io/badge/hooks-24-blueviolet?style=for-the-badge" alt="Hooks" />
+  <img src="https://img.shields.io/badge/skills-33-teal?style=for-the-badge" alt="Skills" />
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 <p align="center">
   <strong>A colony of AI agents forging your product</strong><br/>
-  44 specialist agents. 32 skills. 36 slash commands. 23 lifecycle hooks.<br/>
+  44 specialist agents. 33 skills. 37 slash commands. 24 lifecycle hooks.<br/>
   Three execution modes: inline skills, context:fork, subagents.<br/>
   Adaptive pipeline. Karpathy principles. Adversarial debate. Continuous learning.<br/>
   <em>Works with Claude Code, Codex, Cursor, Gemini, and OpenClaw.</em>
@@ -49,7 +49,7 @@ Claude Code and OpenClaw are powerful out of the box. ForgeBee makes them **opin
 |:--|:--|
 | Agent jumps straight into coding | Agent plans, debates requirements, then codes |
 | "It should work" | Evidence-based verification with actual test output |
-| Single-agent, single-pass | 44 agents + 32 skills working in parallel with blind review |
+| Single-agent, single-pass | 44 agents + 33 skills working in parallel with blind review |
 | Manual project tracking | Automated state.yaml + markdown dashboards |
 | No marketing workflow | Full 9-phase Growth OS with 11 marketing agents + 3 strategy debate agents |
 | Every session starts from scratch | Continuous learning — heuristic pattern detection + pending instinct approval |
@@ -77,7 +77,7 @@ Claude Code and OpenClaw are powerful out of the box. ForgeBee makes them **opin
 | Reviews skim or lose-the-forest | Checkpoint Preview phase: diff-by-concern with `[auth]` / `[schema]` / `[billing]` risk tags before debate |
 | Plans drift without stress-test | `/elicit` applies 18 named methods (Pre-mortem, Red Team, Inversion, Stakeholder Round Table…) to your own output |
 | Quality decays as the kit grows | `/audit-self` re-runs the full scorecard on demand and surfaces regressions since last audit |
-| Claude scans 115 frontmatter blocks per routing decision | Auto-generated `forgebee/INDEX.md` loaded once on SessionStart — replaces speculative scanning with one indexed read |
+| Claude scans every agent/skill/command frontmatter block per routing decision | Auto-generated `forgebee/INDEX.md` loaded once on SessionStart — replaces speculative scanning with one indexed read |
 
 ---
 
@@ -97,8 +97,8 @@ Then edit `CLAUDE.md` with your project details and start working. Hooks activat
 <summary><strong>Install from local directory</strong></summary>
 
 ```bash
-git clone git@github.com:forbee-dev/ForgeBee.git
-claude --plugin-dir ./ForgeBee/forgebee
+git clone git@github.com:forbee-dev/ClaudeDevKit.git
+claude --plugin-dir ./ClaudeDevKit/forgebee
 ```
 
 </details>
@@ -183,7 +183,7 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 
 ## Agents
 
-44 specialist agents + 32 skills for Claude Code's Agent Teams. Use them directly or let `/team` and `/workflow` orchestrate automatically.
+44 specialist agents + 33 skills for Claude Code's Agent Teams. Use them directly or let `/team` and `/workflow` orchestrate automatically.
 
 > **v5.1 highlights:** Karpathy P1–P6 principles baked into every code-producing agent (trace test, senior-engineer check, YAGNI timing, orphan rule, anti-stop rule, severity standard). Seven new skills: `brainstorming` (opt-in via `--strict`), `surface-ambiguity`, `terse-report`, `checkpoint-preview`, `investigate`, `elicitation` (18 methods), `audit-self`. Three new commands: `/investigate`, `/elicit`, `/audit-self`. Adversarial Input Hardening preamble on all 44 agents. Budget circuit breaker on dispatch (maxHops/maxTokens/maxUsd). Decision logs, failure-capture templates, learnings compression. Bloat trim: 6 over-budget agents trimmed to ≤200 lines via references/. **Auto-generated `forgebee/INDEX.md`** — Claude reads one indexed routing map on SessionStart instead of scanning every skill description. See [`CHANGELOG.md`](./CHANGELOG.md) for full release notes.
 >
@@ -341,7 +341,7 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 
 ## Hooks
 
-23 hooks run automatically on Claude Code lifecycle events across 10 event types. No invocation needed.
+24 hooks run automatically on Claude Code lifecycle events across 10 event types. No invocation needed.
 
 **Session & state management:**
 
@@ -366,6 +366,7 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 | `permission-guard` | `PreToolUse` (Bash) | Mode-aware command safety: yields to classifier in auto-mode; blocklist + ask-cascade in default; blocklist-only in bypass |
 | `dev-server-blocker` | `PreToolUse` (Bash) | Blocks `npm run dev` outside tmux |
 | `git-push-reminder` | `PreToolUse` (Bash) | Warns before pushing to main/master |
+| `secret-scan` | `PreToolUse` (Bash) | Blocks commits/pushes that introduce hardcoded secrets (override: `FORGEBEE_ALLOW_SECRET=1`) |
 | `suggest-compact` | `PreToolUse` (Edit\|Write) | Suggests `/compact` at logical breakpoints |
 
 **Continuous learning:**
@@ -390,6 +391,20 @@ Invoke with a slash: `/review`, `/debug`, `/workflow`, etc.
 |:-----|:------|:------------|
 | `TaskCompleted` | Task marked done | Verifies completion — accepts config/markdown tasks, demands evidence for code tasks |
 | `TeammateIdle` | Agent going idle | Checks for unclaimed tasks to pick up |
+
+### Platform parity
+
+The **skills, agents, and commands** are portable — they ship to Claude Code, Codex, Cursor, and Gemini via the per-IDE manifests. The **hooks above are Claude Code-only**: they key on Claude Code's lifecycle events, so the automatic enforcement they provide does not run on the other harnesses.
+
+| Capability | Claude Code | Codex / Cursor / Gemini |
+|:-----------|:-----------:|:-----------------------:|
+| Skills, agents, commands | ✅ | ✅ (via manifest) |
+| 24 lifecycle hooks (permission-guard, secret-scan, audit-trail, …) | ✅ | ❌ |
+| Governance / audit trail | ✅ | ❌ |
+| Continuous learning (observe → instincts) | ✅ | ❌ |
+| Auto project-triage routing | ✅ | ❌ |
+
+On non-Claude harnesses you get the full prompt library; the guardrails, governance, and learning loop are Claude Code-only today.
 
 ---
 
@@ -556,14 +571,14 @@ The `self-improve` hook appends patterns to the **Learned Patterns** section aut
 
 ## OpenClaw
 
-ForgeBee is fully compatible with [OpenClaw](https://github.com/openclaw/openclaw). All 44 agents and 36 commands convert to OpenClaw skills.
+ForgeBee is fully compatible with [OpenClaw](https://github.com/openclaw/openclaw). All 44 agents and 37 commands convert to OpenClaw skills.
 
 ```bash
 # Clone ForgeBee
-git clone git@github.com:forbee-dev/ForgeBee.git
+git clone git@github.com:forbee-dev/ClaudeDevKit.git
 
 # Install for OpenClaw
-node ForgeBee/openclaw/install-openclaw.js
+node ClaudeDevKit/openclaw/install-openclaw.js
 ```
 
 This converts every agent and command into `SKILL.md` files in `~/.openclaw/workspace/skills/forgebee-*`. Skills auto-trigger based on their descriptions — the same ones optimized from the [Superpowers trigger pattern](#why-forgebee).
@@ -583,13 +598,14 @@ This converts every agent and command into `SKILL.md` files in `~/.openclaw/work
 
 ## Contributing
 
-Contributions welcome! ForgeBee is markdown files and Node.js scripts — easy to extend.
+Contributions welcome! ForgeBee is markdown surfaces and Node.js scripts. See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for the surface contracts (agent/skill/command structure, the load-bearing Status + adversarial-hardening contract, the model-tier policy, output modes) and **[ARCHITECTURE.md](./ARCHITECTURE.md)** for how the pieces fit together.
 
 1. Fork the repo
-2. Add your command (`forgebee/commands/your-command.md`) or agent (`forgebee/agents/your-agent.md`) or skill (`forgebee/skills/your-skill/SKILL.md`)
-3. Run `node scripts/build-index.js` to regenerate the routing index — CI fails the PR otherwise
-4. Run `./scripts/bump-version.sh <new-version>` if you're shipping a release; it keeps the version string in sync across manifests (it does not sync the surface counts)
-5. Open a PR
+2. Add your command (`forgebee/commands/your-command.md`), agent (`forgebee/agents/your-agent.md`), or skill (`forgebee/skills/your-skill/SKILL.md`) — follow the contract in CONTRIBUTING.md
+3. Run `node scripts/build-index.js` to regenerate the routing index
+4. Run `npm run check` — index sync + persona references + agent contract + version sync + eval must all pass (CI gates the PR on this)
+5. If you added/removed a surface, update the count strings in the manifests + READMEs (versions sync via `bump-version.sh`; counts are manual). Cut releases with `/release`.
+6. Open a PR
 
 **Release notes:** see [`CHANGELOG.md`](./CHANGELOG.md). The `v5.1.0` entry is the canonical reference for all the discipline patterns (Karpathy P1-P6, prompt defense, budget circuit breaker, terse-report, etc.).
 

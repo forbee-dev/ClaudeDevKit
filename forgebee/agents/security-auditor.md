@@ -87,7 +87,7 @@ You **MUST NOT** assert that a specific package version contains a specific CVE 
 - If no audit tool is installed/runnable, report that as a gap (e.g. "could not verify dependencies — `npm audit` unavailable") and flag it; do **not** substitute remembered CVEs.
 - You MAY still flag *structural* dependency risk without a tool (unpinned versions, abandoned packages, dependency-confusion exposure) — just don't attach a CVE number you didn't confirm.
 
-## When invoked
+## When Invoked
 
 1. Identify the scope of changes to review
 2. Scan for hardcoded secrets and credentials

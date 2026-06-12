@@ -4,10 +4,10 @@
 > Source of truth: frontmatter in `forgebee/skills/*`, `forgebee/agents/*`, `forgebee/commands/*`.
 > Regenerate with: `node scripts/build-index.js`
 
-> Loaded on SessionStart so Claude routes user intent to the right surface in one read instead of scanning 112 frontmatter blocks.
+> Loaded on SessionStart so Claude routes user intent to the right surface in one read instead of scanning 114 frontmatter blocks.
 
 
-**Stats:** 32 skills · 44 agents · 36 commands
+**Stats:** 33 skills · 44 agents · 37 commands
 
 ---
 
@@ -33,11 +33,11 @@
 
 ---
 
-## Skills (32)
+## Skills (33)
 
 ### Pre-Implementation Discipline
 
-- `brainstorming` — Use when invoking /workflow --strict, /plan, or "brainstorm before building" — turns an idea into a written, approved design spec before ...
+- `brainstorming` — Use when invoking /workflow --strict or asking to "brainstorm/design before building" — turns an idea into a written, approved design spe...
 - `elicitation` — Use after producing a plan or design to stress-test it via a named method (Pre-mortem, Red Team, Inversion, Stakeholder Round Table, etc....
 - `surface-ambiguity` — Use when about to make a non-trivial choice with multiple valid interpretations — forces listing of options and the chosen one with ratio...
 
@@ -58,6 +58,7 @@
 - `review-database` — Use when reviewing SQL migrations, queries, RLS/policy changes, schema modifications, or ORM access patterns for safety, performance, or ...
 - `review-docs` — Use when reviewing code for missing docblocks, outdated comments, undocumented parameters, unexplained complex logic, or stale README sec...
 - `review-performance` — Use when investigating slowness or reviewing code for N+1 queries, memory leaks, expensive loops, missing caching, bundle bloat, or rende...
+- `review-prompt` — Use when reviewing code that builds LLM features — prompt construction, tool/function definitions, model-output handling, RAG context, or...
 - `review-security` — Use when auditing code for OWASP Top 10 vulnerabilities, injection flaws, broken auth, secret exposure, or dependency CVEs — typically be...
 - `review-tests` — Use when reviewing test suites for coverage gaps, brittle mocks, missing edge cases, or untested code paths — runs after new code or befo...
 - `review-wordpress` — Use when reviewing WordPress plugin or theme code for WP coding standards (WPCS), security (nonces, sanitization, escaping), hook naming,...
@@ -160,18 +161,15 @@
 - `content-strategist` — Use to design the content engine end-to-end — pillars/clusters/pyramid/platform-map (architecture), angle mining + repurposing chains + s...
 - `email-strategist` — Use when designing email automation flows, segmentation, subject lines, deliverability, or lifecycle sequences (welcome, nurture, cart re...
 - `engagement-strategist` — Use when growing engagement, building communities, or creating engagement playbooks — comment strategies, reciprocity loops, DM flows.
+- `growth-engineer` — Use to engineer compounding growth AND lift conversion — growth loops, flywheels, viral mechanics, funnel diagnosis (acquisition side) pl...
 - `hook-engineer` — Use when creating stop-scrolling hooks, viral formulas, pattern interrupts, engagement triggers, or platform-specific hook libraries.
 - `market-intel` — Use when researching competitors, building Fact-Impact-Act battlecards, comparing positioning, or analyzing niches and market trends.
 - `marketing-analyst` — Use to measure marketing performance — North-Star → input → health metric frameworks, KPI dashboards, campaign analysis, attribution mode...
 - `seo-specialist` — Use for keyword research, on-page optimization, technical SEO audits, content strategy, and search ranking improvement.
 
-### Other
-
-- `growth-engineer` — Use to engineer compounding growth AND lift conversion — growth loops, flywheels, viral mechanics, funnel diagnosis (acquisition side) pl...
-
 ---
 
-## Commands (36)
+## Commands (37)
 
 ### Orchestrators
 
@@ -229,6 +227,10 @@
 - `/migrate` — Migration specialist — upgrades, version transitions, and data migrations
 - `/pm` — Project management dashboard — auto-reads state.yaml and regenerates markdown views. Shows feature status, story progress, decision histo...
 - `/refactor` — Code refactoring specialist — improve structure without changing behavior
+
+### Other
+
+- `/release` — Cut a release — pre-flight gate, version bump across all manifests, changelog, tag, and PR. Wraps bump-version.sh; never reimplements ver...
 
 ---
 

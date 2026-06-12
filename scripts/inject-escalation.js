@@ -95,6 +95,11 @@ const MARKER = '## Escalation';
 
 function inject(file, triggers) {
   const fullpath = path.join(AGENTS, file);
+  if (!fs.existsSync(fullpath)) {
+    // A hardcoded agent was renamed/removed — skip it instead of throwing
+    // ENOENT and aborting the whole batch mid-mutation (mirrors inject-principles).
+    return { file, status: 'missing' };
+  }
   const src = fs.readFileSync(fullpath, 'utf8');
   const lines = src.split('\n');
   const stripped = lines.map(l => l.replace(/\r$/, ''));

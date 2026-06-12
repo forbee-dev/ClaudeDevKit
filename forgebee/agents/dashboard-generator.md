@@ -103,8 +103,8 @@ For each feature in state.yaml, write `docs/pm/features/[feature-name-slugified]
 
 [Visual phase tracker — show all phases with marker on current]
 
-idea → idea-debate → mvp → mvp-debate → planning → req-debate → arch → sprint → exec → code-debate → delivery → done
-                                                                   ▲ YOU ARE HERE
+idea → idea-debate → mvp → mvp-debate → plan → req-debate → arch → work-breakdown → exec → spec-compliance → checkpoint → code-debate → delivery → done
+                                                              ▲ YOU ARE HERE
 
 ## Stories
 
@@ -138,7 +138,7 @@ idea → idea-debate → mvp → mvp-debate → planning → req-debate → arch
 **Notes:**
 - Slugify feature names for filenames: lowercase, hyphens for spaces, remove special chars
 - The visual phase tracker should mark the current phase clearly
-- Only show phases relevant to the feature's origin (idea-origin features show all phases, plan-origin features skip idea phases, workflow-origin features skip idea phases)
+- Only show phases relevant to the feature's origin: idea-origin shows all phases; plan-origin and workflow-origin skip the idea/mvp phases; growth-origin renders the Growth OS phases. General rule: render only the phases present in this feature's `state.yaml` history — never show a phase that doesn't apply to its origin, and if the recorded `phase` isn't in the chain, append it rather than dropping the marker
 - If a feature has no stories, show "No stories defined yet"
 - If a feature has no decisions, show "No decisions recorded yet"
 

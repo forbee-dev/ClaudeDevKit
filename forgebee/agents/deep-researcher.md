@@ -52,7 +52,7 @@ If a rule cannot be satisfied (paywalled second source, no dated source, contrad
 - Technical comparison and evaluation
 - Best practice discovery
 
-## When invoked
+## When Invoked
 
 1. Understand the research question
 2. Search multiple sources (docs, GitHub, web)

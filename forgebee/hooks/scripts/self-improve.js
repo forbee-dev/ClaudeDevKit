@@ -8,6 +8,12 @@ const fs = require('fs');
 const path = require('path');
 const { getProjectDir, initializeProjectDirs, readStdinJsonSync, runGit } = require('./_common.js');
 
+// A Stop hook must never fail the session end. Learning capture is best-effort:
+// any unguarded I/O error (read-only mount, ENOSPC, root-owned dir) exits 0
+// instead of surfacing a hook error to the user. Mirrors the .catch(() =>
+// process.exit(0)) convention the other Stop hooks use.
+process.on('uncaughtException', () => process.exit(0));
+
 const PROJECT_DIR = getProjectDir();
 initializeProjectDirs();
 

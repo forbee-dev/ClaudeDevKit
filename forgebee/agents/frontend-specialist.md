@@ -38,6 +38,8 @@ Before diving into implementation, check project triage to route to the most pre
 | `triage.node.framework == "nextjs"` | **Delegate to `nextjs-frontend`** — App Router, Server Components, SSR |
 | `triage.wordpress.type == "theme"` | **Delegate to `wordpress-frontend`** — block/classic themes, template hierarchy |
 | `triage.wordpress.type == "plugin"` AND task is UI-related | **Delegate to `wordpress-frontend`** — admin pages, block editor UI |
+| Flutter / Dart project (`pubspec.yaml`) | **Delegate to `flutter-expert`** — Flutter widgets, Dart, Riverpod/Bloc/Provider, cross-platform UI |
+| Native Apple project (`*.xcodeproj`, Swift/SwiftUI) | **Delegate to `ios-expert`** — SwiftUI/UIKit, Xcode, Core Data, App Store |
 | React/Vue/Svelte/Angular SPA | Handle directly — component patterns, state management |
 | Astro / Remix / other meta-framework | Handle directly — generic handling per the Expertise list; no dedicated subagent exists |
 | No triage available | Infer from codebase (`next.config.js`, `astro.config.mjs`, `remix.config.js`, `style.css` with Theme Name, etc.) |
@@ -58,7 +60,7 @@ Before diving into implementation, check project triage to route to the most pre
 - Performance optimization (Core Web Vitals, lazy loading, code splitting)
 - Testing (Jest, Testing Library, Playwright, Cypress)
 
-## When invoked
+## When Invoked
 
 1. Understand the UI requirement or component spec
 2. Check existing component patterns in the codebase
