@@ -21,9 +21,9 @@ see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 | Surface | Location | Loaded |
 |---------|----------|--------|
-| Agents (44) | `forgebee/agents/*.md` | dispatched via `Task` by orchestrators |
-| Skills (33) | `forgebee/skills/*/SKILL.md` | activated by name / `skill-activator` |
-| Commands (37) | `forgebee/commands/*.md` | `/name` slash invocation |
+| Agents (45) | `forgebee/agents/*.md` | dispatched via `Task` by orchestrators |
+| Skills (34) | `forgebee/skills/*/SKILL.md` | activated by name / `skill-activator` |
+| Commands (38) | `forgebee/commands/*.md` | `/name` slash invocation |
 | Shared contracts | `forgebee/skills/_review-finding-contract.md`, `_debate-protocol.md` | imported by review/debate skills |
 
 ## Hooks (Claude Code only)

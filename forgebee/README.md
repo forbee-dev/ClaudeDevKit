@@ -11,9 +11,9 @@ forgebee/
 │   ├── hooks.json               # Hook event wiring
 │   └── scripts/                 # 25 wired lifecycle hooks (+ _common.js shared helper)
 ├── agents/
-│   ├── *.md                     # 44 specialist agent personas
+│   ├── *.md                     # 45 specialist agent personas
 │   └── references/              # Reference material extracted from agents (W16 bloat trim)
-├── commands/                    # 37 slash commands
+├── commands/                    # 38 slash commands
 ├── contexts/                    # Session modes (dev, research, review)
 ├── rules/                       # Language-specific conventions (common, TS, PHP, Python)
 ├── skills/
@@ -23,6 +23,7 @@ forgebee/
 │   ├── code-{advocate,skeptic,judge}/      # Code debate triad (context: fork)
 │   ├── continuous-learning/     # Instinct-based learning system + references/
 │   ├── elicitation/             # 18 reasoning methods (methods.csv)
+│   ├── figma-code-sync/         # Code-first Figma design-system reconciliation
 │   ├── forgebee-setup/          # Project initialization
 │   ├── investigate/             # Forensic case files (Confirmed/Deduced/Hypothesized)
 │   ├── project-router/          # Stack detection + routing
@@ -36,7 +37,7 @@ forgebee/
 └── eval/                        # Eval scenarios
 ```
 
-## Key Features (v5.3.1)
+## Key Features (v5.4.0)
 
 ### Behavioral discipline (Karpathy principles)
 - **P1 Trace test** — every changed line traces to the user's request; no drive-by edits
@@ -60,15 +61,15 @@ forgebee/
 - **Bloat-trimmed agents** — 6 worst offenders moved to `references/` (1,733 lines extracted)
 
 ### Safety
-- **Adversarial Input Hardening** preamble on all 44 agents (homoglyphs, urgency, role-play overrides flagged)
+- **Adversarial Input Hardening** preamble on all 45 agents (homoglyphs, urgency, role-play overrides flagged)
 - **Budget circuit breaker** on every `Task()` dispatch (maxHops default 8, ceiling 64) with constant-string errors
 - **Defensive hooks** — `safeWriteFlag` (O_NOFOLLOW symlink defense), `validateHookFields` (settings.json guard)
 - **Sensitive-path refusal** in compression (`.env`, credentials, `.ssh/`, `.aws/`, private keys)
 
 ### Counts
-- **37 slash commands** — orchestration, diagnosis, quality, growth, learning, meta
-- **44 specialist agents** — code, growth, debate, WordPress, Next.js, mobile, CRO, tool
-- **33 skills** — 11 inline + 22 context:fork
+- **38 slash commands** — orchestration, diagnosis, quality, growth, learning, meta
+- **45 specialist agents** — code, growth, debate, WordPress, Next.js, mobile, CRO, tool
+- **34 skills** — 13 inline + 21 context:fork
 - **25 lifecycle hooks** across 10 events
 - **6 templates** — decision log, addendum, failure-capture, investigation case file, prompt-defense baseline, brainstorming/spec
 

@@ -11,6 +11,11 @@
       "path": "README.md",
       "regex": "version-([0-9]+\\.[0-9]+\\.[0-9]+)-blue",
       "replacement": "version-{VERSION}-blue"
+    },
+    {
+      "path": "forgebee/README.md",
+      "regex": "## Key Features \\(v([0-9]+\\.[0-9]+\\.[0-9]+)\\)",
+      "replacement": "## Key Features (v{VERSION})"
     }
   ],
   "audit": {

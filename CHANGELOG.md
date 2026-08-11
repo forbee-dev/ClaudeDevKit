@@ -6,6 +6,40 @@ The format roughly follows [Keep a Changelog](https://keepachangelog.com/) and t
 
 ---
 
+## [5.4.0] — 2026-08-11
+
+**Minor: routing actually fires, and a design-system trio arrives.** ForgeBee shipped 114 surfaces that were effectively unreachable. Five defects, each verified by direct hook test, explain why a WordPress task never reached a `wordpress-*` agent.
+
+### Fixed — the routing path
+
+- **`load-index.js` emitted the entire 20,599-byte `INDEX.md` as `additionalContext`.** The harness rejects an oversized payload, persists it to a file, and injects only a ~2KB preview. Every section past that point — including the whole WordPress agent roster, which starts at byte 7335 — never reached the session. It now emits a digest: the Quick Triage table plus the stack section matching `project-triage.json`, 1.2KB on a node repo and 2.1KB on a WordPress repo, with a hard 3.5KB ceiling and a pointer to read the full file.
+- **`skill-activator.js` emitted a top-level `additionalContext`.** `UserPromptSubmit` requires `hookSpecificOutput.additionalContext`. The hook exited 0 with valid JSON and correct content, and the harness discarded all of it — a silent failure with no error surface. This is why skill recommendations never appeared.
+- **The activator scanned only skills.** All 45 agents and all 38 commands were invisible to it, so no agent or slash command could ever be recommended. It now builds one manifest across skills, agents, and commands.
+- **Matching had a 5-character floor on description words**, which silently excluded every high-signal acronym in the domain — ACF, SCF, SEO, API, RLS, CPT, TDD. Floor lowered to 4, plus a dedicated acronym pass that reads capitalisation from the source description before lowercasing, weighted higher than an ordinary word.
+- **Recommendations were unranked and unbounded** — 13 undifferentiated "Consider…" lines per prompt. Now scored (name tokens 3, acronyms 2, description overlap 1, explicit triggers 6, plus a stack boost from detected project type), floored at 3, deduped so a command does not repeat its same-named skill, and capped at 5.
+
+Also fixed: frontmatter values kept their surrounding quotes, which leaked into output as `\"…\"`, and the payload flattened every newline into a space.
+
+### Added
+
+- **`figma-code-sync` skill** — code-first reconciliation of a Figma design system against the code that ships. Carries THE ONE LAW (code is the source of truth; Figma is derived, never approximated from a screenshot), a three-tier free-check pass that needs no source access, 12 defect priors each paired with the counter-case that makes blind application dangerous, ~18 Figma Plugin API traps (including Figma's counter-clockwise-positive `rotation` against CSS's clockwise, and `mainComponent.name` returning the variant while the set name is `mainComponent.parent.name`), absence/census hygiene, and record-keeping rules — one audit file per writer, never shared between concurrent writers.
+- **`wp-design-system` agent** — WordPress block design systems. Resolves layer ownership first: core blocks take `theme.json` presets, custom blocks take their own stylesheet, and the two collide by name with different values. Covers the token pipeline in both directions, a cost-ordered choice between pattern / synced pattern / style variation / custom block / Block Bindings, and saved-content safety via deprecations.
+- **`/design-system` command** — `audit`, `onboard`, or `tokens`, with a documented context load order that stops when a project-level design-system skill is missing rather than improvising a file key. Audits parallelise across pages, never across writers of one file.
+- **Routing Discipline R1–R4** in `CLAUDE.md` — name the route in one line before the first edit, prefer the stack-specific surface over the generic one, read `INDEX.md` rather than guess, and treat hook candidates as input rather than orders.
+- **`findAgentsDirs()`** in `hooks/scripts/_common.js`, mirroring `findSkillsDirs()` for flat `<name>.md` agent files.
+
+### Changed
+
+- **`wordpress-backend` is now an ACF/SCF field-architecture specialist.** It previously held retrieval patterns only. Adds field-group registration (`acf_add_local_field_group` versus JSON sync), immutable field keys and why changing one orphans every value, the real meta storage shape — one field is two rows, and a Repeater flattens to `name_<i>_<sub>` so it **cannot** be `meta_query`'d — `update_field` versus `update_post_meta`, meta-cache priming for the archive N+1, validation hooks, REST exposure with schema, and an ACF-PRO-to-SCF migration risk table. Plus 6 new failure modes and 3 new escalation triggers.
+- `forgebee/README.md` is now tracked in `.version-bump.json`; its `## Key Features (vX.Y.Z)` heading was drifting outside the declared set.
+- Documentation counts corrected across `README.md`, `forgebee/README.md`, and `ARCHITECTURE.md`. The inline/fork skill split in `forgebee/README.md` was already wrong before this release (`11 + 22` against an actual 21 fork skills) and now reads `13 inline + 21 context:fork`.
+
+### Known limitation
+
+The activator's stack boost depends on `project-triage.json`. On a repo triaged as something other than WordPress, a WordPress-flavoured prompt still routes correctly but ranks below generic name-token matches such as `/audit`.
+
+---
+
 ## [5.3.1] — 2026-06-12
 
 **Patch: the `checkpoint` hook is revived and wired.** Follow-up to 5.3.0.
