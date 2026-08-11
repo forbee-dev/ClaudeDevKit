@@ -4,10 +4,10 @@
 > Source of truth: frontmatter in `forgebee/skills/*`, `forgebee/agents/*`, `forgebee/commands/*`.
 > Regenerate with: `node scripts/build-index.js`
 
-> Loaded on SessionStart so Claude routes user intent to the right surface in one read instead of scanning 114 frontmatter blocks.
+> Loaded on SessionStart so Claude routes user intent to the right surface in one read instead of scanning 117 frontmatter blocks.
 
 
-**Stats:** 33 skills · 44 agents · 37 commands
+**Stats:** 34 skills · 45 agents · 38 commands
 
 ---
 
@@ -33,7 +33,7 @@
 
 ---
 
-## Skills (33)
+## Skills (34)
 
 ### Pre-Implementation Discipline
 
@@ -87,11 +87,12 @@
 
 ### Other
 
+- `figma-code-sync` — Use when reconciling a Figma design-system file against the code that ships — auditing a component page, fixing drift, or onboarding a ne...
 - `forgebee-help` — Use when the user asks "what commands are available", "how do I use ForgeBee", "what can ForgeBee do", or needs a quick reference. Reads ...
 
 ---
 
-## Agents (44)
+## Agents (45)
 
 ### Code Core
 
@@ -126,7 +127,7 @@
 
 ### WordPress Stack
 
-- `wordpress-backend` — Use when building WordPress plugin logic, custom REST endpoints, ACF fields, hooks, AJAX, or Settings API in PHP.
+- `wordpress-backend` — Use when building WordPress plugin logic, custom REST endpoints, hooks, AJAX, or Settings API in PHP. Specialist in ACF and SCF field arc...
 - `wordpress-content` — Use when creating WordPress Gutenberg block patterns, ACF-driven content, custom post type entries, WooCommerce product descriptions, or ...
 - `wordpress-frontend` — Use when developing WordPress block/classic themes, template hierarchy, theme.json, or template parts.
 - `wordpress-security` — Use for WordPress security audits — sanitization/escaping, nonce verification, capability checks, SQL injection prevention, WPCS compliance.
@@ -167,9 +168,13 @@
 - `marketing-analyst` — Use to measure marketing performance — North-Star → input → health metric frameworks, KPI dashboards, campaign analysis, attribution mode...
 - `seo-specialist` — Use for keyword research, on-page optimization, technical SEO audits, content strategy, and search ranking improvement.
 
+### Other
+
+- `wp-design-system` — Use when building or maintaining a WordPress block-based design system — theme.json token architecture, the Figma-variables-to-presets pi...
+
 ---
 
-## Commands (37)
+## Commands (38)
 
 ### Orchestrators
 
@@ -230,6 +235,7 @@
 
 ### Other
 
+- `/design-system` — Design system operations — audit a Figma component page against code, onboard a newly built component, or audit token drift
 - `/release` — Cut a release — pre-flight gate, version bump across all manifests, changelog, tag, and PR. Wraps bump-version.sh; never reimplements ver...
 
 ---

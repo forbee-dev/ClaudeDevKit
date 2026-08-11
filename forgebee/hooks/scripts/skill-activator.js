@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 /**
- * skill-activator.js — Analyze user prompts and recommend relevant skills
+ * skill-activator.js — Analyze user prompts and recommend relevant skills/agents
  * Runs on UserPromptSubmit event
- * Outputs additionalContext with skill recommendations
+ * Outputs hookSpecificOutput.additionalContext with routing recommendations
  * v2: Added intent detection — intercepts build/implement intent to suggest /plan or /workflow
+ * v3: Agents are now scanned alongside skills, matches are scored and capped, and the
+ *     payload uses hookSpecificOutput (top-level additionalContext was discarded).
  */
 
 const fs = require('fs');
@@ -12,9 +14,19 @@ const common = require('./_common.js');
 
 // ── Bootstrap: resolve paths for both plugin and legacy installs ──────
 const PROJECT_DIR = common.getProjectDir();
-const CACHE_FILE = path.join(PROJECT_DIR, '.claude/session-cache/skill-manifest.json');
+const CACHE_FILE = path.join(PROJECT_DIR, '.claude/session-cache/routing-manifest.json');
 const TRIAGE_CACHE = path.join(PROJECT_DIR, '.claude/session-cache/project-triage.json');
 const CACHE_TTL = 300; // 5 minutes
+const MAX_RECOMMENDATIONS = 5;
+const MIN_SCORE = 3;
+
+// Name prefixes that belong to a detected stack. A prompt about the project's own
+// stack should route to these before any generic surface.
+const STACK_PREFIXES = {
+  wordpress: ['wordpress-', 'wp-', 'woocommerce-', 'phpunit-'],
+  nextjs: ['nextjs-', 'saas-'],
+  supabase: ['supabase-'],
+};
 
 // ── Helper: Get file modification time ─────────────────────────────────
 function getFileAge(filePath) {
@@ -42,7 +54,9 @@ function extractFrontmatter(content) {
     const colonIndex = line.indexOf(':');
     if (colonIndex > 0) {
       const key = line.substring(0, colonIndex).trim();
-      const value = line.substring(colonIndex + 1).trim();
+      let value = line.substring(colonIndex + 1).trim();
+      // Drop surrounding quotes — they leaked into recommendations as \"…\"
+      value = value.replace(/^["'](.*)["']$/, '$1');
       frontmatter[key] = value;
     }
   }
@@ -63,40 +77,90 @@ function extractTriggers(content) {
     .join(',');
 }
 
-// ── Helper: Build/refresh skill manifest cache ─────────────────────────
-function buildSkillManifest() {
-  const skillsDirs = common.findSkillsDirs();
-  const skills = [];
+// ── Helper: Build/refresh routing manifest cache (skills + agents) ─────
+function buildRoutingManifest() {
+  const entries = [];
 
-  for (const skillDir of skillsDirs) {
+  // Skills live at <dir>/<name>/SKILL.md
+  for (const skillDir of common.findSkillsDirs()) {
     if (!fs.existsSync(skillDir)) {
       continue;
     }
 
-    const entries = fs.readdirSync(skillDir);
-    for (const entry of entries) {
+    for (const entry of fs.readdirSync(skillDir)) {
       const skillPath = path.join(skillDir, entry, 'SKILL.md');
 
       if (!fs.existsSync(skillPath)) {
         continue;
       }
 
-      const skillName = entry;
       const content = fs.readFileSync(skillPath, 'utf8');
       const frontmatter = extractFrontmatter(content);
-      const description = frontmatter.description || '';
-      const triggers = extractTriggers(content);
 
-      skills.push({
-        name: skillName,
-        description: description,
-        triggers: triggers,
-        path: skillPath,
+      entries.push({
+        kind: 'skill',
+        name: entry,
+        description: frontmatter.description || '',
+        triggers: extractTriggers(content),
       });
     }
   }
 
-  return skills;
+  // Agents live at <dir>/<name>.md — flat files, no SKILL.md wrapper
+  for (const agentDir of common.findAgentsDirs()) {
+    if (!fs.existsSync(agentDir)) {
+      continue;
+    }
+
+    for (const entry of fs.readdirSync(agentDir)) {
+      if (!entry.endsWith('.md')) {
+        continue;
+      }
+
+      const agentPath = path.join(agentDir, entry);
+      const content = fs.readFileSync(agentPath, 'utf8');
+      const frontmatter = extractFrontmatter(content);
+
+      entries.push({
+        kind: 'agent',
+        name: frontmatter.name || entry.replace(/\.md$/, ''),
+        description: frontmatter.description || '',
+        triggers: extractTriggers(content),
+      });
+    }
+  }
+
+  // Commands live at <dir>/<name>.md and are the "run this task" surface
+  const commandsDir = common.findCommandsDir();
+  if (commandsDir && fs.existsSync(commandsDir)) {
+    for (const entry of fs.readdirSync(commandsDir)) {
+      if (!entry.endsWith('.md') || entry.startsWith('_')) {
+        continue;
+      }
+
+      const commandPath = path.join(commandsDir, entry);
+      const content = fs.readFileSync(commandPath, 'utf8');
+      const frontmatter = extractFrontmatter(content);
+
+      entries.push({
+        kind: 'command',
+        name: frontmatter.name || entry.replace(/\.md$/, ''),
+        description: frontmatter.description || '',
+        triggers: extractTriggers(content),
+      });
+    }
+  }
+
+  // Same name can appear in plugin + project + global installs; keep the first.
+  const seen = new Set();
+  return entries.filter(e => {
+    const key = `${e.kind}:${e.name}`;
+    if (seen.has(key) || !e.description) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
 }
 
 // ── Helper: Check if cache needs rebuild ───────────────────────────────
@@ -109,17 +173,17 @@ function shouldRebuildCache() {
   return age > CACHE_TTL;
 }
 
-// ── Helper: Get or build skill manifest ────────────────────────────────
-function getSkillManifest() {
+// ── Helper: Get or build routing manifest ──────────────────────────────
+function getRoutingManifest() {
   if (shouldRebuildCache()) {
-    const skills = buildSkillManifest();
+    const entries = buildRoutingManifest();
     try {
       common.ensureDir(path.dirname(CACHE_FILE));
-      fs.writeFileSync(CACHE_FILE, JSON.stringify(skills, null, 2));
+      fs.writeFileSync(CACHE_FILE, JSON.stringify(entries, null, 2));
     } catch (e) {
-      // Ignore write errors, return generated skills
+      // Ignore write errors, return generated entries
     }
-    return skills;
+    return entries;
   }
 
   try {
@@ -130,40 +194,99 @@ function getSkillManifest() {
   }
 }
 
+// ── Helper: Normalize a word for loose matching ───────────────────────
+function stem(word) {
+  return word.length > 4 && word.endsWith('s') ? word.slice(0, -1) : word;
+}
+
 // ── Helper: Clean word list from description ──────────────────────────
+const STOP_WORDS = new Set([
+  'about', 'after', 'agent', 'also', 'asked', 'asking', 'before', 'being',
+  'best', 'better', 'between', 'both', 'build', 'building', 'could', 'covers',
+  'during', 'each', 'every', 'first', 'following', 'from', 'have', 'here',
+  'including', 'instead', 'into', 'invoked', 'issue', 'just', 'less', 'like',
+  'make', 'many', 'more', 'most', 'much', 'need', 'needs', 'only', 'other',
+  'over', 'produce', 'quick', 'reach', 'reaches', 'right', 'runs', 'same',
+  'should', 'some', 'such', 'than', 'that', 'their', 'them', 'then', 'there',
+  'these', 'they', 'this', 'those', 'through', 'turns', 'under', 'until',
+  'usage', 'used', 'user', 'users', 'using', 'value', 'want', 'well', 'were',
+  'what', 'when', 'where', 'which', 'while', 'with', 'within', 'without',
+  'working', 'would', 'write', 'writing', 'your',
+]);
+
 function getSignificantWords(description) {
-  const STOP_WORDS = new Set([
-    'using',
-    'these',
-    'about',
-    'which',
-    'where',
-    'their',
-    'would',
-    'could',
-    'should',
-    'there',
-    'through',
-    'between',
-    'before',
-    'after',
-    'other',
-    'under',
-    'during',
-    'without',
-    'within',
-    'including',
-    'building',
-    'working',
-    'following',
-  ]);
+  // 4-char floor, not 5 — "meta", "hook", "cron", "role" carry real signal.
+  const words = description.toLowerCase().match(/\b[a-z][a-z.-]{3,}\b/g) || [];
+  return [...new Set(words.map(stem).filter(w => !STOP_WORDS.has(w)))];
+}
 
-  // Extract words longer than 6 characters
-  const words = description
+// ── Helper: Extract acronyms from a description ───────────────────────
+// ACF, SCF, SEO, API, RLS, CPT, TDD, HPOS are the highest-signal tokens in this
+// domain and every one of them is too short for the word floor above. Capitalisation
+// in the source description is what marks them, so read it before lowercasing.
+function getAcronyms(description) {
+  // Tolerate a plural "s" — "APIs", "CPTs", "CVEs" are written that way and a
+  // strict all-caps match skips them entirely rather than yielding the stem.
+  const found = description.match(/\b[A-Z][A-Z0-9]+(?=s\b|\b)/g) || [];
+  return [...new Set(found.map(a => a.toLowerCase()))];
+}
+
+// ── Helper: Split a surface name into matchable tokens ────────────────
+function getNameTokens(name) {
+  return name
     .toLowerCase()
-    .match(/\b[a-z]{7,}\b/g) || [];
+    .split(/[-_.]/)
+    .filter(t => t.length >= 3)
+    .map(stem);
+}
 
-  return words.filter(w => !STOP_WORDS.has(w));
+// ── Helper: Score one surface against the prompt ──────────────────────
+function scoreEntry(entry, prompt, promptWords, stacks) {
+  let score = 0;
+
+  // Explicit triggers are an exact-intent signal — treat as decisive.
+  // Match against the raw prompt, not the token set: a trigger is often a
+  // phrase ("design system"), which no single-token lookup can ever hit.
+  for (const trigger of (entry.triggers || '').split(',')) {
+    const clean = trigger.trim().toLowerCase();
+    if (clean && prompt.includes(clean)) {
+      score += 6;
+      break;
+    }
+  }
+
+  // A name token in the prompt ("wordpress", "security", "seo") is a strong hint.
+  for (const token of getNameTokens(entry.name)) {
+    if (promptWords.has(token)) {
+      score += 3;
+    }
+  }
+
+  // An acronym match is far more specific than a common word — weigh it higher.
+  for (const acronym of getAcronyms(entry.description)) {
+    if (promptWords.has(acronym)) {
+      score += 2;
+    }
+  }
+
+  // Description overlap is the weak signal — one point per distinct term.
+  for (const word of getSignificantWords(entry.description)) {
+    if (promptWords.has(word)) {
+      score += 1;
+    }
+  }
+
+  // Prefer the surface built for this project's stack over the generic one.
+  if (score > 0) {
+    for (const stack of stacks) {
+      if (STACK_PREFIXES[stack].some(p => entry.name.startsWith(p))) {
+        score += 3;
+        break;
+      }
+    }
+  }
+
+  return score;
 }
 
 // ── Main script ───────────────────────────────────────────────────────
@@ -215,103 +338,113 @@ async function main() {
     }
   }
 
-  // ── Match prompt against skills ───────────────────────────────────────
-  const skills = getSkillManifest();
-  let MATCHED_SKILLS = '';
+  // ── Read project triage (drives both stack routing and the header) ────
+  let triage = null;
 
-  for (const skill of skills) {
-    const NAME = skill.name;
-    const TRIGGERS = skill.triggers || '';
-    const DESC = skill.description || '';
-
-    // Check trigger keywords
-    if (TRIGGERS) {
-      const triggerList = TRIGGERS.split(',').map(t => t.trim());
-      let matched = false;
-
-      for (const trigger of triggerList) {
-        if (trigger && new RegExp(trigger, 'i').test(PROMPT_LOWER)) {
-          MATCHED_SKILLS += `- Use the **${NAME}** skill: ${DESC}\n`;
-          matched = true;
-          break;
-        }
-      }
-
-      if (matched) {
-        continue;
-      }
+  if (fs.existsSync(TRIAGE_CACHE)) {
+    try {
+      triage = JSON.parse(fs.readFileSync(TRIAGE_CACHE, 'utf8'));
+    } catch (e) {
+      // Ignore triage parsing errors
     }
+  }
 
-    // Check description keywords as fallback
-    if (!MATCHED_SKILLS.includes(NAME)) {
-      const significantWords = getSignificantWords(DESC);
-      for (const word of significantWords) {
-        if (new RegExp(`\\b${word}\\b`, 'i').test(PROMPT_LOWER)) {
-          MATCHED_SKILLS += `- Consider the **${NAME}** skill: ${DESC}\n`;
-          break;
-        }
+  const STACKS = common.detectProjectStacks();
+
+  // ── Score every skill and agent against the prompt ────────────────────
+  const promptWords = new Set(
+    (PROMPT_LOWER.match(/\b[a-z][a-z.-]{2,}\b/g) || []).map(stem)
+  );
+
+  // A command usually wraps a same-named skill (e.g. /audit-self). Show the
+  // invocable one and drop the duplicate so it does not eat a slot.
+  const KIND_RANK = { command: 0, agent: 1, skill: 2 };
+  const emitted = new Set();
+
+  const ranked = getRoutingManifest()
+    .map(entry => ({
+      entry,
+      score: scoreEntry(entry, PROMPT_LOWER, promptWords, STACKS),
+    }))
+    .filter(r => r.score >= MIN_SCORE)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        (KIND_RANK[a.entry.kind] ?? 3) - (KIND_RANK[b.entry.kind] ?? 3) ||
+        a.entry.name.localeCompare(b.entry.name)
+    )
+    .filter(r => {
+      if (emitted.has(r.entry.name)) {
+        return false;
       }
+      emitted.add(r.entry.name);
+      return true;
+    })
+    .slice(0, MAX_RECOMMENDATIONS);
+
+  let MATCHED = '';
+
+  for (const { entry } of ranked) {
+    let how;
+    if (entry.kind === 'agent') {
+      how = `dispatch the **${entry.name}** agent`;
+    } else if (entry.kind === 'command') {
+      how = `run **/${entry.name}**`;
+    } else {
+      how = `use the **${entry.name}** skill`;
     }
+    MATCHED += `- ${how} — ${entry.description}\n`;
   }
 
   // ── Inject project triage context ─────────────────────────────────────
   let TRIAGE_CONTEXT = '';
+  const PROJECT_TYPE = triage?.project_type || 'unknown';
 
-  if (fs.existsSync(TRIAGE_CACHE)) {
-    try {
-      const triageContent = fs.readFileSync(TRIAGE_CACHE, 'utf8');
-      const triage = JSON.parse(triageContent);
+  if (PROJECT_TYPE !== 'unknown' && PROJECT_TYPE !== 'null') {
+    const WP_TYPE = triage.wordpress?.type || 'none';
+    const WP_SUB = triage.wordpress?.subtype || '';
+    const NODE_FW = triage.node?.framework || 'none';
+    const HAS_TS = triage.node?.typescript || false;
+    const STYLING = (triage.styling?.systems || []).join(', ');
+    const DB_ORM = triage.database?.orm || 'none';
+    const WP_ECO = (triage.wordpress?.ecosystem || []).join(', ');
 
-      const PROJECT_TYPE = triage.project_type || 'unknown';
-      if (PROJECT_TYPE !== 'unknown' && PROJECT_TYPE !== 'null') {
-        const WP_TYPE = triage.wordpress?.type || 'none';
-        const WP_SUB = triage.wordpress?.subtype || '';
-        const NODE_FW = triage.node?.framework || 'none';
-        const HAS_TS = triage.node?.typescript || false;
-        const STYLING = (triage.styling?.systems || []).join(', ');
-        const DB_ORM = triage.database?.orm || 'none';
-        const WP_ECO = (triage.wordpress?.ecosystem || []).join(', ');
+    TRIAGE_CONTEXT = `**Project:** ${PROJECT_TYPE}`;
 
-        TRIAGE_CONTEXT = `**Project:** ${PROJECT_TYPE}`;
-
-        if (WP_TYPE !== 'none') {
-          TRIAGE_CONTEXT += ` (WP ${WP_TYPE}${WP_SUB ? ` / ${WP_SUB}` : ''})`;
-        }
-
-        if (WP_ECO) {
-          TRIAGE_CONTEXT += ` [${WP_ECO}]`;
-        }
-
-        if (NODE_FW !== 'none') {
-          TRIAGE_CONTEXT += ` | Framework: ${NODE_FW}`;
-        }
-
-        if (HAS_TS === true || HAS_TS === 'true') {
-          TRIAGE_CONTEXT += ` + TypeScript`;
-        }
-
-        if (STYLING) {
-          TRIAGE_CONTEXT += ` | Styling: ${STYLING}`;
-        }
-
-        if (DB_ORM !== 'none') {
-          TRIAGE_CONTEXT += ` | DB: ${DB_ORM}`;
-        }
-
-        const SUPABASE = triage.supabase?.detected || false;
-        if (SUPABASE === true || SUPABASE === 'true') {
-          const SB_FEATURES = (triage.supabase?.features || []).join(', ');
-          TRIAGE_CONTEXT += ` | Supabase`;
-          if (SB_FEATURES) {
-            TRIAGE_CONTEXT += ` [${SB_FEATURES}]`;
-          }
-        }
-
-        TRIAGE_CONTEXT += ` — Follow conventions from \`project-router\` skill references.\n`;
-      }
-    } catch (e) {
-      // Ignore triage parsing errors
+    if (WP_TYPE !== 'none') {
+      TRIAGE_CONTEXT += ` (WP ${WP_TYPE}${WP_SUB ? ` / ${WP_SUB}` : ''})`;
     }
+
+    if (WP_ECO) {
+      TRIAGE_CONTEXT += ` [${WP_ECO}]`;
+    }
+
+    if (NODE_FW !== 'none') {
+      TRIAGE_CONTEXT += ` | Framework: ${NODE_FW}`;
+    }
+
+    if (HAS_TS === true || HAS_TS === 'true') {
+      TRIAGE_CONTEXT += ` + TypeScript`;
+    }
+
+    if (STYLING) {
+      TRIAGE_CONTEXT += ` | Styling: ${STYLING}`;
+    }
+
+    if (DB_ORM !== 'none') {
+      TRIAGE_CONTEXT += ` | DB: ${DB_ORM}`;
+    }
+
+    const SUPABASE = triage.supabase?.detected || false;
+    if (SUPABASE === true || SUPABASE === 'true') {
+      const SB_FEATURES = (triage.supabase?.features || []).join(', ');
+      TRIAGE_CONTEXT += ` | Supabase`;
+      if (SB_FEATURES) {
+        TRIAGE_CONTEXT += ` [${SB_FEATURES}]`;
+      }
+    }
+
+    TRIAGE_CONTEXT += ` — Follow conventions from \`project-router\` skill references.\n`;
   }
 
   // ── Output recommendations ────────────────────────────────────────────
@@ -325,14 +458,17 @@ async function main() {
     CONTEXT += INTENT_CONTEXT;
   }
 
-  if (MATCHED_SKILLS) {
-    CONTEXT += `📌 Skill Recommendations:\n${MATCHED_SKILLS}`;
+  if (MATCHED) {
+    CONTEXT += `📌 Routing candidates (state your route before you start work):\n${MATCHED}`;
   }
 
   if (CONTEXT) {
-    // Escape quotes and format for JSON
-    const escapedContext = CONTEXT.replace(/"/g, '\\"').replace(/\n/g, ' ');
-    console.log(JSON.stringify({ additionalContext: escapedContext }));
+    common.output({
+      hookSpecificOutput: {
+        hookEventName: 'UserPromptSubmit',
+        additionalContext: CONTEXT,
+      },
+    });
   }
 
   process.exit(0);

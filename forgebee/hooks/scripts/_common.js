@@ -104,6 +104,79 @@ function findSkillsDirs() {
 }
 
 /**
+ * Returns array of all valid agent directories (plugin, project, global, legacy)
+ * Agents are flat `<name>.md` files, unlike skills which are `<name>/SKILL.md`.
+ * @returns {string[]} Array of valid agent directory paths
+ */
+function findAgentsDirs() {
+  const dirs = [];
+  const pluginRoot = getPluginRoot();
+  const projectDir = getProjectDir();
+
+  // Plugin agents
+  if (pluginRoot) {
+    const pluginAgents = path.join(pluginRoot, 'agents');
+    if (fs.existsSync(pluginAgents)) {
+      dirs.push(pluginAgents);
+    }
+  }
+
+  // Project agents
+  const projectAgents = path.join(projectDir, '.claude', 'agents');
+  if (fs.existsSync(projectAgents)) {
+    dirs.push(projectAgents);
+  }
+
+  // Global agents (if in home directory)
+  const homeDir = os.homedir();
+  const globalAgents = path.join(homeDir, '.claude', 'agents');
+  if (fs.existsSync(globalAgents)) {
+    dirs.push(globalAgents);
+  }
+
+  // Legacy agents (current directory)
+  if (fs.existsSync('./agents')) {
+    dirs.push(path.resolve('./agents'));
+  }
+
+  return dirs;
+}
+
+/**
+ * Reads the SessionStart triage cache and returns the stacks this project uses.
+ * Shared by load-index.js (which stack section to pin) and skill-activator.js
+ * (which surfaces to boost). Returns [] when no triage has run yet.
+ * @returns {string[]} Subset of ['wordpress', 'nextjs', 'supabase']
+ */
+function detectProjectStacks() {
+  const cacheFile = path.join(
+    getProjectDir(),
+    '.claude',
+    'session-cache',
+    'project-triage.json'
+  );
+
+  try {
+    const triage = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+    const stacks = [];
+
+    if ((triage.wordpress?.type || 'none') !== 'none') {
+      stacks.push('wordpress');
+    }
+    if (/next/i.test(triage.node?.framework || '')) {
+      stacks.push('nextjs');
+    }
+    if (triage.supabase?.detected === true || triage.supabase?.detected === 'true') {
+      stacks.push('supabase');
+    }
+
+    return stacks;
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
  * Initializes project directory structure
  * Creates: .claude/sessions, .claude/session-cache/context-backups, .claude/learnings,
  *          docs/pm/features, docs/planning/briefs, docs/planning/requirements, docs/planning/stories
@@ -724,6 +797,8 @@ module.exports = {
   findForgebeeRoot,
   findCommandsDir,
   findSkillsDirs,
+  findAgentsDirs,
+  detectProjectStacks,
   initializeProjectDirs,
   initializeLearnings,
   initializePermissions,
