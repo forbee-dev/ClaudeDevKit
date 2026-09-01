@@ -6,6 +6,33 @@ The format roughly follows [Keep a Changelog](https://keepachangelog.com/) and t
 
 ---
 
+## [5.5.0] — 2026-09-01
+
+**Minor: `/team` now sizes the task before it spends.** A single 5-file change measured 905 API calls and 131.6M billed-equivalent tokens across 7 sessions in 37 minutes — roughly 205,000 tokens per line of code written. Three rules in `/team` produced it, and all three are fixed.
+
+### Fixed — `/team` cost control
+
+- **The scope table set a floor instead of a ceiling.** "3-5 files → 2-3 specialists" read as an instruction to reach that count; the observed run dispatched 6 agents for a 5-file diff. Step 1 is now a mandatory sizing gate with four tiers (Direct 0 agents / Small 1 / Medium 2-3 / Large 3-5), the lead must state its tier and agent count in one line before dispatching, and **ambiguity resolves downward**. Auth, payments, or user data adds `security-auditor` without raising the tier.
+- **The Anti-Stop Rule told the lead to keep working, and it did — on the agents' task.** "IMMEDIATELY continue with your own next-step work" produced 75 lead-side `Bash` calls (curl against the local site, `docker exec` PHP dumps, git) while six agents investigated the same code. The rule now scopes "continue" to orchestration and explicitly forbids `Edit`, running the app, hitting its endpoints, container exec, and running its tests while agents are live. If the lead finds itself implementing, it sized the task wrong and drops to Tier Direct.
+- **Nothing forbade polling.** The lead called `ListAgents` 12 times at an average 186K context per call. Polling is now banned outright — wait for the harness notification.
+- **`security-auditor` and `test-engineer` were unconditional.** "Always include … for code-producing tasks" is replaced by explicit trigger lists: five conditions for security (auth/authz/sessions, payments/PII, untrusted input reaching output, secrets, upload-deserialization-path construction) and three for tests (extendable suite plus a new code path, a bug fix, or an explicit ask). Neither is automatic, and on a Tier Small task both are usually wrong.
+
+### Added
+
+- **Cost rule in `/team`** — states plainly that every agent is a fresh session re-reading the full preamble on each of its tool calls, so a one-paragraph return still costs six figures. Bans the research-then-re-derive pattern that cost 7.5M tokens in the measured run when two research agents were dispatched and the implementer re-derived their findings anyway.
+- **Two dispatch-hygiene rules** — full context in an agent's first message (a follow-up round trip costs as much as the first), and reviewers sequenced after implementers rather than alongside them.
+
+### Changed
+
+- `/team`'s `## Never` list gains "never implement, verify, or poll while agents run" and "never dispatch more agents than the tier allows".
+- `/team`'s closing `## Rules` now defers to the Step 1 tier for the agent count instead of restating "3-5 agents" as a standalone target.
+
+### Known limitation
+
+The tiers key off file count, which is a proxy for effort rather than a measure of it. A one-file change to a hot path can still warrant a reviewer; the lead is expected to override upward with a stated reason, and the ceiling language permits it.
+
+---
+
 ## [5.4.0] — 2026-08-11
 
 **Minor: routing actually fires, and a design-system trio arrives.** ForgeBee shipped 114 surfaces that were effectively unreachable. Five defects, each verified by direct hook test, explain why a WordPress task never reached a `wordpress-*` agent.
