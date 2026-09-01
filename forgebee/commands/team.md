@@ -26,7 +26,11 @@ In short: `/team` is "go fast"; `/workflow` is "go thorough." If unsure → `/wo
 
 ## Anti-Stop Rule (P5)
 
-**After dispatching a sub-agent, IMMEDIATELY continue with your own next-step work. Do not idle waiting for the sub-agent to return.** The harness will notify you when work completes — until then, your job is to be planning the next dispatch, integrating partial results, or preparing the verification gate. Do not announce "waiting for X to return" — that's the most common orchestrator failure mode.
+**After dispatching a sub-agent, continue with your own next-step *orchestration* work.** The harness notifies you when work completes. Until then: plan the next dispatch, integrate partial results, or prepare the verification gate. Do not announce "waiting for X to return."
+
+**"Continue" means orchestrate, never implement.** While agents run you must not `Edit`, run the app, hit its endpoints, exec into containers, or run its tests. Doing the agent's job in parallel pays for the same work twice and produces conflicting edits. If you find yourself working, you sized the task wrong — cancel and do it directly at Tier Direct.
+
+**Do not poll.** Never call `ListAgents` in a loop to check on a dispatch. Each poll re-reads your full context. Wait for the notification.
 
 ## Never
 
@@ -35,22 +39,38 @@ In short: `/team` is "go fast"; `/workflow` is "go thorough." If unsure → `/wo
 - Never deliver with known failing tests or build errors
 - Never skip security-auditor for code that touches auth, payments, or user data
 - Never idle after dispatching — see Anti-Stop Rule
+- Never implement, verify, or poll while agents run — see Anti-Stop Rule
+- Never dispatch more agents than the tier allows
 - Never report done without running the full test suite
 
-## Step 1: Assess
+## Step 1: Size the task (mandatory, before any other action)
 
-Read the task. Explore the codebase. Identify what needs to change.
+Estimate the blast radius with one or two cheap commands (`git diff --stat`, `grep -l`, `find`). Then pick a tier and **state the tier and the agent count in one line** before you dispatch anything.
 
-| Scope | Approach |
-|-------|----------|
-| **1-2 files, clear change** | Do it directly — no orchestration needed |
-| **3-5 files, clear plan** | 2-3 specialists in parallel |
-| **5+ files, needs planning** | Full team with dependency graph |
-| **Auth, payments, data** | Full team + mandatory security-auditor |
+| Tier | Blast radius | Agents | Shape |
+|---|---|---|---|
+| **Direct** | 1–2 files, change already clear | **0** | Do it yourself. No plan table, no dispatch. |
+| **Small** | 3–6 files, one concern | **1** | One implementer. You review the diff at the end. |
+| **Medium** | 7–15 files, or 2 distinct concerns | **2–3** | Implementer(s) + one reviewer. |
+| **Large** | 15+ files, or needs a plan first | **3–5** | Research → implement → review. |
+
+Ambiguity resolves **downward**. A tier is a ceiling, not a target. Auth, payments, or user data adds `security-auditor` — it does not raise the tier.
+
+### Cost rule
+
+Every agent is a fresh session that re-reads the whole preamble on each of its tool calls. An agent that returns one paragraph still costs six figures in tokens. Dispatch one only when it does work you would otherwise do serially, or work you genuinely cannot do.
+
+Never dispatch a research agent whose findings the implementer will re-derive. Either research yourself and hand the result to the implementer, or let the implementer research.
 
 ## Step 2: Plan & Show
 
-Break work into independent workstreams. For each, define: agent, files it owns, deliverable, acceptance criteria. Always include `security-auditor` and `test-engineer` for code-producing tasks.
+Break work into independent workstreams. For each, define: agent, files it owns, deliverable, acceptance criteria.
+
+**Add `security-auditor` only when the change touches one of these:** authentication, authorization, sessions, or capability checks; payments, billing, or PII; untrusted input reaching output (escaping, `wp_kses`, SQL, shell); secrets, tokens, or credentials; file upload, deserialization, or a path built from user input.
+
+**Add `test-engineer` only when:** the repo has a real suite the change can extend *and* the change adds a new code path; or the change fixes a bug (add the regression test); or the task asks for tests. Otherwise the implementer covers its own change.
+
+Neither is automatic. On a Tier Small task both are usually wrong.
 
 **If 3+ agents**, show a dependency graph before dispatch:
 
@@ -166,7 +186,9 @@ Reject any response without a status. If `BLOCKED` twice on same issue → escal
 
 ## Rules
 
-- Keep teams to 3-5 agents — more creates coordination overhead
+- The tier from Step 1 caps the agent count. 3–5 is the Large ceiling, not a default
+- The lead orchestrates only — it does not edit, verify, or poll while agents run
 - Break work so each agent owns different files
-- Include clear context in each agent's task
+- Include full context in each agent's first message; a follow-up round trip costs as much as the first
+- Sequence reviewers after implementers — reviewing a diff still being written wastes the review
 - After all agents finish, run the full test suite as verification
